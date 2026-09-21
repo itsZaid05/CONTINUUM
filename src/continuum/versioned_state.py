@@ -5,12 +5,12 @@ Append-only, parent-linked, with rapid-change merge and WAL.
 Design borrowed from prism_rt versioned_store + FreshCtx dependency tracking,
 simplified for Engineer A text MVP.
 """
+
 from __future__ import annotations
 
-import json
 import hashlib
+import json
 from pathlib import Path
-from datetime import datetime, timezone
 from typing import Any
 
 from .contracts import (
@@ -22,7 +22,6 @@ from .contracts import (
     StateVersion,
     utcnow,
 )
-
 
 MERGE_WINDOW_MS = 300
 
@@ -50,7 +49,9 @@ class VersionedStore:
     # ------------------------------------------------------------------
     # Core ops
     # ------------------------------------------------------------------
-    def create_initial(self, state: dict[str, Any], evidence: list[EvidenceSpan] | None = None) -> StateVersion:
+    def create_initial(
+        self, state: dict[str, Any], evidence: list[EvidenceSpan] | None = None
+    ) -> StateVersion:
         v = StateVersion(
             version=self._next,
             parent=None,
@@ -105,10 +106,7 @@ class VersionedStore:
 
         new_state = dict(base.state)
         # Apply delta
-        if delta.op == DeltaOp.REPLACE:
-            assert delta.field is not None
-            self._set_nested(new_state, delta.field, delta.new_value)
-        elif delta.op == DeltaOp.ADD:
+        if delta.op == DeltaOp.REPLACE or delta.op == DeltaOp.ADD:
             assert delta.field is not None
             self._set_nested(new_state, delta.field, delta.new_value)
         elif delta.op == DeltaOp.REMOVE:

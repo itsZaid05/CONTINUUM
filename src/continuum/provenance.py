@@ -5,6 +5,7 @@ Typed vector provenance (freshness/capability/tool/verification).
 Selective invalidation: only affected steps invalidated; rest reused.
 Stale check uses version lineage, not wall-clock alone.
 """
+
 from __future__ import annotations
 
 from typing import Any
@@ -14,7 +15,6 @@ from .contracts import (
     ExecutionNode,
     GateDecision,
     NodeStatus,
-    Provenance,
 )
 
 # ---------------------------------------------------------------------------
@@ -66,6 +66,7 @@ def dependents_for(category: ArbiterCategory, field: str | None) -> set[str]:
 # ProvenanceGraph
 # ---------------------------------------------------------------------------
 
+
 class ProvenanceGraph:
     """DAG of execution nodes keyed by id, indexed by based_on version."""
 
@@ -88,7 +89,9 @@ class ProvenanceGraph:
         return [n for n in self._nodes.values() if n.status == NodeStatus.COMPLETED]
 
     # --- invalidation ----------------------------------------------------
-    def invalidate_affected(self, current_version: int, category: ArbiterCategory, field: str | None) -> list[str]:
+    def invalidate_affected(
+        self, current_version: int, category: ArbiterCategory, field: str | None
+    ) -> list[str]:
         """Mark affected nodes with based_on < current_version as INVALIDATED. Return ids."""
         needle = dependents_for(category, field)
         if not needle:
@@ -108,7 +111,11 @@ class ProvenanceGraph:
 
     def reuse_candidates(self, current_version: int) -> list[ExecutionNode]:
         """Nodes still valid after invalidation (based_on == current version or unaffected)."""
-        return [n for n in self._nodes.values() if n.status not in {NodeStatus.INVALIDATED, NodeStatus.CANCELLED}]
+        return [
+            n
+            for n in self._nodes.values()
+            if n.status not in {NodeStatus.INVALIDATED, NodeStatus.CANCELLED}
+        ]
 
     # --- stale gate ------------------------------------------------------
     def is_stale(self, node: ExecutionNode, current_version: int) -> bool:
@@ -135,7 +142,11 @@ class ProvenanceGraph:
         return sum(1 for n in self._nodes.values() if n.status == NodeStatus.INVALIDATED)
 
     def reused_count(self) -> int:
-        return sum(1 for n in self._nodes.values() if n.status not in {NodeStatus.INVALIDATED, NodeStatus.CANCELLED})
+        return sum(
+            1
+            for n in self._nodes.values()
+            if n.status not in {NodeStatus.INVALIDATED, NodeStatus.CANCELLED}
+        )
 
     def to_trace(self) -> list[dict[str, Any]]:
         return [n.model_dump(mode="json") for n in self._nodes.values()]

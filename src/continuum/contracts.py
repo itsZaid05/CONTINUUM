@@ -5,28 +5,30 @@ Pydantic v2, frozen, json_schema-exportable.
 
 Corresponds to: PERCEPTION → DELTA+ARBITER → VERSIONED STATE → PROVENANCE → POLICY → BRANCH → GATE
 """
+
 from __future__ import annotations
 
-from datetime import datetime, timezone
-from enum import Enum
+from datetime import UTC, datetime
+from enum import StrEnum
 from typing import Any, Literal
 
 from pydantic import BaseModel, Field, field_validator, model_validator
-
 
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def utcnow() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 # ---------------------------------------------------------------------------
 # 1. Perception
 # ---------------------------------------------------------------------------
 
-class Modality(str, Enum):
+
+class Modality(StrEnum):
     TEXT = "text"
     AUDIO = "audio"
     VISION = "vision"
@@ -37,7 +39,9 @@ class EvidenceSpan(BaseModel):
 
     model_config = {"frozen": True}
 
-    text: str = Field(..., min_length=1, description="Raw evidence text, e.g. 'Actually, Bangalore'")
+    text: str = Field(
+        ..., min_length=1, description="Raw evidence text, e.g. 'Actually, Bangalore'"
+    )
     modality: Modality = Field(default=Modality.TEXT)
     start_ms: int | None = Field(default=None, ge=0)
     end_ms: int | None = Field(default=None, ge=0)
@@ -56,7 +60,7 @@ class EvidenceSpan(BaseModel):
         return v
 
     @model_validator(mode="after")
-    def _validate_span(self) -> "EvidenceSpan":
+    def _validate_span(self) -> EvidenceSpan:
         if self.start_ms is not None and self.end_ms is not None:
             if self.end_ms < self.start_ms:
                 raise ValueError("end_ms must be >= start_ms")
@@ -79,7 +83,8 @@ class PerceptionOutput(BaseModel):
 # 2. Delta + Arbiter (fused)
 # ---------------------------------------------------------------------------
 
-class ArbiterCategory(str, Enum):
+
+class ArbiterCategory(StrEnum):
     NEW_GOAL = "NEW_GOAL"
     MODIFY = "MODIFY"
     ADD_CONSTRAINT = "ADD_CONSTRAINT"
@@ -87,7 +92,7 @@ class ArbiterCategory(str, Enum):
     NOISE = "NOISE"
 
 
-class DeltaOp(str, Enum):
+class DeltaOp(StrEnum):
     REPLACE = "replace"
     ADD = "add"
     REMOVE = "remove"
@@ -99,13 +104,15 @@ class Delta(BaseModel):
     model_config = {"frozen": True}
 
     op: DeltaOp | None = Field(default=None, description="None means no semantic change (NOISE)")
-    field: str | None = Field(default=None, description="Dot-path, e.g. 'destination' or 'constraints.time'")
+    field: str | None = Field(
+        default=None, description="Dot-path, e.g. 'destination' or 'constraints.time'"
+    )
     old_value: Any | None = None
     new_value: Any | None = None
     span: str = Field(default="", description="Raw phrase that triggered delta")
 
     @model_validator(mode="after")
-    def _check_noise_consistency(self) -> "Delta":
+    def _check_noise_consistency(self) -> Delta:
         # NOISE deltas should have op=None; we allow callers to omit field but be consistent
         if self.op is None:
             # allow field/new_value to be None for noise
@@ -125,7 +132,9 @@ class ArbiterDecision(BaseModel):
     confidence: float = Field(...)
     delta: Delta | None = None
     rationale: str = Field(..., min_length=1)
-    evidence_spans: list[int] = Field(default_factory=list, description="Indices into PerceptionOutput.evidences")
+    evidence_spans: list[int] = Field(
+        default_factory=list, description="Indices into PerceptionOutput.evidences"
+    )
     suggested_clarification: str | None = Field(default=None)
     latency_ms: int = Field(default=0, ge=0)
     model: str = Field(default="offline-fake")
@@ -136,11 +145,13 @@ class ArbiterDecision(BaseModel):
     def _clamp(cls, v: Any) -> float:
         try:
             fv = float(v)
-        except Exception:
-            raise ValueError("confidence must be float")
+        except Exception as exc:  # noqa: BLE001
+            raise ValueError("confidence must be float") from exc
         return max(0.0, min(1.0, fv))
 
-    def needs_clarification(self, risky_threshold: float = 0.72, general_threshold: float = 0.60) -> bool:
+    def needs_clarification(
+        self, risky_threshold: float = 0.72, general_threshold: float = 0.60
+    ) -> bool:
         if self.category in {ArbiterCategory.RETRACT, ArbiterCategory.NEW_GOAL}:
             return self.confidence < risky_threshold
         return self.confidence < general_threshold
@@ -150,7 +161,8 @@ class ArbiterDecision(BaseModel):
 # 3. Versioned State
 # ---------------------------------------------------------------------------
 
-class StateStatus(str, Enum):
+
+class StateStatus(StrEnum):
     ACTIVE = "ACTIVE"
     MERGED = "MERGED"
     ABANDONED = "ABANDONED"
@@ -171,7 +183,7 @@ class StateVersion(BaseModel):
     arbiter_category: ArbiterCategory | None = Field(default=None)
     delta: Delta | None = Field(default=None)
 
-    def diff(self, other: "StateVersion") -> dict[str, Any]:
+    def diff(self, other: StateVersion) -> dict[str, Any]:
         """Simple diff for debugging."""
         keys = set(self.state) | set(other.state)
         out: dict[str, Any] = {}
@@ -185,10 +197,11 @@ class StateVersion(BaseModel):
 # 4. Provenance + Execution Graph
 # ---------------------------------------------------------------------------
 
-class RiskLevel(str, Enum):
-    FREE = "FREE"               # search, read, dry-run — auto
-    STAGEABLE = "STAGEABLE"     # draft booking, hold fare — stageable
-    MUTATING = "MUTATING"       # cancel, prune — auditable
+
+class RiskLevel(StrEnum):
+    FREE = "FREE"  # search, read, dry-run — auto
+    STAGEABLE = "STAGEABLE"  # draft booking, hold fare — stageable
+    MUTATING = "MUTATING"  # cancel, prune — auditable
     IRREVERSIBLE = "IRREVERSIBLE"  # book, pay, send — requires explicit commit
 
 
@@ -201,11 +214,21 @@ class Provenance(BaseModel):
     based_on: int = Field(..., ge=1, description="StateVersion this reasoning was derived from")
     inputs: dict[str, Any] = Field(default_factory=dict)
     axes: dict[str, float] = Field(
-        default_factory=lambda: {"freshness": 1.0, "capability": 1.0, "tool": 1.0, "verification": 1.0},
+        default_factory=lambda: {
+            "freshness": 1.0,
+            "capability": 1.0,
+            "tool": 1.0,
+            "verification": 1.0,
+        },
         description="Per-axis trust in [0,1]; merged via min, not average",
     )
     tainted_by: dict[str, set[str]] = Field(
-        default_factory=lambda: {"freshness": set(), "capability": set(), "tool": set(), "verification": set()}
+        default_factory=lambda: {
+            "freshness": set[str](),
+            "capability": set[str](),
+            "tool": set[str](),
+            "verification": set[str](),
+        }
     )
     timestamp: datetime = Field(default_factory=utcnow)
 
@@ -217,7 +240,7 @@ class Provenance(BaseModel):
                 raise ValueError(f"axis {k} score {score} out of [0,1]")
         return v
 
-    def merge(self, *upstreams: "Provenance") -> "Provenance":
+    def merge(self, *upstreams: Provenance) -> Provenance:
         """Merge provenance: per-axis min (stalest wins), taint union."""
         merged_axes: dict[str, float] = dict(self.axes)
         merged_taint: dict[str, set[str]] = {k: set(v) for k, v in self.tainted_by.items()}
@@ -241,7 +264,7 @@ class Provenance(BaseModel):
         )
 
 
-class NodeStatus(str, Enum):
+class NodeStatus(StrEnum):
     PENDING = "PENDING"
     RUNNING = "RUNNING"
     COMPLETED = "COMPLETED"
@@ -253,7 +276,9 @@ class ExecutionNode(BaseModel):
     model_config = {"frozen": True}
 
     id: str = Field(..., min_length=1)
-    kind: Literal["search", "filter", "price", "book", "pay", "inform", "hold", "cancel"] = Field(...)
+    kind: Literal["search", "filter", "price", "book", "pay", "inform", "hold", "cancel"] = Field(
+        ...
+    )
     provenance: Provenance
     status: NodeStatus = Field(default=NodeStatus.PENDING)
     risk: RiskLevel = Field(default=RiskLevel.FREE)
@@ -265,7 +290,8 @@ class ExecutionNode(BaseModel):
 # 5. Branch Manager
 # ---------------------------------------------------------------------------
 
-class BranchState(str, Enum):
+
+class BranchState(StrEnum):
     CREATED = "CREATED"
     RUNNING = "RUNNING"
     SHADOW = "SHADOW"
@@ -303,7 +329,9 @@ class SpeculationBudget(BaseModel):
     max_depth: int = Field(default=3, ge=0, le=10)
     max_calls_per_shadow: int = Field(default=6, ge=0, le=100)
     max_compute_ms: int | None = Field(default=None, ge=0)
-    allowed_levels: set[RiskLevel] = Field(default_factory=lambda: {RiskLevel.FREE, RiskLevel.STAGEABLE})
+    allowed_levels: set[RiskLevel] = Field(
+        default_factory=lambda: {RiskLevel.FREE, RiskLevel.STAGEABLE}
+    )
     pause_shadow_when_busy: bool = Field(default=True)
 
 
@@ -311,7 +339,8 @@ class SpeculationBudget(BaseModel):
 # 6. Effect Ledger
 # ---------------------------------------------------------------------------
 
-class EffectStatus(str, Enum):
+
+class EffectStatus(StrEnum):
     UNKNOWN = "UNKNOWN"
     COMMITTED = "COMMITTED"
     ROLLED_BACK = "ROLLED_BACK"
@@ -321,7 +350,9 @@ class EffectStatus(str, Enum):
 class EffectRecord(BaseModel):
     model_config = {"frozen": False}
 
-    effect_id: str = Field(..., min_length=1, description="Idempotency key: sha256(version+tool+args)")
+    effect_id: str = Field(
+        ..., min_length=1, description="Idempotency key: sha256(version+tool+args)"
+    )
     tool: str = Field(..., min_length=1)
     args_hash: str = Field(..., min_length=1)
     status: EffectStatus = Field(default=EffectStatus.UNKNOWN)
@@ -335,7 +366,8 @@ class EffectRecord(BaseModel):
 # 7. Result Gate
 # ---------------------------------------------------------------------------
 
-class GateDecision(str, Enum):
+
+class GateDecision(StrEnum):
     APPLY = "APPLY"
     DISCARD = "DISCARD"  # stale
 
@@ -343,6 +375,7 @@ class GateDecision(str, Enum):
 # ---------------------------------------------------------------------------
 # 8. Scenario replay contracts (deterministic)
 # ---------------------------------------------------------------------------
+
 
 class ScenarioTurn(BaseModel):
     """One entry in a replay scenario JSON."""
@@ -370,6 +403,7 @@ class Scenario(BaseModel):
 # ---------------------------------------------------------------------------
 # 9. Reports
 # ---------------------------------------------------------------------------
+
 
 class ArbiterAccuracyReport(BaseModel):
     model_config = {"frozen": True}

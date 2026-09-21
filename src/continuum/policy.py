@@ -4,6 +4,7 @@ Policy + Commitment Control — Risk Levels
 Phase 1: minimal enforcement + honest retraction message generator.
 Phase 3 will add CommitGate, EffectLedger verify-after-timeout.
 """
+
 from __future__ import annotations
 
 from .contracts import ArbiterCategory, RiskLevel
@@ -21,11 +22,14 @@ KIND_RISK: dict[str, RiskLevel] = {
     # price is FREE (read), but map explicitly
 }
 
+
 def risk_for(kind: str) -> RiskLevel:
     return KIND_RISK.get(kind, RiskLevel.FREE)
 
+
 def is_mutating_or_irreversible(kind: str) -> bool:
     return risk_for(kind) in {RiskLevel.MUTATING, RiskLevel.IRREVERSIBLE}
+
 
 # Dialogue for risky retraction after commit
 def retraction_after_commit_message(ref: str, domain: str = "booking") -> str:
@@ -34,8 +38,10 @@ def retraction_after_commit_message(ref: str, domain: str = "booking") -> str:
         f"Want me to cancel it? I'll check if {domain} supports cancellation (and fees) first."
     )
 
+
 def retraction_before_commit_message() -> str:
     return "Understood — I've pruned the booking steps. Your search and options stay — want to adjust anything else?"
+
 
 def low_confidence_question(category: ArbiterCategory) -> str:
     if category == ArbiterCategory.RETRACT:

@@ -2,6 +2,7 @@
 Minimal FastAPI preview for Phase 5 — exposes replay and metrics for e2b preview.
 Binds to 0.0.0.0, allows preview host.
 """
+
 from __future__ import annotations
 
 from pathlib import Path
@@ -11,6 +12,7 @@ try:
     from fastapi import FastAPI
     from fastapi.middleware.cors import CORSMiddleware
     from fastapi.responses import HTMLResponse, JSONResponse
+
     HAS_FASTAPI = True
 except Exception:
     HAS_FASTAPI = False
@@ -57,6 +59,7 @@ if HAS_FASTAPI:
     @app.get("/replay/{scenario}")
     def replay_api(scenario: str) -> JSONResponse:
         from .replay import replay_scenario
+
         path = Path(f"data/scenarios/{scenario}.json")
         if not path.exists():
             return JSONResponse({"error": f"scenario {scenario} not found"}, status_code=404)
@@ -69,6 +72,7 @@ if HAS_FASTAPI:
         if not p.exists():
             return JSONResponse({"error": "run eval-arbiter first"}, status_code=404)
         import json
+
         return JSONResponse(json.loads(p.read_text()))
 
     @app.get("/metrics/comparison")
@@ -77,6 +81,7 @@ if HAS_FASTAPI:
         if not p.exists():
             return JSONResponse({"error": "run compare first"}, status_code=404)
         import json
+
         return JSONResponse(json.loads(p.read_text()))
 
 else:

@@ -4,12 +4,14 @@ Branch Manager — Speculation Budget (Phase 1 minimal)
 Implements branch lifecycle CREATED→RUNNING→SHADOW|ACTIVE … with budget caps.
 Phase 4 will add async spawning, pause-when-busy, depth tracking.
 """
+
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
-from .contracts import Branch, BranchState, SpeculationBudget, ArbiterDecision
+from .contracts import ArbiterDecision, Branch, BranchState, SpeculationBudget
+
 
 class BranchManager:
     def __init__(self, budget: SpeculationBudget | None = None) -> None:
@@ -17,7 +19,13 @@ class BranchManager:
         self._branches: dict[str, Branch] = {}
         self._shadow_count: int = 0
 
-    def spawn_shadow(self, parent_version: int, hypothesis: ArbiterDecision, depth: int = 1, tool_calls: int = 0) -> Branch | None:
+    def spawn_shadow(
+        self,
+        parent_version: int,
+        hypothesis: ArbiterDecision,
+        depth: int = 1,
+        tool_calls: int = 0,
+    ) -> Branch | None:
         """Try to spawn a shadow branch within budget. Return None if refused."""
         if self._shadow_count >= self.budget.max_shadow:
             return None
@@ -86,14 +94,14 @@ class BranchManager:
         if not b or b.state != BranchState.CANCELLED:
             return None
         b.state = BranchState.CLEANED_UP
-        b.cleaned_at = datetime.now(timezone.utc)
+        b.cleaned_at = datetime.now(UTC)
         # free budget if it was shadow
         if not b.is_primary and self._shadow_count > 0:
             self._shadow_count -= 1
         return b
 
     def abandon(self, branch_id: str) -> Branch | None:
-        """ABANDONED: non-cancellable dispatched — budget freed immediately, stale gate will discard later result."""
+        """ABANDONED: non-cancellable dispatched — budget freed, stale gate discards late result."""
         b = self._branches.get(branch_id)
         if not b:
             return None

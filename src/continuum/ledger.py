@@ -4,6 +4,7 @@ Effect Ledger — idempotency + verify-after-timeout
 Phase 1: in-memory ledger with deterministic sha256 idempotency keys.
 Phase 3 will add tool-client verify hook.
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -25,7 +26,12 @@ class EffectLedger:
     def prepare(self, effect_id: str, tool: str, args_hash: str) -> EffectRecord:
         if effect_id in self._records:
             return self._records[effect_id]
-        rec = EffectRecord(effect_id=effect_id, tool=tool, args_hash=args_hash, status=EffectStatus.UNKNOWN)
+        rec = EffectRecord(
+            effect_id=effect_id,
+            tool=tool,
+            args_hash=args_hash,
+            status=EffectStatus.UNKNOWN,
+        )
         self._records[effect_id] = rec
         return rec
 

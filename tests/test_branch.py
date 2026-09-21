@@ -1,8 +1,10 @@
 from continuum.branch_manager import BranchManager
-from continuum.contracts import SpeculationBudget, ArbiterCategory, ArbiterDecision, BranchState
+from continuum.contracts import ArbiterCategory, ArbiterDecision, BranchState, SpeculationBudget
+
 
 def _dec(cat=ArbiterCategory.MODIFY):
     return ArbiterDecision(category=cat, confidence=0.9, rationale="x")
+
 
 def test_budget_max_shadow():
     bm = BranchManager(SpeculationBudget(max_shadow=2))
@@ -12,10 +14,12 @@ def test_budget_max_shadow():
     assert b1 is not None and b2 is not None
     assert b3 is None  # budget refused
 
+
 def test_budget_max_depth():
     bm = BranchManager(SpeculationBudget(max_shadow=2, max_depth=3))
     b = bm.spawn_shadow(1, _dec(), depth=4)
     assert b is None
+
 
 def test_lifecycle_promote():
     bm = BranchManager()
@@ -23,6 +27,7 @@ def test_lifecycle_promote():
     assert b.state == BranchState.SHADOW
     bm.promote(b.id)
     assert b.state == BranchState.PROMOTED
+
 
 def test_lifecycle_cancel_cleanup_frees_budget():
     bm = BranchManager(SpeculationBudget(max_shadow=1))
@@ -39,6 +44,7 @@ def test_lifecycle_cancel_cleanup_frees_budget():
     b2 = bm.spawn_shadow(1, _dec())
     assert b2 is not None
 
+
 def test_abandoned_frees_budget_immediately():
     bm = BranchManager(SpeculationBudget(max_shadow=1))
     b = bm.spawn_shadow(1, _dec())
@@ -46,6 +52,7 @@ def test_abandoned_frees_budget_immediately():
     assert b.state == BranchState.ABANDONED
     b2 = bm.spawn_shadow(1, _dec())
     assert b2 is not None
+
 
 def test_primary_not_counted_as_shadow():
     bm = BranchManager(SpeculationBudget(max_shadow=1))

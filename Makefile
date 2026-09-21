@@ -24,16 +24,16 @@ test:
 	$(PY) -m pytest -q
 
 baseline:
-	$(PY) -m continuum.cli compare --scenarios data/scenarios/*.json --output reports/comparison.json || true
+	$(PY) -m continuum.cli compare --output reports/comparison.json || true
 	@cat reports/comparison.json 2>/dev/null | head -n 100 || echo "no comparison yet"
 	@cat reports/comparison.md 2>/dev/null | head -n 100 || echo "no md yet"
 
-eval: test
+eval: test lint
 	@echo "== Arbiter accuracy =="
 	$(PY) -m continuum.cli eval-arbiter --gold data/gold/arbiter_100.jsonl --output reports/arbiter_accuracy.json || true
 	@cat reports/arbiter_accuracy.json | head -n 80 || true
 	@echo "== Comparison =="
-	$(PY) -m continuum.cli compare --scenarios data/scenarios/*.json --output reports/comparison.json || true
+	$(PY) -m continuum.cli compare --output reports/comparison.json || true
 	@cat reports/comparison.md || true
 	@echo "== All reports =="
 	@ls -lh reports/

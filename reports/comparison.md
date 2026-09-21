@@ -11,4 +11,4 @@ Backend: `offline-fake`
 | shadow_bangalore | 2100ms | 1100ms | 47.6% | 2 | 1 | 1 |
 | timeout_booking | 2250ms | 2250ms | 0.0% | 2 | 0 | 2 |
 
-Generated at 2026-09-21T23:46:28.140445
+Generated at 2026-09-21T23:55:58.683925

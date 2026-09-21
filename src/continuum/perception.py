@@ -4,6 +4,7 @@ Turns input into structured evidence with confidence, ACKs within 200ms.
 
 Phase 1: deterministic Layer 0 only (text). Embedding gate + ASR are Phase 2.
 """
+
 from __future__ import annotations
 
 import re
@@ -11,7 +12,6 @@ import time
 from typing import Literal
 
 from .contracts import EvidenceSpan, Modality, PerceptionOutput
-
 
 # Backchannel / noise lexicon (NOISE fast-path)
 BACKCHANNEL: set[str] = {
@@ -30,11 +30,12 @@ BACKCHANNEL: set[str] = {
     "sure",
     "…",
     "...",
-    "hmm, okay…",
 }
 
 # Explicit retract/new-goal markers for Layer 0 hint
-RETRACT_MARKERS = re.compile(r"\b(don't|do not|cancel|stop|abort|forget|never mind|hold off)\b", re.I)
+RETRACT_MARKERS = re.compile(
+    r"\b(don't|do not|cancel|stop|abort|forget|never mind|hold off)\b", re.I
+)
 MODIFY_MARKERS = re.compile(r"\b(actually|instead|change|switch|make it|no,|correction)\b", re.I)
 
 # Quick ACK templates
@@ -77,7 +78,9 @@ def _guess_ack_category(text: str) -> str:
     return "generic"
 
 
-def perceive_text(text: str, version_in: int = 1, modality: Literal["text", "audio", "vision"] = "text") -> PerceptionOutput:
+def perceive_text(
+    text: str, version_in: int = 1, modality: Literal["text", "audio", "vision"] = "text"
+) -> PerceptionOutput:
     """
     Synchronous fast-path perception for text (MVP).
     Guaranteed <5ms; fast_ack emitted immediately.
