@@ -39,9 +39,7 @@ TOOL_LATENCY_MS: dict[str, int] = {
     "inform": 100,
 }
 
-AllowedKind = Literal[
-    "search", "filter", "price", "book", "pay", "inform", "hold", "cancel"
-]
+AllowedKind = Literal["search", "filter", "price", "book", "pay", "inform", "hold", "cancel"]
 
 
 def _make_node(kind: str, based_on: int, idx: int = 0) -> ExecutionNode:
@@ -136,9 +134,7 @@ def replay_scenario(
             tid = tool_result.get("id", "")
             result_payload = tool_result.get("payload")
             based_on_claimed = int(tool_result.get("based_on", current_version))
-            gate_node: ExecutionNode | None = next(
-                (n for n in dispatched if n.id == tid), None
-            )
+            gate_node: ExecutionNode | None = next((n for n in dispatched if n.id == tid), None)
             if gate_node is None and tid:
                 kind_hint = tid.split(":")[0] if ":" in tid else tid
                 gate_node = next(
@@ -204,9 +200,7 @@ def replay_scenario(
                     )
                     graph.add(completed)
                 else:
-                    emit(
-                        {"event": "stale_discarded", "at_ms": at_ms, "node_id": gate_node.id}
-                    )
+                    emit({"event": "stale_discarded", "at_ms": at_ms, "node_id": gate_node.id})
 
         # ---- Timeout injection ----
         if inject_timeout:
@@ -344,13 +338,15 @@ def replay_scenario(
                 emit({"event": "no_delta", "at_ms": at_ms})
 
     # --- Wall time calc (simulated) ---
-    baseline_wall = sum(TOOL_LATENCY_MS.get(n.kind, 500) for n in dispatched) + len(
-        [t for t in turns if t.get("user")]
-    ) * 150
+    baseline_wall = (
+        sum(TOOL_LATENCY_MS.get(n.kind, 500) for n in dispatched)
+        + len([t for t in turns if t.get("user")]) * 150
+    )
     invalidated_ids = {n.id for n in graph.all_nodes() if n.status == NodeStatus.INVALIDATED}
-    continuum_wall = sum(
-        TOOL_LATENCY_MS.get(n.kind, 500) for n in dispatched if n.id not in invalidated_ids
-    ) + 200
+    continuum_wall = (
+        sum(TOOL_LATENCY_MS.get(n.kind, 500) for n in dispatched if n.id not in invalidated_ids)
+        + 200
+    )
     if invalidated_ids:
         continuum_wall = min(continuum_wall, baseline_wall - 300)
     else:
