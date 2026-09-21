@@ -1,0 +1,12 @@
+{
+  "name": "shadow_bangalore",
+  "description": "Shadow speculation: after Delhi, spawn Bangalore morning vs evening shadows; user confirms morning → promote one, discard other.",
+  "initial_state": { "destination": "Delhi", "dates": "next Monday", "goal_domain": "flights" },
+  "turns": [
+    { "at_ms": 0, "user": "Book Delhi flights for next Monday" },
+    { "at_ms": 50, "tool_start": "search:Delhi" },
+    { "at_ms": 200, "user": "Actually, Bangalore" },
+    { "at_ms": 250, "tool_start": "search:Bangalore" },
+    { "at_ms": 900, "tool_result": { "id": "search:1:0", "payload": { "flights": ["AI-201 Bangalore"] }, "based_on": 2 } }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "name": "delhi_bangalore",
+  "description": "Core demo: user books Delhi flights, then corrects to Bangalore mid-search. Morning constraint persists. Validates versioned state, selective invalidation, stale gate.",
+  "initial_state": {},
+  "turns": [
+    { "at_ms": 0, "user": "Book Delhi flights for next Monday morning" },
+    { "at_ms": 50, "tool_start": "search:Delhi" },
+    { "at_ms": 300, "user": "Actually, Bangalore" },
+    { "at_ms": 350, "tool_start": "search:Bangalore" },
+    { "at_ms": 900, "tool_result": { "id": "search:1:0", "payload": { "flights": ["AI-101 Delhi"], "stale": true }, "based_on": 1 } },
+    { "at_ms": 950, "tool_result": { "id": "search:1:1", "payload": { "flights": ["AI-201 Bangalore", "6E-301 Bangalore"] }, "based_on": 2 } },
+    { "at_ms": 1200, "user": "…but keep the morning constraint" },
+    { "at_ms": 1250, "tool_start": "filter:morning" }
+  ]
+}

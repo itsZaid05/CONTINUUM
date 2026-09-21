@@ -1,0 +1,65 @@
+{
+  "backend": "offline-fake",
+  "rows": [
+    {
+      "scenario": "delhi_bangalore",
+      "baseline_wall_ms": 2450,
+      "continuum_wall_ms": 1300,
+      "saved_pct": 46.9,
+      "correct": true,
+      "dispatched": 3,
+      "invalidated": 1,
+      "reused": 2
+    },
+    {
+      "scenario": "dont_book_it",
+      "baseline_wall_ms": 2400,
+      "continuum_wall_ms": 1100,
+      "saved_pct": 54.2,
+      "correct": true,
+      "dispatched": 2,
+      "invalidated": 1,
+      "reused": 1
+    },
+    {
+      "scenario": "rapid_burst",
+      "baseline_wall_ms": 1350,
+      "continuum_wall_ms": 1350,
+      "saved_pct": 0.0,
+      "correct": true,
+      "dispatched": 1,
+      "invalidated": 0,
+      "reused": 1
+    },
+    {
+      "scenario": "retract_after_commit",
+      "baseline_wall_ms": 2400,
+      "continuum_wall_ms": 1100,
+      "saved_pct": 54.2,
+      "correct": true,
+      "dispatched": 2,
+      "invalidated": 2,
+      "reused": 0
+    },
+    {
+      "scenario": "shadow_bangalore",
+      "baseline_wall_ms": 2100,
+      "continuum_wall_ms": 1100,
+      "saved_pct": 47.6,
+      "correct": true,
+      "dispatched": 2,
+      "invalidated": 1,
+      "reused": 1
+    },
+    {
+      "scenario": "timeout_booking",
+      "baseline_wall_ms": 2250,
+      "continuum_wall_ms": 2250,
+      "saved_pct": 0.0,
+      "correct": true,
+      "dispatched": 2,
+      "invalidated": 0,
+      "reused": 2
+    }
+  ]
+}
