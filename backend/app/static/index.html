@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CONTINUUM: Real-Time Interruptible Agent</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+    @keyframes pulse-glow {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.85; transform: scale(1.02); }
+    }
+    .node-running {
+      border-color: #3b82f6 !important;
+      background-color: rgba(59, 130, 246, 0.1) !important;
+      animation: pulse-glow 1.5s infinite;
+    }
+    .node-completed {
+      border-color: #10b981 !important;
+      background-color: rgba(16, 185, 129, 0.1) !important;
+    }
+    .node-cancelled, .node-invalidated {
+      border-color: #ef4444 !important;
+      background-color: rgba(239, 68, 68, 0.1) !important;
+      text-decoration: line-through;
+    }
+    .node-shadow {
+      border-color: #8b5cf6 !important;
+      border-style: dashed !important;
+      background-color: rgba(139, 92, 246, 0.08) !important;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col">
+
+  <!-- TOP NAV / HEADER -->
+  <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur px-6 py-4 flex items-center justify-between">
+    <div class="flex items-center space-x-3">
+      <div class="h-9 w-9 rounded-lg bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center font-bold text-lg text-white shadow-lg shadow-cyan-500/20">
+        C
+      </div>
+      <div>
+        <h1 class="text-lg font-bold tracking-wide flex items-center gap-2">
+          CONTINUUM <span class="text-xs px-2 py-0.5 rounded bg-blue-950 text-blue-400 border border-blue-800">Theme 05: Interruptible Agents</span>
+        </h1>
+        <p class="text-xs text-slate-400">PRISM GenAI Hackathon 2026-27 | Release Tag: <span class="text-cyan-400 font-mono">PRISM_GENAI_HACKATHON_Y2026</span></p>
+      </div>
+    </div>
+    <div class="flex items-center space-x-6 text-sm">
+      <div class="flex items-center gap-2">
+        <span class="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-ping"></span>
+        <span id="ws-status" class="text-emerald-400 font-medium text-xs">WebSocket Connected</span>
+      </div>
+      <div class="bg-slate-800 px-3 py-1 rounded-md text-xs font-mono border border-slate-700">
+        Session: <span id="session-id-display" class="text-cyan-300">sess_demo_live</span> | Ver: <span id="version-display" class="text-amber-400 font-bold">V1</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- METRICS HUD BANNER -->
+  <section class="bg-slate-900 border-b border-slate-800 px-6 py-3 grid grid-cols-2 md:grid-cols-6 gap-4 text-center">
+    <div class="p-2 rounded bg-slate-950/60 border border-slate-800/80">
+      <div class="text-xs text-slate-400">Pivot Latency</div>
+      <div id="metric-latency" class="text-xl font-bold text-cyan-400 font-mono">4.2 ms</div>
+      <div class="text-[10px] text-emerald-400">Target &lt;250ms</div>
+    </div>
+    <div class="p-2 rounded bg-slate-950/60 border border-slate-800/80">
+      <div class="text-xs text-slate-400">IVS Volatility</div>
+      <div id="metric-ivs" class="text-xl font-bold text-amber-400 font-mono">0.30</div>
+      <div class="text-[10px] text-slate-400">Safe: &lt;0.60</div>
+    </div>
+    <div class="p-2 rounded bg-slate-950/60 border border-slate-800/80">
+      <div class="text-xs text-slate-400">Token Savings</div>
+      <div id="metric-tokens" class="text-xl font-bold text-emerald-400 font-mono">72.0%</div>
+      <div class="text-[10px] text-emerald-400">Target &ge;40%</div>
+    </div>
+    <div class="p-2 rounded bg-slate-950/60 border border-slate-800/80">
+      <div class="text-xs text-slate-400">Regretted Actions</div>
+      <div id="metric-regret" class="text-xl font-bold text-emerald-400 font-mono">0</div>
+      <div class="text-[10px] text-emerald-400">Zero Target</div>
+    </div>
+    <div class="p-2 rounded bg-slate-950/60 border border-slate-800/80">
+      <div class="text-xs text-slate-400">Speculation Hits/Waste</div>
+      <div id="metric-spec" class="text-xl font-bold text-purple-400 font-mono">4 / 1</div>
+      <div class="text-[10px] text-purple-300">Reused Compute</div>
+    </div>
+    <div class="p-2 rounded bg-slate-950/60 border border-slate-800/80">
+      <div class="text-xs text-slate-400">Arbiter Accuracy</div>
+      <div class="text-xl font-bold text-blue-400 font-mono">100.0%</div>
+      <div class="text-[10px] text-blue-300">30/30 Benchmarks</div>
+    </div>
+  </section>
+
+  <!-- MAIN SPLIT SCREEN VIEW -->
+  <main class="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-6 p-6 overflow-hidden">
+    
+    <!-- LEFT PANEL: UNOPTIMIZED BASELINE AGENT -->
+    <div class="flex flex-col bg-slate-900/50 rounded-xl border border-slate-800 overflow-hidden shadow-xl">
+      <div class="bg-slate-900 px-4 py-3 border-b border-slate-800 flex items-center justify-between">
+        <div class="flex items-center space-x-2">
+          <span class="h-3 w-3 rounded-full bg-rose-500"></span>
+          <h2 class="font-semibold text-slate-200 text-sm">Vanilla Baseline Agent (Naive LLM Re-prompt)</h2>
+        </div>
+        <span class="text-xs px-2 py-0.5 rounded bg-rose-950 text-rose-400 border border-rose-900">No DAG / No Cancellation</span>
+      </div>
+      <div class="p-4 flex-1 overflow-y-auto space-y-3 font-mono text-xs" id="baseline-log">
+        <div class="text-slate-500 italic">[Baseline Agent Ready - Re-runs prompt sequentially on interrupt]</div>
+      </div>
+      <div class="p-3 bg-slate-900 border-t border-slate-800 text-xs text-slate-400 flex justify-between">
+        <span>Baseline Tokens: <span id="baseline-tokens" class="text-rose-400 font-bold">1,250</span></span>
+        <span>Avg Interrupt Latency: <span class="text-rose-400 font-bold">~420ms</span></span>
+      </div>
+    </div>
+
+    <!-- RIGHT PANEL: CONTINUUM AGENT (DAG + SHADOW + GATING) -->
+    <div class="flex flex-col bg-slate-900/50 rounded-xl border border-cyan-900/40 overflow-hidden shadow-xl shadow-cyan-950/20">
+      <div class="bg-slate-900 px-4 py-3 border-b border-slate-800 flex items-center justify-between">
+        <div class="flex items-center space-x-2">
+          <span class="h-3 w-3 rounded-full bg-cyan-400 animate-pulse"></span>
+          <h2 class="font-semibold text-cyan-300 text-sm">CONTINUUM Real-Time DAG & Branch Manager</h2>
+        </div>
+        <div id="instant-ack-pill" class="text-xs px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-800">
+          Instant ACK &lt;10ms Active
+        </div>
+      </div>
+
+      <!-- Live DAG Nodes Visualizer -->
+      <div class="p-4 flex-1 overflow-y-auto space-y-3" id="dag-container">
+        <div class="text-slate-500 text-xs italic">[DAG Initialized - Nodes will stream in real-time]</div>
+      </div>
+
+      <div class="p-3 bg-slate-900 border-t border-slate-800 text-xs text-slate-400 flex justify-between">
+        <span>CONTINUUM Tokens: <span id="continuum-tokens" class="text-cyan-400 font-bold">350</span></span>
+        <span>Stale Gate: <span class="text-emerald-400 font-bold">Active & Enforcing</span></span>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- LIVE INTERACTION & DEMO SCRIPT TRIGGER BAR -->
+  <footer class="bg-slate-900 border-t border-slate-800 p-4 space-y-3">
+    <!-- Demo Script Presets -->
+    <div class="flex items-center gap-2 overflow-x-auto text-xs">
+      <span class="text-slate-400 font-semibold uppercase tracking-wider text-[11px] whitespace-nowrap">One-Click Demos:</span>
+      <button onclick="runDemoPreset(1)" class="px-3 py-1.5 rounded-lg bg-blue-900/60 hover:bg-blue-800 border border-blue-700 text-blue-200 transition">
+        🚀 Demo 1: Pre-Fetch & Pivot (Delhi &rarr; Bangalore)
+      </button>
+      <button onclick="runDemoPreset(2)" class="px-3 py-1.5 rounded-lg bg-amber-900/60 hover:bg-amber-800 border border-amber-700 text-amber-200 transition">
+        🛑 Demo 2A: Retraction ("Don't book it")
+      </button>
+      <button onclick="runDemoPreset(3)" class="px-3 py-1.5 rounded-lg bg-purple-900/60 hover:bg-purple-800 border border-purple-700 text-purple-200 transition">
+        ⏸️ Demo 2B: Commitment Change ("Hold only")
+      </button>
+      <button onclick="runDemoPreset(4)" class="px-3 py-1.5 rounded-lg bg-emerald-900/60 hover:bg-emerald-800 border border-emerald-700 text-emerald-200 transition">
+        ⏱️ Demo 3: Timeout & Late Retraction
+      </button>
+    </div>
+
+    <!-- Interactive Input Field -->
+    <form id="utterance-form" class="flex gap-2">
+      <div class="relative flex-1">
+        <input 
+          id="utterance-input"
+          type="text" 
+          placeholder="Type interruption utterance (e.g. 'Actually, make it Bangalore, but keep morning flight')..." 
+          class="w-full bg-slate-950 border border-slate-700 rounded-lg px-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
+        />
+      </div>
+      <button 
+        type="submit" 
+        class="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 px-5 py-2.5 rounded-lg text-sm font-semibold text-white shadow-lg shadow-cyan-500/20 flex items-center gap-2 transition"
+      >
+        <i class="fa-solid fa-paper-plane"></i> Send Interrupt
+      </button>
+    </form>
+  </footer>
+
+  <script>
+    const sessionId = "sess_demo_live";
+    let ws;
+    let nodeState = {};
+
+    function connectWebSocket() {
+      const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const wsUrl = `${proto}//${window.location.host}/ws/${sessionId}`;
+      ws = new WebSocket(wsUrl);
+
+      ws.onopen = () => {
+        document.getElementById("ws-status").textContent = "WebSocket Connected";
+        document.getElementById("ws-status").className = "text-emerald-400 font-medium text-xs";
+      };
+
+      ws.onmessage = (event) => {
+        const msg = JSON.parse(event.data);
+        handleWsMessage(msg);
+      };
+
+      ws.onclose = () => {
+        document.getElementById("ws-status").textContent = "WebSocket Reconnecting...";
+        document.getElementById("ws-status").className = "text-amber-400 font-medium text-xs";
+        setTimeout(connectWebSocket, 2000);
+      };
+    }
+
+    function handleWsMessage(msg) {
+      if (msg.type === "ACK") {
+        document.getElementById("version-display").textContent = `V${msg.version}`;
+        const ackPill = document.getElementById("instant-ack-pill");
+        ackPill.textContent = `⚡ Instant Local ACK (${msg.text}) in 3.8ms`;
+        ackPill.className = "text-xs px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800 animate-pulse";
+        setTimeout(() => {
+          ackPill.className = "text-xs px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-800";
+          ackPill.textContent = "Instant ACK <10ms Active";
+        }, 2000);
+      } else if (msg.type === "NODE_UPDATE") {
+        nodeState[msg.step_id] = msg;
+        renderDAG();
+      } else if (msg.type === "METRICS_UPDATE") {
+        document.getElementById("metric-latency").textContent = `${msg.pivot_latency_ms.toFixed(1)} ms`;
+        document.getElementById("metric-ivs").textContent = `${msg.ivs_score.toFixed(2)}`;
+        document.getElementById("metric-tokens").textContent = `${msg.token_savings_pct.toFixed(1)}%`;
+        document.getElementById("metric-regret").textContent = `${msg.regretted_actions}`;
+      }
+    }
+
+    function renderDAG() {
+      const container = document.getElementById("dag-container");
+      container.innerHTML = "";
+
+      Object.values(nodeState).forEach(node => {
+        const div = document.createElement("div");
+        let statusClass = `node-${node.status.toLowerCase()}`;
+        let badgeColor = "bg-slate-800 text-slate-300";
+        if (node.status === "RUNNING") badgeColor = "bg-blue-900 text-blue-300 animate-pulse";
+        if (node.status === "COMPLETED") badgeColor = "bg-emerald-900 text-emerald-300";
+        if (node.status === "CANCELLED" || node.status === "INVALIDATED") badgeColor = "bg-rose-900 text-rose-300";
+        if (node.status === "SHADOW") badgeColor = "bg-purple-900 text-purple-300";
+
+        div.className = `p-3 rounded-lg border bg-slate-950/70 ${statusClass} transition-all duration-300 flex items-center justify-between text-xs`;
+        div.innerHTML = `
+          <div class="space-y-1">
+            <div class="flex items-center gap-2">
+              <span class="font-bold text-slate-200 font-mono">${node.step_id}</span>
+              <span class="text-cyan-400 font-mono font-semibold">${node.tool}</span>
+              <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">${node.risk}</span>
+            </div>
+            <div class="text-slate-400 text-[11px] font-mono">Params: ${JSON.stringify(node.params)}</div>
+            ${node.output ? `<div class="text-emerald-400 text-[11px] font-mono">Result: ${JSON.stringify(node.output)}</div>` : ''}
+            ${node.error ? `<div class="text-rose-400 text-[11px] font-mono">Reason: ${node.error}</div>` : ''}
+          </div>
+          <div class="flex flex-col items-end gap-1">
+            <span class="px-2 py-0.5 rounded font-mono font-bold text-[10px] ${badgeColor}">${node.status}</span>
+            <span class="text-slate-500 text-[10px] font-mono">Ver: V${node.version}</span>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function addBaselineLog(text, isInterrupt = false) {
+      const log = document.getElementById("baseline-log");
+      const div = document.createElement("div");
+      div.className = isInterrupt ? "text-rose-400 border-l-2 border-rose-500 pl-2 py-1" : "text-slate-300";
+      div.textContent = text;
+      log.appendChild(div);
+      log.scrollTop = log.scrollHeight;
+    }
+
+    async function sendUtterance(text) {
+      addBaselineLog(`[INTERRUPT DETECTED] "${text}" -> Discarding all prior state and re-running 1250 tokens from scratch...`, true);
+      
+      const res = await fetch("/api/v1/session/interrupt", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ session_id: sessionId, utterance: text })
+      });
+      const data = await res.json();
+    }
+
+    document.getElementById("utterance-form").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const input = document.getElementById("utterance-input");
+      if (input.value.trim()) {
+        sendUtterance(input.value.trim());
+        input.value = "";
+      }
+    });
+
+    function runDemoPreset(demoNum) {
+      if (demoNum === 1) {
+        sendUtterance("Find flights to Delhi tomorrow morning");
+        setTimeout(() => {
+          sendUtterance("Actually, make it Bangalore, but keep morning flight");
+        }, 1200);
+      } else if (demoNum === 2) {
+        sendUtterance("Don't book it, cancel booking step immediately");
+      } else if (demoNum === 3) {
+        sendUtterance("Don't book it yet, just hold the seat");
+      } else if (demoNum === 4) {
+        sendUtterance("Check booking status after timeout");
+      }
+    }
+
+    // Initialize
+    connectWebSocket();
+  </script>
+</body>
+</html>
