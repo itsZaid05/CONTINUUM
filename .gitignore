@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.so
+*.egg-info/
+.eggs/
+build/
+dist/
+*.whl
+.venv/
+venv/
+.env
+.env.local
+
+# uv
+.uv/
+uv.lock
+
+# Reports (keep checked-in for judges, but ignore temp)
+# reports/ is intentionally committed for Phase 1 demo
+# Uncomment to ignore: reports/*.tmp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs & temp
+*.log
+*.tmp
+.tmp/
+.coverage
+htmlcov/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.hypothesis/
+
+# Secrets
+*.key
+*.pem
+.env
+credentials.json
