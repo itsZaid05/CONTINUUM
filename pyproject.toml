@@ -1,6 +1,6 @@
 [project]
 name = "continuum"
-version = "0.1.0"
+version = "0.2.0"
 description = "CONTINUUM — Interruptible Real-Time Agents for Samsung PRISM Theme 05 (Engineer A: Understanding, Dialogue & Evaluation)"
 readme = "README.md"
 requires-python = "==3.11.*"
@@ -63,6 +63,7 @@ ignore = ["B008"]  # Typer idiom uses function calls in defaults by design
 "src/continuum/contracts.py" = ["E501", "SIM102", "UP042", "B904"]
 "src/continuum/cli.py" = ["E501", "E741"]
 "src/continuum/delta_arbiter.py" = ["E501"]
+"src/continuum/llm.py" = ["E501", "SIM102", "SIM108", "B904", "F841"]
 "src/continuum/perception.py" = ["E501"]
 "src/continuum/policy.py" = ["E501"]
 "src/continuum/provenance.py" = ["E501"]

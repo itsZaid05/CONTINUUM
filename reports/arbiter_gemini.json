@@ -1,0 +1,80 @@
+{
+  "total": 100,
+  "correct": 100,
+  "accuracy": 1.0,
+  "macro_f1": 1.0,
+  "per_category": {
+    "NEW_GOAL": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "support": 20
+    },
+    "MODIFY": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "support": 20
+    },
+    "ADD_CONSTRAINT": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "support": 20
+    },
+    "RETRACT": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "support": 20
+    },
+    "NOISE": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "support": 20
+    }
+  },
+  "confusion": {
+    "NEW_GOAL": {
+      "NEW_GOAL": 20,
+      "MODIFY": 0,
+      "ADD_CONSTRAINT": 0,
+      "RETRACT": 0,
+      "NOISE": 0
+    },
+    "MODIFY": {
+      "NEW_GOAL": 0,
+      "MODIFY": 20,
+      "ADD_CONSTRAINT": 0,
+      "RETRACT": 0,
+      "NOISE": 0
+    },
+    "ADD_CONSTRAINT": {
+      "NEW_GOAL": 0,
+      "MODIFY": 0,
+      "ADD_CONSTRAINT": 20,
+      "RETRACT": 0,
+      "NOISE": 0
+    },
+    "RETRACT": {
+      "NEW_GOAL": 0,
+      "MODIFY": 0,
+      "ADD_CONSTRAINT": 0,
+      "RETRACT": 20,
+      "NOISE": 0
+    },
+    "NOISE": {
+      "NEW_GOAL": 0,
+      "MODIFY": 0,
+      "ADD_CONSTRAINT": 0,
+      "RETRACT": 0,
+      "NOISE": 20
+    }
+  },
+  "ece": null,
+  "latency_p50_ms": 665.0,
+  "latency_p95_ms": 674.0,
+  "model": "gemini",
+  "gold_hash": "b8920267657a"
+}

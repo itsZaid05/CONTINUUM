@@ -21,7 +21,10 @@ console = Console()
 def replay(
     scenario: Path = typer.Argument(..., help="Path to scenario JSON"),  # noqa: B008
     backend: str = typer.Option(  # noqa: B008
-        "offline-fake", "--backend", "-b", help="offline-fake|ollama|gemini"
+        "offline-fake",
+        "--backend",
+        "-b",
+        help="offline-fake|dense|ollama|gemini|openai (or $CONTINUUM_BACKEND)",
     ),
     trace: bool = typer.Option(  # noqa: B008
         False, "--trace", help="Print trace events"
@@ -64,7 +67,9 @@ def eval_arbiter(
     output: Path = typer.Option(  # noqa: B008
         Path("reports/arbiter_accuracy.json"), "--output", "-o"
     ),
-    backend: str = typer.Option("offline-fake", "--backend", "-b"),  # noqa: B008
+    backend: str = typer.Option(
+        "offline-fake", "--backend", "-b", help="offline-fake|dense|ollama|gemini|openai"
+    ),  # noqa: B008
 ) -> None:
     """Evaluate arbiter accuracy on frozen gold set (100 sentences)."""
     import statistics
@@ -203,7 +208,9 @@ def compare(
     output: Path = typer.Option(  # noqa: B008
         Path("reports/comparison.json"), "--output", "-o"
     ),
-    backend: str = typer.Option("offline-fake", "--backend"),  # noqa: B008
+    backend: str = typer.Option(
+        "offline-fake", "--backend", help="offline-fake|dense|ollama|gemini|openai"
+    ),  # noqa: B008
 ) -> None:
     """Baseline vs CONTINUUM comparison across scenarios."""
     import glob as _glob
