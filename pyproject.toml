@@ -1,0 +1,89 @@
+[project]
+name = "continuum"
+version = "0.2.0"
+description = "CONTINUUM — Interruptible Real-Time Agents for Samsung PRISM Theme 05 (Engineer A: Understanding, Dialogue & Evaluation)"
+readme = "README.md"
+requires-python = "==3.11.*"
+license = { text = "MIT" }
+authors = [{ name = "CONTINUUM Team", email = "continuum@prism.local" }]
+keywords = ["agent","interruptible","samsung-prism","dialogue","provenance"]
+dependencies = [
+    "pydantic>=2.9,<3",
+    "pydantic-settings>=2.4",
+    "typer>=0.12",
+    "rich>=13.7",
+    "python-dateutil>=2.9",
+    "sentence-transformers>=3.0 ; python_version >= '3.11'",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.2",
+    "pytest-asyncio>=0.23",
+    "httpx>=0.27",
+    "ruff>=0.9",
+    "mypy>=1.10",
+]
+
+dense = [
+    "sentence-transformers>=3.0",
+    "torch>=2.3",
+    "rank-bm25>=0.2.2",
+]
+
+[project.scripts]
+continuum = "continuum.cli:main"
+
+[project.urls]
+Repository = "https://github.com/itsZaid05/new"
+Issues = "https://github.com/itsZaid05/new/issues"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/continuum"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+addopts = "-q"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E","F","I","UP","B","SIM"]
+ignore = ["B008"]  # Typer idiom uses function calls in defaults by design
+
+[tool.ruff.lint.per-file-ignores]
+"src/continuum/api.py" = ["E501"]
+"src/continuum/contracts.py" = ["E501", "SIM102", "UP042", "B904"]
+"src/continuum/cli.py" = ["E501", "E741"]
+"src/continuum/delta_arbiter.py" = ["E501"]
+"src/continuum/llm.py" = ["E501", "SIM102", "SIM108", "B904", "F841"]
+"src/continuum/perception.py" = ["E501"]
+"src/continuum/policy.py" = ["E501"]
+"src/continuum/provenance.py" = ["E501"]
+"src/continuum/ledger.py" = ["E501"]
+"src/continuum/versioned_state.py" = ["E501"]
+"src/continuum/replay.py" = ["E501", "SIM108"]
+"tests/test_contract.py" = ["B017", "E501"]
+"tests/*" = ["B017", "E501", "E702", "F841"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = false
+ignore_missing_imports = true
+warn_unused_ignores = false
+# Phase 1 relaxed; Phase 5 will enable stricter checks
+
+[tool.coverage.run]
+source = ["src"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false

@@ -1,0 +1,13 @@
+{
+  "name": "retract_after_commit",
+  "description": "Edge case: user says 'don't book it' after booking already COMMITTED. Must respond honestly and offer cancel.",
+  "initial_state": { "destination": "Bangalore", "dates": "next Monday", "goal_domain": "flights" },
+  "turns": [
+    { "at_ms": 0, "user": "Book Bangalore flights" },
+    { "at_ms": 50, "tool_start": "search:Bangalore" },
+    { "at_ms": 400, "tool_result": { "id": "search:1:0", "payload": { "flights": ["AI-201"] }, "based_on": 1 } },
+    { "at_ms": 450, "tool_start": "book" },
+    { "at_ms": 1100, "tool_result": { "id": "book:1:1", "payload": { "ref": "BLR-11:03", "status": "COMMITTED" }, "based_on": 1 } },
+    { "at_ms": 5000, "user": "Don't book it" }
+  ]
+}
