@@ -1,0 +1,11 @@
+{
+  "name": "duplicate_result",
+  "description": "R-02 class: the same tool result is delivered twice (e.g. network retry at the transport). Must be applied ONCE; second delivery ignored — no double state effect.",
+  "initial_state": { "destination": "Bangalore", "dates": "next Monday", "goal_domain": "flights" },
+  "turns": [
+    { "at_ms": 0, "user": "Book Bangalore flights for next Monday" },
+    { "at_ms": 50, "tool_start": "search:Bangalore" },
+    { "at_ms": 400, "tool_result": { "id": "search:1:0", "payload": { "flights": ["AI-201"] }, "based_on": 1 } },
+    { "at_ms": 420, "tool_result": { "id": "search:1:0", "payload": { "flights": ["AI-201"] }, "based_on": 1 } }
+  ]
+}

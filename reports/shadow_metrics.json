@@ -1,0 +1,114 @@
+{
+  "backend": "offline-fake",
+  "totals": {
+    "spawned": 2,
+    "promoted": 1,
+    "discarded": 1,
+    "abandoned": 0,
+    "reused_pct": 50.0,
+    "wasted_pct": 50.0
+  },
+  "per_scenario": {
+    "delhi_bangalore": {
+      "spawned": 0,
+      "promoted": 0,
+      "discarded": 0,
+      "abandoned": 0,
+      "reused_pct": 0.0,
+      "wasted_pct": 0.0,
+      "cleanup_p95_ms": 0.0,
+      "cleanup_samples": 0,
+      "primary_slowdown_pct": 0.0,
+      "primary_reserved_ms": 0.0,
+      "live_budget": "0/2",
+      "by_state": {}
+    },
+    "dont_book_it": {
+      "spawned": 0,
+      "promoted": 0,
+      "discarded": 0,
+      "abandoned": 0,
+      "reused_pct": 0.0,
+      "wasted_pct": 0.0,
+      "cleanup_p95_ms": 0.0,
+      "cleanup_samples": 0,
+      "primary_slowdown_pct": 0.0,
+      "primary_reserved_ms": 0.0,
+      "live_budget": "0/2",
+      "by_state": {}
+    },
+    "duplicate_result": {
+      "spawned": 0,
+      "promoted": 0,
+      "discarded": 0,
+      "abandoned": 0,
+      "reused_pct": 0.0,
+      "wasted_pct": 0.0,
+      "cleanup_p95_ms": 0.0,
+      "cleanup_samples": 0,
+      "primary_slowdown_pct": 0.0,
+      "primary_reserved_ms": 0.0,
+      "live_budget": "0/2",
+      "by_state": {}
+    },
+    "rapid_burst": {
+      "spawned": 0,
+      "promoted": 0,
+      "discarded": 0,
+      "abandoned": 0,
+      "reused_pct": 0.0,
+      "wasted_pct": 0.0,
+      "cleanup_p95_ms": 0.0,
+      "cleanup_samples": 0,
+      "primary_slowdown_pct": 0.0,
+      "primary_reserved_ms": 0.0,
+      "live_budget": "0/2",
+      "by_state": {}
+    },
+    "retract_after_commit": {
+      "spawned": 0,
+      "promoted": 0,
+      "discarded": 0,
+      "abandoned": 0,
+      "reused_pct": 0.0,
+      "wasted_pct": 0.0,
+      "cleanup_p95_ms": 0.0,
+      "cleanup_samples": 0,
+      "primary_slowdown_pct": 0.0,
+      "primary_reserved_ms": 0.0,
+      "live_budget": "0/2",
+      "by_state": {}
+    },
+    "shadow_bangalore": {
+      "spawned": 2,
+      "promoted": 1,
+      "discarded": 1,
+      "abandoned": 0,
+      "reused_pct": 50.0,
+      "wasted_pct": 50.0,
+      "cleanup_p95_ms": 0.009,
+      "cleanup_samples": 1,
+      "primary_slowdown_pct": 4.5,
+      "primary_reserved_ms": 49.5,
+      "live_budget": "0/2",
+      "by_state": {
+        "PROMOTED": 1,
+        "CLEANED_UP": 1
+      }
+    },
+    "timeout_booking": {
+      "spawned": 0,
+      "promoted": 0,
+      "discarded": 0,
+      "abandoned": 0,
+      "reused_pct": 0.0,
+      "wasted_pct": 0.0,
+      "cleanup_p95_ms": 0.0,
+      "cleanup_samples": 0,
+      "primary_slowdown_pct": 0.0,
+      "primary_reserved_ms": 0.0,
+      "live_budget": "0/2",
+      "by_state": {}
+    }
+  }
+}

@@ -1,8 +1,8 @@
 """CONTINUUM — Interruptible Real-Time Agents
 
 Engineer A: Understanding, Dialogue & Evaluation
-Phase 2: LLM Adapter (fused prompt, dense gate, ollama/gemini/openai) + offline fallback
+Phase 4: Shadow speculation — bounded budget + cleanup + metrics (0.4.0)
 """
 
-__version__ = "0.2.0-phase2"
+__version__ = "0.4.0-phase4"
 __all__ = ["__version__"]

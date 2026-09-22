@@ -1,13 +1,17 @@
 """
-Policy + Commitment Control — Risk Levels
+Policy + Commitment Control — Risk Levels + CommitGate (Phase 3)
 
-Phase 1: minimal enforcement + honest retraction message generator.
-Phase 3 will add CommitGate, EffectLedger verify-after-timeout.
+FREE / STAGEABLE flow through; IRREVERSIBLE requires explicit confirmation;
+a RETRACT decision BLOCKS pending bookings outright. Honest retraction
+messages for before/after-commit states live here (shared by dialogue.py).
 """
 
 from __future__ import annotations
 
-from .contracts import ArbiterCategory, RiskLevel
+from dataclasses import dataclass
+from enum import StrEnum
+
+from .contracts import ArbiterCategory, ArbiterDecision, ExecutionNode, RiskLevel
 
 # Node kind → RiskLevel mapping (hardcoded MVP, later policy file)
 KIND_RISK: dict[str, RiskLevel] = {
@@ -49,3 +53,52 @@ def low_confidence_question(category: ArbiterCategory) -> str:
     if category == ArbiterCategory.NEW_GOAL:
         return "Just to confirm — you want to forget the current task and start fresh — correct?"
     return "Just to confirm — did you want to change that — correct?"
+
+
+# ---------------------------------------------------------------------------
+# CommitGate (Phase 3 — plan Task 3.3.A)
+# ---------------------------------------------------------------------------
+
+
+class GateAction(StrEnum):
+    ALLOW = "ALLOW"
+    STAGE = "STAGE"  # prepare but do not dispatch
+    CONFIRM_REQUIRED = "CONFIRM_REQUIRED"
+    BLOCK = "BLOCK"
+
+
+@dataclass
+class CommitGate:
+    """Decide whether a node may execute given risk, decision and confirmation.
+
+    Rules (mirror the PRD table):
+      FREE            → ALLOW        (search/filter/price are harmless reads)
+      STAGEABLE       → STAGE        (hold/draft: prepare, never dispatch alone)
+      MUTATING        → ALLOW unless the arbiter itself wants clarification
+      IRREVERSIBLE    → CONFIRM_REQUIRED without explicit confirm;
+                        BLOCK outright when the latest decision is RETRACT
+                        (user just said don't do it — never execute anyway).
+    """
+
+    allow_stage_auto_dispatch: bool = False
+
+    def can_execute(
+        self,
+        node: ExecutionNode,
+        decision: ArbiterDecision | None = None,
+        *,
+        confirmed: bool = False,
+    ) -> GateAction:
+        risk = risk_for(node.kind)
+        if risk == RiskLevel.FREE:
+            return GateAction.ALLOW
+        if risk == RiskLevel.STAGEABLE:
+            return GateAction.ALLOW if self.allow_stage_auto_dispatch else GateAction.STAGE
+        if risk == RiskLevel.MUTATING:
+            if decision is not None and decision.needs_clarification():
+                return GateAction.CONFIRM_REQUIRED
+            return GateAction.ALLOW
+        # IRREVERSIBLE
+        if decision is not None and decision.category == ArbiterCategory.RETRACT:
+            return GateAction.BLOCK
+        return GateAction.ALLOW if confirmed else GateAction.CONFIRM_REQUIRED

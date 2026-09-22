@@ -72,7 +72,8 @@
       "NOISE": 20
     }
   },
-  "ece": null,
+  "ece": 0.106,
+  "ece_bins": 10,
   "latency_p50_ms": 665.0,
   "latency_p95_ms": 674.0,
   "model": "gemini",

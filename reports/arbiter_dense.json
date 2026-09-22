@@ -72,7 +72,8 @@
       "NOISE": 20
     }
   },
-  "ece": null,
+  "ece": 0.106,
+  "ece_bins": 10,
   "latency_p50_ms": 20.5,
   "latency_p95_ms": 30.0,
   "model": "dense",

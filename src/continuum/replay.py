@@ -3,12 +3,18 @@ Deterministic Replay — Stepped Clock
 
 Ingests scenario JSON (sorted by at_ms), drives:
   perception → arbiter (1 call) → versioned_state.patch
-  → provenance.invalidate → branch manager → tool graph simulation
+  → provenance.invalidate → branch manager (Phase 4: shadow spawn/promote/discard)
+  → tool graph simulation → dialogue (honest retraction, clarify questions)
 Logs every step to JSONL for metrics.
+
+Ablation flags (used by `continuum ablate`):
+  disable_stale_gate → stale results get applied (shows the bug the gate prevents)
+  disable_shadows    → no speculation (shows shadow cost/benefit is optional work)
 """
 
 from __future__ import annotations
 
+import time as _time
 from pathlib import Path
 from typing import Any, Literal, cast
 
@@ -22,10 +28,12 @@ from .contracts import (
     SpeculationBudget,
 )
 from .delta_arbiter import ArbiterBackend
+from .dialogue import respond, respond_to_turn
 from .ledger import EffectLedger, effect_id_for
 from .perception import perceive_text
 from .policy import risk_for
 from .provenance import ProvenanceGraph
+from .shadow import ShadowScorer, hypothesis_to_row
 from .versioned_state import VersionedStore
 
 # Simulated tool latency (ms) for wall-time calc
@@ -77,6 +85,8 @@ def replay_scenario(
     trace: bool = False,
     wal_path: Path | None = None,
     output_path: Path | None = None,
+    disable_shadows: bool = False,
+    disable_stale_gate: bool = False,
 ) -> dict[str, Any]:
     import json as _json
 
@@ -85,12 +95,18 @@ def replay_scenario(
     initial_state: dict[str, Any] = data.get("initial_state", {})
     turns = data.get("turns", [])
     turns = sorted(turns, key=lambda t: t.get("at_ms", 0))
+    force_shadow = bool(data.get("force_shadow"))
 
     store = VersionedStore(wal_path=wal_path)
     graph = ProvenanceGraph()
     bm = BranchManager(budget=SpeculationBudget())
     ledger = EffectLedger()
     arbiter = ArbiterBackend(backend)
+    scorer = ShadowScorer()
+    shadow_meta: dict[str, dict[str, Any]] = {}  # branch_id → {label, score, version}
+    shadow_rows: list[dict[str, Any]] = []
+    stale_leaks = 0
+    duplicate_ignored = 0
 
     if not initial_state:
         initial_state = {}
@@ -182,7 +198,25 @@ def replay_scenario(
                 else:
                     gate_node = graph.get(synthetic_id)
             if gate_node is not None:
+                gate_node = graph.get(gate_node.id) or gate_node
+                # R-02 class guard: duplicate delivery of an already-applied result is ignored
+                if gate_node.status == NodeStatus.COMPLETED and _json.dumps(
+                    result_payload, sort_keys=True, default=str
+                ) == _json.dumps(gate_node.result, sort_keys=True, default=str):
+                    duplicate_ignored += 1
+                    emit(
+                        {
+                            "event": "duplicate_result_ignored",
+                            "at_ms": at_ms,
+                            "node_id": gate_node.id,
+                        }
+                    )
+                    continue
                 gate_decision = graph.gate(gate_node, result_payload, current_version)
+                if disable_stale_gate and gate_decision == GateDecision.DISCARD:
+                    # ABLATION: the bug the stale gate prevents — stale result applied
+                    stale_leaks += 1
+                    gate_decision = GateDecision.APPLY
                 emit(
                     {
                         "event": "tool_result",
@@ -199,6 +233,60 @@ def replay_scenario(
                         update={"status": NodeStatus.COMPLETED, "result": result_payload}
                     )
                     graph.add(completed)
+                    if (
+                        disable_stale_gate
+                        and stale_leaks
+                        and gate_node.provenance.based_on < current_version
+                    ):
+                        emit(
+                            {
+                                "event": "stale_applied_ablation",
+                                "at_ms": at_ms,
+                                "node_id": gate_node.id,
+                            }
+                        )
+                    # ---- Phase 4: first APPLY at the patched version settles shadows ----
+                    if shadow_meta:
+                        payload_blob = _json.dumps(result_payload, default=str).lower()
+                        live = bm.shadow_branches()
+                        matched = [
+                            b
+                            for b in live
+                            if shadow_meta[b.id]["label"].split(" ")[0].lower() in payload_blob
+                        ]
+                        pool = matched or live
+                        winner = max(pool, key=lambda b: (shadow_meta[b.id]["score"], b.id))
+                        wb = bm.promote(winner.id)
+                        if wb is not None:
+                            emit(
+                                {
+                                    "event": "shadow_promote",
+                                    "at_ms": at_ms,
+                                    "branch_id": wb.id,
+                                    "label": shadow_meta[winner.id]["label"],
+                                    "reused": True,
+                                    "node_id": gate_node.id,
+                                }
+                            )
+                        for loser in [x for x in live if x.id != winner.id]:
+                            bm.invalidate(loser.id)
+                            bm.cancel(loser.id)
+                            t0 = _time.perf_counter()
+                            cb = bm.cleanup(loser.id)
+                            latency_ms = round((_time.perf_counter() - t0) * 1000, 3)
+                            if cb is not None:
+                                emit(
+                                    {
+                                        "event": "shadow_discard",
+                                        "at_ms": at_ms,
+                                        "branch_id": loser.id,
+                                        "label": shadow_meta[loser.id]["label"],
+                                        "wasted": True,
+                                        "cleanup_latency_ms": latency_ms,
+                                    }
+                                )
+                        for bid in [winner.id, *(lb.id for lb in live if lb.id != winner.id)]:
+                            shadow_meta[bid]["settled"] = True
                 else:
                     emit({"event": "stale_discarded", "at_ms": at_ms, "node_id": gate_node.id})
 
@@ -276,6 +364,8 @@ def replay_scenario(
 
             if arbiter_decision.category == ArbiterCategory.NOISE:
                 emit({"event": "noise_ignored", "at_ms": at_ms, "applied": False})
+                if "initial task request" in arbiter_decision.rationale:
+                    emit({"event": "dialogue", "at_ms": at_ms + 5, "text": respond("ack")})
                 continue
 
             if arbiter_decision.category == ArbiterCategory.NEW_GOAL:
@@ -300,7 +390,48 @@ def replay_scenario(
                         "current_version": current_version,
                     }
                 )
+                emit(
+                    {
+                        "event": "dialogue",
+                        "at_ms": at_ms + 5,
+                        "text": respond_to_turn(arbiter_decision),
+                    }
+                )
                 continue
+
+            if arbiter_decision.category == ArbiterCategory.RETRACT:
+                # ---- Phase 3 edge case: retraction AFTER commit → honesty, never fake undo
+                committed = next(
+                    (
+                        n
+                        for n in graph.all_nodes()
+                        if n.kind in {"book", "pay"}
+                        and n.status == NodeStatus.COMPLETED
+                        and isinstance(n.result, dict)
+                        and n.result.get("status") == "COMMITTED"
+                    ),
+                    None,
+                )
+                if committed is not None:
+                    ref = str((committed.result or {}).get("ref", "?"))
+                    emit(
+                        {
+                            "event": "honest_retract",
+                            "at_ms": at_ms,
+                            "node_id": committed.id,
+                            "ref": ref,
+                            "applied": False,
+                            "cancel_offer": True,
+                        }
+                    )
+                    emit(
+                        {
+                            "event": "dialogue",
+                            "at_ms": at_ms + 5,
+                            "text": respond_to_turn(arbiter_decision, committed_ref=ref),
+                        }
+                    )
+                    continue
 
             if arbiter_decision.delta is not None:
                 v_next = store.patch(
@@ -323,6 +454,13 @@ def replay_scenario(
                             "kept_search": True,
                         }
                     )
+                    emit(
+                        {
+                            "event": "dialogue",
+                            "at_ms": at_ms + 10,
+                            "text": respond_to_turn(arbiter_decision),
+                        }
+                    )
                 emit(
                     {
                         "event": "patched",
@@ -334,6 +472,59 @@ def replay_scenario(
                     }
                 )
                 current_version = v_next.version
+
+                # ---- Phase 4: bounded speculation on uncertain MODIFY/ADD_CONSTRAINT ----
+                state_now = store.get(current_version)
+                hyps = scorer.score(arbiter_decision, state_now)
+                gated = scorer.should_spawn(arbiter_decision, state_now)
+                will_spawn = (not disable_shadows) and (force_shadow or gated)
+                shadow_rows.append(
+                    {
+                        "scenario": name,
+                        "at_ms": at_ms,
+                        "category": arbiter_decision.category.value,
+                        "confidence": arbiter_decision.confidence,
+                        "gate_pass": gated,
+                        "force": force_shadow,
+                        "k_eff": scorer.k_eff(hyps),
+                        "hypotheses": [hypothesis_to_row(h) for h in hyps],
+                    }
+                )
+                if will_spawn and hyps:
+                    branches = bm.spawn_shadows_for_decision(
+                        arbiter_decision, current_version, state_now, scorer, force=True
+                    )
+                    for b in branches:
+                        h = next((x for x in hyps if x.label == bm.label_of(b.id)), None)
+                        shadow_meta[b.id] = {
+                            "label": bm.label_of(b.id),
+                            "score": h.score if h else 0.0,
+                            "version": current_version,
+                            "settled": False,
+                        }
+                        emit(
+                            {
+                                "event": "shadow_spawn",
+                                "at_ms": at_ms + 5,
+                                "branch_id": b.id,
+                                "label": bm.label_of(b.id),
+                                "score": h.score if h else 0.0,
+                                "kind": h.kind if h else "search",
+                                "risk": h.risk.value if h else "FREE",
+                                "parent_version": current_version,
+                            }
+                        )
+                if arbiter_decision.category in {
+                    ArbiterCategory.MODIFY,
+                    ArbiterCategory.ADD_CONSTRAINT,
+                }:
+                    emit(
+                        {
+                            "event": "dialogue",
+                            "at_ms": at_ms + 10,
+                            "text": respond_to_turn(arbiter_decision),
+                        }
+                    )
             else:
                 emit({"event": "no_delta", "at_ms": at_ms})
 
@@ -367,6 +558,11 @@ def replay_scenario(
         "saved_pct": saved_pct,
         "trace": trace_events,
         "branch_stats": bm.stats(),
+        "shadow_metrics": bm.shadow_metrics(wall_ms=continuum_wall),
+        "shadow_rows": shadow_rows,
+        "force_shadow": force_shadow,
+        "stale_leaks": stale_leaks,
+        "duplicate_ignored": duplicate_ignored,
     }
 
     if output_path:

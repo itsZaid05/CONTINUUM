@@ -72,9 +72,10 @@
       "NOISE": 20
     }
   },
-  "ece": null,
-  "latency_p50_ms": 39.0,
-  "latency_p95_ms": 49.0,
+  "ece": 0.106,
+  "ece_bins": 10,
+  "latency_p50_ms": 439.0,
+  "latency_p95_ms": 450.0,
   "model": "ollama",
   "gold_hash": "b8920267657a"
 }
