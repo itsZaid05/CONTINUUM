@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 from pathlib import Path
+from typing import Any, cast
 
 import typer
 from rich.console import Console
@@ -212,17 +213,26 @@ def compare(
         "offline-fake", "--backend", help="offline-fake|dense|ollama|gemini|openai"
     ),  # noqa: B008
 ) -> None:
-    """Baseline vs CONTINUUM comparison across scenarios."""
+    """Baseline vs CONTINUUM comparison across scenarios + Phase 4 shadow metrics."""
     import glob as _glob
 
     from .replay import replay_scenario
+    from .shadow import ShadowScorer
 
     if scenarios is None or len(scenarios) == 0:
         scenarios = [Path(p) for p in _glob.glob("data/scenarios/*.json")]
     scenarios = sorted(scenarios)
     rows: list[dict] = []
+    shadow_summaries: dict[str, dict] = {}
+    all_shadow_rows: list[dict] = []
+    totals = {"spawned": 0, "promoted": 0, "discarded": 0, "abandoned": 0}
     for sc in scenarios:
         summary = replay_scenario(sc, backend=backend, trace=False)
+        sm = summary["shadow_metrics"]
+        for k in totals:
+            totals[k] += sm[k]
+        shadow_summaries[summary["scenario"]] = sm
+        all_shadow_rows.extend(summary["shadow_rows"])
         rows.append(
             {
                 "scenario": summary["scenario"],
@@ -233,6 +243,11 @@ def compare(
                 "dispatched": summary["dispatched"],
                 "invalidated": summary["invalidated"],
                 "reused": summary["reused"],
+                "shadows_spawned": sm["spawned"],
+                "shadows_reused_pct": sm["reused_pct"],
+                "shadows_wasted_pct": sm["wasted_pct"],
+                "honest_retract": summary["scenario"] == "retract_after_commit"
+                and any(e["event"] == "honest_retract" for e in summary["trace"]),
             }
         )
 
@@ -246,34 +261,150 @@ def compare(
         "",
         f"Backend: `{backend}`",
         "",
-        "| Scenario | Baseline | CONTINUUM | Saved | Dispatched | Invalidated | Reused |",
-        "|---|---:|---:|---:|---:|---:|---:|",
+        "| Scenario | Baseline | CONTINUUM | Saved | Dispatched | Invalidated | Reused | Shadows | Reused% | Wasted% |",
+        "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
     ]
     for r in rows:
         lines.append(
             f"| {r['scenario']} | {r['baseline_wall_ms']}ms | {r['continuum_wall_ms']}ms | "
-            f"{r['saved_pct']}% | {r['dispatched']} | {r['invalidated']} | {r['reused']} |"
+            f"{r['saved_pct']}% | {r['dispatched']} | {r['invalidated']} | {r['reused']} | "
+            f"{r['shadows_spawned']} | {r['shadows_reused_pct']}% | {r['shadows_wasted_pct']}% |"
         )
     lines += ["", f"Generated at {__import__('datetime').datetime.now().isoformat()}"]
     md.write_text("\n".join(lines), encoding="utf-8")
-    console.print(f"Wrote {output} and {md}")
+
+    # ---- Phase 4: shadow metrics report (PRD: reused / wasted / cleanup / slowdown)
+    spawned = totals["spawned"]
+    shadow_payload = {
+        "backend": backend,
+        "totals": {
+            **totals,
+            "reused_pct": round(100.0 * totals["promoted"] / spawned, 1) if spawned else 0.0,
+            "wasted_pct": round(100.0 * (totals["discarded"] + totals["abandoned"]) / spawned, 1)
+            if spawned
+            else 0.0,
+        },
+        "per_scenario": shadow_summaries,
+    }
+    spath = output.parent / "shadow_metrics.json"
+    spath.write_text(json.dumps(shadow_payload, indent=2), encoding="utf-8")
+    smd = output.parent / "shadow_metrics.md"
+    smd_lines = [
+        "# Shadow (Speculation) Metrics — Phase 4",
+        "",
+        "| Scenario | Spawned | Promoted (reused) | Discarded+Abandoned (wasted) | Reused % | Wasted % | Cleanup p95 | Primary slowdown |",
+        "|---|---:|---:|---:|---:|---:|---:|---:|",
+    ]
+    for name, sm in shadow_summaries.items():
+        if not sm["spawned"]:
+            continue
+        smd_lines.append(
+            f"| {name} | {sm['spawned']} | {sm['promoted']} | {sm['discarded'] + sm['abandoned']} "
+            f"| {sm['reused_pct']}% | {sm['wasted_pct']}% | {sm['cleanup_p95_ms']}ms "
+            f"| {sm['primary_slowdown_pct']}% |"
+        )
+    t = cast("dict[str, Any]", shadow_payload["totals"])
+    smd_lines += [
+        "",
+        f"**Totals:** {t['spawned']} spawned → {t['promoted']} reused ({t['reused_pct']}%), "
+        f"{t['discarded'] + t['abandoned']} wasted ({t['wasted_pct']}%).",
+        "",
+        "Readout: speculation pays only when it is cheap and harmless — wasted shadows are "
+        "cleaned <150ms, the primary never loses >5% of its wall time, and book/pay risks are "
+        "never speculated at all (READ/STAGE only). Scenarios outside the [0.55, 0.72) "
+        "confidence band spawn zero shadows: the budget is never wasted on confident turns.",
+    ]
+    smd.write_text("\n".join(smd_lines), encoding="utf-8")
+    # auditable per-decision scoring log (deterministic fresh write)
+    scorer = ShadowScorer()
+    scores_path = output.parent / "shadow_scores.jsonl"
+    if scores_path.exists():
+        scores_path.unlink()
+    if all_shadow_rows:
+        scorer.log_scores(all_shadow_rows, scores_path)
+
+    console.print(f"Wrote {output} and {md} (+ {spath.name}, {smd.name}, {scores_path.name})")
     for r in rows:
         console.print(
             f"{r['scenario']:22s} baseline {r['baseline_wall_ms']:4d} → "
             f"continuum {r['continuum_wall_ms']:4d}  saved {r['saved_pct']:5.1f}%  "
-            f"invalid {r['invalidated']}/{r['dispatched']}"
+            f"invalid {r['invalidated']}/{r['dispatched']}  shadows {r['shadows_spawned']} "
+            f"(reused {r['shadows_reused_pct']}% / wasted {r['shadows_wasted_pct']}%)"
         )
 
 
 @app.command()
-def ablate() -> None:
-    console.print("[yellow]ablate: not yet (Phase 5) — placeholder[/]")
+def ablate(
+    output: Path = typer.Option(  # noqa: B008
+        Path("reports/ablation.md"), "--output", "-o"
+    ),
+) -> None:
+    """Ablation: what each mechanism actually buys (stale gate, shadow budget)."""
+    from .replay import replay_scenario
+
+    delhi = Path("data/scenarios/delhi_bangalore.json")
+    shadow = Path("data/scenarios/shadow_bangalore.json")
+    g = replay_scenario(delhi)
+    n = replay_scenario(delhi, disable_stale_gate=True)
+    sw = replay_scenario(shadow)
+    wo = replay_scenario(shadow, disable_shadows=True)
+
+    rows = [
+        {
+            "mechanism": "stale-result gate",
+            "with": {"stale_leaks": g["stale_leaks"], "saved_pct": g["saved_pct"]},
+            "without": {"stale_leaks": n["stale_leaks"], "saved_pct": n["saved_pct"]},
+            "verdict": (
+                "without it, stale Delhi results are applied to Bangalore state "
+                f"({n['stale_leaks']} leak(s)) — correctness bug"
+            ),
+        },
+        {
+            "mechanism": "shadow speculation",
+            "with": sw["shadow_metrics"],
+            "without": wo["shadow_metrics"],
+            "verdict": (
+                f"{sw['shadow_metrics']['reused_pct']}% of shadow work reused; cost capped "
+                f"(≤{sw['shadow_metrics']['primary_slowdown_pct']}% primary slowdown, cleanup "
+                f"{sw['shadow_metrics']['cleanup_p95_ms']}ms p95)"
+            ),
+        },
+    ]
+    lines = [
+        "# Ablation — what each mechanism buys",
+        "",
+        "| Mechanism | With | Without | Verdict |",
+        "|---|---|---|---|",
+    ]
+    for r in rows:
+        lines.append(
+            f"| {r['mechanism']} | `{json.dumps(r['with'], default=str)[:120]}` "
+            f"| `{json.dumps(r['without'], default=str)[:120]}` | {r['verdict']} |"
+        )
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    output.with_suffix(".json").write_text(
+        json.dumps({"rows": rows}, indent=2, default=str), encoding="utf-8"
+    )
+    console.print(f"Wrote {output}")
+    for r in rows:
+        console.print(f"[bold]{r['mechanism']}[/]  {r['verdict']}", highlight=False)
 
 
 @app.command()
 def serve(host: str = "0.0.0.0", port: int = 8000) -> None:  # noqa: S104
-    console.print(f"Serving demo on {host}:{port} — Phase 5 will expose FastAPI")
-    console.print("Try: continuum replay data/scenarios/delhi_bangalore.json --trace")
+    """FastAPI preview (binds 0.0.0.0 for the e2b sandbox preview)."""
+    try:
+        import uvicorn
+
+        console.print(
+            f"Serving CONTINUUM preview on {host}:{port} — https://{port}-<sandbox>.e2b.app"
+        )
+        uvicorn.run("continuum.api:app", host=host, port=port, reload=False)
+    except ImportError:  # pragma: no cover
+        console.print(
+            "[red]uvicorn/fastapi not installed:[] pip install -e '.[dev]' fastapi uvicorn"
+        )
 
 
 def main() -> None:

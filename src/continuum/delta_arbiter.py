@@ -480,7 +480,8 @@ def arbitrate_offline_fake(
         else:
             # 3. Heuristic: short → NOISE, contains "book" + negation → RETRACT, else MODIFY generic
             low = text.lower()
-            if len(low.split()) <= 2:
+            words = low.split()
+            if len(words) <= 2:
                 cat, delta, conf, rationale = (
                     ArbiterCategory.NOISE,
                     None,
@@ -499,6 +500,21 @@ def arbitrate_offline_fake(
                     ),
                     0.65,
                     "Heuristic: negation → retract (low confidence, will clarify)",
+                )
+            elif (
+                words
+                and words[0] in {"book", "find", "plan", "search", "get", "reserve", "arrange"}
+                and not any(
+                    m in low for m in ("actually", "instead", "but", "change", "rather", "switch")
+                )
+            ):
+                # Initial task request: slots are captured in V1 (scenario initial_state),
+                # so this is NOT a change to existing intent — no delta, no version bump.
+                cat, delta, conf, rationale = (
+                    ArbiterCategory.NOISE,
+                    None,
+                    0.60,
+                    "Heuristic: initial task request — no delta (acknowledged)",
                 )
             else:
                 cat, delta, conf, rationale = (

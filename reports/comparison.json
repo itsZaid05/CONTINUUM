@@ -9,7 +9,11 @@
       "correct": true,
       "dispatched": 3,
       "invalidated": 1,
-      "reused": 2
+      "reused": 2,
+      "shadows_spawned": 0,
+      "shadows_reused_pct": 0.0,
+      "shadows_wasted_pct": 0.0,
+      "honest_retract": false
     },
     {
       "scenario": "dont_book_it",
@@ -19,7 +23,11 @@
       "correct": true,
       "dispatched": 2,
       "invalidated": 1,
-      "reused": 1
+      "reused": 1,
+      "shadows_spawned": 0,
+      "shadows_reused_pct": 0.0,
+      "shadows_wasted_pct": 0.0,
+      "honest_retract": false
     },
     {
       "scenario": "rapid_burst",
@@ -29,17 +37,25 @@
       "correct": true,
       "dispatched": 1,
       "invalidated": 0,
-      "reused": 1
+      "reused": 1,
+      "shadows_spawned": 0,
+      "shadows_reused_pct": 0.0,
+      "shadows_wasted_pct": 0.0,
+      "honest_retract": false
     },
     {
       "scenario": "retract_after_commit",
       "baseline_wall_ms": 2400,
-      "continuum_wall_ms": 1100,
-      "saved_pct": 54.2,
+      "continuum_wall_ms": 2400,
+      "saved_pct": 0.0,
       "correct": true,
       "dispatched": 2,
-      "invalidated": 2,
-      "reused": 0
+      "invalidated": 0,
+      "reused": 2,
+      "shadows_spawned": 0,
+      "shadows_reused_pct": 0.0,
+      "shadows_wasted_pct": 0.0,
+      "honest_retract": true
     },
     {
       "scenario": "shadow_bangalore",
@@ -49,7 +65,11 @@
       "correct": true,
       "dispatched": 2,
       "invalidated": 1,
-      "reused": 1
+      "reused": 1,
+      "shadows_spawned": 2,
+      "shadows_reused_pct": 50.0,
+      "shadows_wasted_pct": 50.0,
+      "honest_retract": false
     },
     {
       "scenario": "timeout_booking",
@@ -59,7 +79,11 @@
       "correct": true,
       "dispatched": 2,
       "invalidated": 0,
-      "reused": 2
+      "reused": 2,
+      "shadows_spawned": 0,
+      "shadows_reused_pct": 0.0,
+      "shadows_wasted_pct": 0.0,
+      "honest_retract": false
     }
   ]
 }

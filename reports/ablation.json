@@ -1,0 +1,51 @@
+{
+  "rows": [
+    {
+      "mechanism": "stale-result gate",
+      "with": {
+        "stale_leaks": 0,
+        "saved_pct": 46.9
+      },
+      "without": {
+        "stale_leaks": 2,
+        "saved_pct": 0.0
+      },
+      "verdict": "without it, stale Delhi results are applied to Bangalore state (2 leak(s)) \u2014 correctness bug"
+    },
+    {
+      "mechanism": "shadow speculation",
+      "with": {
+        "spawned": 2,
+        "promoted": 1,
+        "discarded": 1,
+        "abandoned": 0,
+        "reused_pct": 50.0,
+        "wasted_pct": 50.0,
+        "cleanup_p95_ms": 0.008,
+        "cleanup_samples": 1,
+        "primary_slowdown_pct": 4.5,
+        "primary_reserved_ms": 49.5,
+        "live_budget": "0/2",
+        "by_state": {
+          "PROMOTED": 1,
+          "CLEANED_UP": 1
+        }
+      },
+      "without": {
+        "spawned": 0,
+        "promoted": 0,
+        "discarded": 0,
+        "abandoned": 0,
+        "reused_pct": 0.0,
+        "wasted_pct": 0.0,
+        "cleanup_p95_ms": 0.0,
+        "cleanup_samples": 0,
+        "primary_slowdown_pct": 0.0,
+        "primary_reserved_ms": 0.0,
+        "live_budget": "0/2",
+        "by_state": {}
+      },
+      "verdict": "50.0% of shadow work reused; cost capped (\u22644.5% primary slowdown, cleanup 0.008ms p95)"
+    }
+  ]
+}

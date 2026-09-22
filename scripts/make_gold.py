@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Generate frozen gold set 100 utterances, 20 per category, deterministic, pattern-coverable."""
+
 import json
 import pathlib
 import hashlib
@@ -127,19 +128,51 @@ noise_utterances = [
     "Hmm, yeah",
 ]
 
+
 def mk(category, utterance, idx):
     # delta stub minimal
     if category == "MODIFY":
-        delta = {"op": "replace", "field": "destination", "old": "Delhi", "new": "Bangalore", "span": utterance}
+        delta = {
+            "op": "replace",
+            "field": "destination",
+            "old": "Delhi",
+            "new": "Bangalore",
+            "span": utterance,
+        }
     elif category == "ADD_CONSTRAINT":
-        delta = {"op": "add", "field": "constraints", "old": None, "new": {"time": "morning"}, "span": utterance}
+        delta = {
+            "op": "add",
+            "field": "constraints",
+            "old": None,
+            "new": {"time": "morning"},
+            "span": utterance,
+        }
     elif category == "RETRACT":
-        delta = {"op": "remove", "field": "booking_instruction", "old": "book", "new": None, "span": utterance}
+        delta = {
+            "op": "remove",
+            "field": "booking_instruction",
+            "old": "book",
+            "new": None,
+            "span": utterance,
+        }
     elif category == "NEW_GOAL":
-        delta = {"op": "replace", "field": "goal_domain", "old": "flights", "new": "trains", "span": utterance}
+        delta = {
+            "op": "replace",
+            "field": "goal_domain",
+            "old": "flights",
+            "new": "trains",
+            "span": utterance,
+        }
     else:
         delta = None
-    return {"id": f"{category.lower()}-{idx:02d}", "utterance": utterance, "category": category, "delta": delta, "rationale": f"Gold {category} example {idx}"}
+    return {
+        "id": f"{category.lower()}-{idx:02d}",
+        "utterance": utterance,
+        "category": category,
+        "delta": delta,
+        "rationale": f"Gold {category} example {idx}",
+    }
+
 
 for i, u in enumerate(modify_utterances, 1):
     items.append(mk("MODIFY", u, i))
@@ -165,6 +198,7 @@ print(f"Wrote {out} ({len(items)} items) hash {h}")
 
 # also verify offline-fake coverage
 import sys
+
 sys.path.insert(0, "src")
 from continuum.delta_arbiter import arbitrate_offline_fake
 from continuum.versioned_state import VersionedStore
