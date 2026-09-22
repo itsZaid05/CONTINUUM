@@ -3,7 +3,7 @@
 - **Accuracy:** 100.00% (100/100)
 - **Macro-F1:** 1.000
 - **Latency:** p50 20.5ms, p95 30ms
-- **ECE:** None
+- **ECE:** 0.106
 
 | Category | Precision | Recall | F1 | Support |
 |---|---:|---:|---:|---:|

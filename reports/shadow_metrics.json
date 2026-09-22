@@ -37,6 +37,20 @@
       "live_budget": "0/2",
       "by_state": {}
     },
+    "duplicate_result": {
+      "spawned": 0,
+      "promoted": 0,
+      "discarded": 0,
+      "abandoned": 0,
+      "reused_pct": 0.0,
+      "wasted_pct": 0.0,
+      "cleanup_p95_ms": 0.0,
+      "cleanup_samples": 0,
+      "primary_slowdown_pct": 0.0,
+      "primary_reserved_ms": 0.0,
+      "live_budget": "0/2",
+      "by_state": {}
+    },
     "rapid_burst": {
       "spawned": 0,
       "promoted": 0,

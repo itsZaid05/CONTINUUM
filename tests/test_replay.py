@@ -86,3 +86,13 @@ def test_ablation_stale_gate_leaks():
     assert guarded["stale_leaks"] == 0
     assert leaky["stale_leaks"] >= 1
     assert any(e["event"] == "stale_applied_ablation" for e in leaky["trace"])
+
+
+def test_duplicate_result_ignored():
+    """R-02 class: identical result delivered twice → applied once, second ignored."""
+    summary = replay_scenario(Path("data/scenarios/duplicate_result.json"))
+    events = [e["event"] for e in summary["trace"]]
+    assert events.count("duplicate_result_ignored") == 1
+    assert summary["duplicate_ignored"] == 1
+    applies = [e for e in summary["trace"] if e["event"] == "tool_result" and e["gate"] == "APPLY"]
+    assert len(applies) == 1  # only one application despite two deliveries

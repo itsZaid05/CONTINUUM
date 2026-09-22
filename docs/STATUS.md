@@ -27,9 +27,10 @@
 | **CLI** — `replay / eval-arbiter / compare (+shadow reports) / ablate / serve (uvicorn)` | `src/continuum/cli.py` | (manual + compare tests) | ✅ Pass |
 | **API preview** — FastAPI `GET / /health /replay/{id} /metrics/{arbiter,comparison,shadow}` CORS=*, 0.0.0.0 | `src/continuum/api.py` | (live preview) | ✅ Pass — v0.4.0-phase4 |
 | **Gold** — 100 utterances, 20/category, hash `b8920267657a` | `data/gold/arbiter_100.jsonl` | `scripts/make_gold.py` | ✅ Frozen |
-| **Scenarios** — 6 deterministic traces (incl. `shadow_bangalore` with `force_shadow` demo flag) | `data/scenarios/*.json` | replay | ✅ 6/6 green |
+| **Baseline agent (Phase 5)** — naive redo-all, independent: stale-apply / retract-ignore / double-book / fake-undo measured as defects on same scenarios | `src/continuum/baseline.py` | `tests/test_baseline.py` (6) | ✅ Pass |
+| **Scenarios** — 7 deterministic traces (incl. `shadow_bangalore` `force_shadow` demo + R-02 `duplicate_result`) | `data/scenarios/*.json` | replay | ✅ 7/7 green |
 
-**Counts:** **130 tests**, 0 failures · `ruff check src tests` ✅ · `mypy src` ✅ (16 files) · `pytest -q` <10s.
+**Counts:** **137 tests**, 0 failures · `ruff check src tests` ✅ · `mypy src` ✅ (17 files) · `pytest -q` <10s.
 
 ---
 
@@ -37,8 +38,10 @@
 
 ```text
 Arbiter accuracy 100.00% macro-F1 1.000 (gold b8920267657a) — all 5 categories 1.00
-Comparison (baseline → continuum, saved):
-  delhi_bangalore      2450ms → 1300ms  46.9%   (1/3 invalidated, 2 reused)
+ECE (real, 10-bin): 0.106 — fake table mildly underconfident vs 1.00 acc; reported, not hidden
+Baseline naive agent vs continuum (reports/comparison.md):
+  delhi_bangalore      6480ms → 1300ms  79.9%   (baseline applies stale Delhi result → wrong booking)
+  analytic redo-all    2450ms → 1300ms  46.9%   (kept as baseline_analytic_ms for transparency)
   dont_book_it         2400ms → 1100ms  54.2%   (RETRACT prunes book, keeps search)
   rapid_burst          1350ms → 1350ms   0.0%
   retract_after_commit 2400ms → 2400ms   0.0%   (HONEST_RETRACT ref BLR-11:03, state V1 untouched)
@@ -49,6 +52,7 @@ Shadow metrics (PRD): spawned 2 → promoted 1 (reused 50.0%), discarded 1 (wast
 Ablation: disable stale gate → 2 stale Delhi results leak into Bangalore state (bug demonstrated);
   disable shadows → 0 spawned, 0% slowdown (speculation is opt-in work, never required)
 Timeout matrix: 10/10 no-double-book, COMMITTED never re-dispatched
+Duplicate delivery (R-02): applied once, second ignored (duplicate_result scenario + test)
 ```
 
 ---
@@ -58,7 +62,7 @@ Timeout matrix: 10/10 no-double-book, COMMITTED never re-dispatched
 ```bash
 git checkout arena/01a0c708-new
 pip install --break-system-packages -e ".[dev]"   # or: uv sync --extra dev
-pytest -q                                          # 130 passed
+pytest -q                                          # 137 passed
 python -m continuum.cli replay data/scenarios/delhi_bangalore.json --trace | tail -n 30
 python -m continuum.cli replay data/scenarios/shadow_bangalore.json --trace | grep -E "shadow_(spawn|promote|discard)"
 python -m continuum.cli replay data/scenarios/retract_after_commit.json --trace | grep -A2 honest_retract

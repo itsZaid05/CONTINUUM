@@ -98,6 +98,7 @@ def eval_arbiter(
     }
     confusion: dict[str, dict[str, int]] = {c: {d: 0 for d in cats} for c in cats}
     lats: list[int] = []
+    calib: list[tuple[float, bool]] = []  # (confidence, correct) per utterance — real ECE
 
     for line in raw_lines:
         item = json.loads(line)
@@ -112,9 +113,11 @@ def eval_arbiter(
         if pred == gold_cat:
             correct += 1
             per_cat[gold_cat]["tp"] += 1
+            calib.append((decision.confidence, True))
         else:
             per_cat[gold_cat]["fn"] += 1
             per_cat[pred]["fp"] += 1
+            calib.append((decision.confidence, False))
 
     total = len(raw_lines)
     acc = correct / total if total else 0.0
@@ -136,7 +139,23 @@ def eval_arbiter(
         }
 
     macro_f1 = sum(f1s) / len(f1s) if f1s else 0.0
-    ece = round(abs(acc - 0.92), 3) if backend == "offline-fake" else None
+    # Real 10-bin ECE: Σ_b (n_b/N)·|acc_b − conf_b| over per-utterance decisions
+    ece: float | None = None
+    if calib:
+        n_bins = 10
+        bins: list[list[tuple[float, bool]]] = [[] for _ in range(n_bins)]
+        for conf_b, ok_b in calib:
+            bins[min(n_bins - 1, max(0, int(conf_b * n_bins)))].append((conf_b, ok_b))
+        n_total = len(calib)
+        ece = round(
+            sum(
+                (len(b) / n_total)
+                * abs((sum(1 for _, o in b if o) / len(b)) - (sum(cc for cc, _ in b) / len(b)))
+                for b in bins
+                if b
+            ),
+            3,
+        )
     p50 = statistics.median(lats) if lats else 0
     p95 = sorted(lats)[int(0.95 * len(lats))] if lats else 0
 
@@ -148,6 +167,7 @@ def eval_arbiter(
         "per_category": per_report,
         "confusion": confusion,
         "ece": ece,
+        "ece_bins": 10 if ece is not None else None,
         "latency_p50_ms": float(p50),
         "latency_p95_ms": float(p95),
         "model": backend,
@@ -216,6 +236,7 @@ def compare(
     """Baseline vs CONTINUUM comparison across scenarios + Phase 4 shadow metrics."""
     import glob as _glob
 
+    from .baseline import compare_with_baseline
     from .replay import replay_scenario
     from .shadow import ShadowScorer
 
@@ -233,13 +254,22 @@ def compare(
             totals[k] += sm[k]
         shadow_summaries[summary["scenario"]] = sm
         all_shadow_rows.extend(summary["shadow_rows"])
+        bcmp = compare_with_baseline(sc, summary)
         rows.append(
             {
                 "scenario": summary["scenario"],
-                "baseline_wall_ms": summary["baseline_wall_ms"],
+                "baseline_wall_ms": bcmp["naive_wall_ms"],
+                "baseline_analytic_ms": summary["baseline_wall_ms"],
                 "continuum_wall_ms": summary["continuum_wall_ms"],
-                "saved_pct": summary["saved_pct"],
-                "correct": True,
+                "saved_pct": bcmp["saved_pct"],
+                "correct": bool(bcmp["continuum_correct"]),
+                "baseline_stale_applied": bcmp["stale_applied"],
+                "baseline_retract_ignored": bcmp["retract_ignored"],
+                "baseline_double_booked": bcmp["double_booked"],
+                "baseline_dishonest_after_commit": bcmp["dishonest_after_commit"],
+                "baseline_correct": bcmp["correct"],
+                "baseline_llm_calls": bcmp["naive_llm_calls"],
+                "baseline_redo_dispatches": bcmp["naive_redo_dispatches"],
                 "dispatched": summary["dispatched"],
                 "invalidated": summary["invalidated"],
                 "reused": summary["reused"],
@@ -259,18 +289,37 @@ def compare(
     lines = [
         "# Baseline vs CONTINUUM",
         "",
-        f"Backend: `{backend}`",
+        f"Backend: `{backend}` — baseline column is the naive **redo-all agent** "
+        "(`src/continuum/baseline.py`: 2 LLM calls/turn, no versioning, no stale gate, "
+        "no ledger verify), CONTINUUM column is the full pipeline.",
         "",
-        "| Scenario | Baseline | CONTINUUM | Saved | Dispatched | Invalidated | Reused | Shadows | Reused% | Wasted% |",
-        "|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
+        "| Scenario | Baseline agent | CONTINUUM | Saved | Baseline defects | C✓ | DB | Shadows | Reused% | Wasted% |",
+        "|---|---:|---:|---:|---|:-:|:-:|---:|---:|---:|",
     ]
     for r in rows:
+        defects = []
+        if r["baseline_stale_applied"]:
+            defects.append("stale applied")
+        if r["baseline_retract_ignored"]:
+            defects.append("retract ignored → booked")
+        if r["baseline_double_booked"]:
+            defects.append("blind retry → double-book")
+        if r["baseline_dishonest_after_commit"]:
+            defects.append("fake undo claim")
         lines.append(
             f"| {r['scenario']} | {r['baseline_wall_ms']}ms | {r['continuum_wall_ms']}ms | "
-            f"{r['saved_pct']}% | {r['dispatched']} | {r['invalidated']} | {r['reused']} | "
+            f"{r['saved_pct']}% | {', '.join(defects) or '—'} | "
+            f"{'✓' if r['correct'] else '✗'} | {'✗' if r['baseline_double_booked'] else '—'} | "
             f"{r['shadows_spawned']} | {r['shadows_reused_pct']}% | {r['shadows_wasted_pct']}% |"
         )
-    lines += ["", f"Generated at {__import__('datetime').datetime.now().isoformat()}"]
+    lines += [
+        "",
+        "C✓ = CONTINUUM correctness check (zero stale leaks, honest retract); "
+        "DB = baseline double-book. Baseline analytic redo-all wall kept in JSON "
+        "(`baseline_analytic_ms`) for transparency.",
+        "",
+        f"Generated at {__import__('datetime').datetime.now().isoformat()}",
+    ]
     md.write_text("\n".join(lines), encoding="utf-8")
 
     # ---- Phase 4: shadow metrics report (PRD: reused / wasted / cleanup / slowdown)

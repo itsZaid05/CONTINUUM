@@ -106,6 +106,7 @@ def replay_scenario(
     shadow_meta: dict[str, dict[str, Any]] = {}  # branch_id → {label, score, version}
     shadow_rows: list[dict[str, Any]] = []
     stale_leaks = 0
+    duplicate_ignored = 0
 
     if not initial_state:
         initial_state = {}
@@ -197,6 +198,20 @@ def replay_scenario(
                 else:
                     gate_node = graph.get(synthetic_id)
             if gate_node is not None:
+                gate_node = graph.get(gate_node.id) or gate_node
+                # R-02 class guard: duplicate delivery of an already-applied result is ignored
+                if gate_node.status == NodeStatus.COMPLETED and _json.dumps(
+                    result_payload, sort_keys=True, default=str
+                ) == _json.dumps(gate_node.result, sort_keys=True, default=str):
+                    duplicate_ignored += 1
+                    emit(
+                        {
+                            "event": "duplicate_result_ignored",
+                            "at_ms": at_ms,
+                            "node_id": gate_node.id,
+                        }
+                    )
+                    continue
                 gate_decision = graph.gate(gate_node, result_payload, current_version)
                 if disable_stale_gate and gate_decision == GateDecision.DISCARD:
                     # ABLATION: the bug the stale gate prevents — stale result applied
@@ -547,6 +562,7 @@ def replay_scenario(
         "shadow_rows": shadow_rows,
         "force_shadow": force_shadow,
         "stale_leaks": stale_leaks,
+        "duplicate_ignored": duplicate_ignored,
     }
 
     if output_path:

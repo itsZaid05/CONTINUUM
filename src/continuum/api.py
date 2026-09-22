@@ -26,6 +26,7 @@ _SCENARIOS = [
     ("timeout_booking", "edge case: verify-after-timeout, no double-book"),
     ("rapid_burst", "burst of rapid changes (merged before heavy work)"),
     ("shadow_bangalore", "Phase 4: bounded shadow speculation (≤2, READ/STAGE, 50/50 reuse)"),
+    ("duplicate_result", "R-02 class: duplicate tool-result delivery applied once, second ignored"),
 ]
 
 if HAS_FASTAPI:

@@ -4,14 +4,14 @@
 > **One-line pitch:** *CONTINUUM keeps AI agents consistent when humans change their minds: it sorts what kind of change happened, keeps the work that's still valid, discards the rest, and prepares for likely next changes within strict safety and resource limits.*
 
 [![Phase](https://img.shields.io/badge/phase-4%20speculation-%2300C853)](docs/STATUS.md)
-[![Tests](https://img.shields.io/badge/tests-130%20passed-%2300C853)](#quickstart)
+[![Tests](https://img.shields.io/badge/tests-137%20passed-%2300C853)](#quickstart)
 [![Ruff](https://img.shields.io/badge/ruff-clean-%2300C853)](#quickstart)
 [![Mypy](https://img.shields.io/badge/mypy-clean-%2300C853)](#quickstart)
 [![Python](https://img.shields.io/badge/python-3.11-blue)](#quickstart)
 [![License](https://img.shields.io/badge/license-MIT-lightgrey)](#acknowledgments)
 [![Demo](https://img.shields.io/badge/demo-Delhi→Bangalore-2962FF)](#scenarios)
 
-**Status:** Phases 1–4 complete — **runnable, 130 tests, deterministic offline-fake + env-gated LLM/dense**. Judges `make eval` in 60 s with no keys; with keys `GEMINI_API_KEY` / `OPENAI_API_KEY` / `OLLAMA_HOST` + `CONTINUUM_DENSE_DOWNLOAD=1` shows real gaps. Phase 4 adds bounded shadow speculation with reused/wasted/cleanup metrics; Phase 3 edges (honest retraction after commit, verify-after-timeout, CommitGate) are wired into replay + API preview. See `docs/STATUS.md`.
+**Status:** Phases 1–5 (A-scope) complete — **runnable, 130 tests, deterministic offline-fake + env-gated LLM/dense**. Judges `make eval` in 60 s with no keys; with keys `GEMINI_API_KEY` / `OPENAI_API_KEY` / `OLLAMA_HOST` + `CONTINUUM_DENSE_DOWNLOAD=1` shows real gaps. Phase 4 adds bounded shadow speculation with reused/wasted/cleanup metrics; Phase 3 edges (honest retraction after commit, verify-after-timeout, CommitGate) are wired into replay + API preview. See `docs/STATUS.md`.
 
 ---
 
@@ -84,9 +84,9 @@ git checkout arena/01a0c653-new
 pip install --break-system-packages -e ".[dev]"   # or: uv sync --extra dev
 
 # 1) tests + lint + mypy (offline-fake deterministic, LLM adapters env-gated)
-python -m pytest -q          # 130 passed, 0 fail  (<10s, dense fallback no download)
+python -m pytest -q          # 137 passed, 0 fail  (<10s, dense fallback no download)
 ruff check src tests         # All checks passed!
-python -m mypy src           # Success: no issues in 16 files
+python -m mypy src           # Success: no issues in 17 files
 
 # 2) metrics (recreates reports/, <10s) — offline-fake
 python -m continuum.cli eval-arbiter --gold data/gold/arbiter_100.jsonl --output reports/arbiter_accuracy.json
@@ -117,13 +117,21 @@ Arbiter accuracy 100.00% macro-F1 1.000  (20/20 per category) — same for dense
   ollama (fallback) p50 439ms p95 449ms (+400ms simulated)
   gemini (fallback) p50 665ms p95 674ms (+650ms simulated)  # with GEMINI_API_KEY real is ~600ms
 
-Scenario             baseline → continuum   saved   invalid  reused  shadows
-delhi_bangalore      2450ms → 1300ms       46.9%   1/3      2       0     # 0 = budget never wasted on confident turns
-dont_book_it         2400ms → 1100ms       54.2%   1/2      1       0     # RETRACT pruned book, search kept
-rapid_burst          1350ms → 1350ms        0.0%   0/1      1       0     # merge_rapid unit-tested
-retract_after_commit 2400ms → 2400ms        0.0%   0/2      2       0     # honest: state untouched, nothing "undone"
-shadow_bangalore     2100ms → 1100ms       47.6%   1/2      1       2     # 1 promoted (reused) / 1 discarded (wasted)
-timeout_booking      2250ms → 2250ms        0.0%   0/2      2       0     # verify→reuse, never blind retry
+Scenario              naive-agent → continuum  saved   baseline defects (measured, not claimed)
+delhi_bangalore       6480ms → 1300ms         79.9%   stale Delhi result applied → wrong booking
+dont_book_it          4320ms → 1100ms         74.5%   retract ignored → baseline booked anyway
+rapid_burst           6480ms → 1350ms         79.2%   ×3 thrash redo vs merged patch
+retract_after_commit  4320ms → 2400ms         44.4%   fake-undo claim (CONTINUUM: honest_retract)
+shadow_bangalore      4320ms → 1100ms         74.5%   + 2 CONTINUUM shadows: 1 reused / 1 wasted
+timeout_booking       2160ms → 2250ms          0.0%   blind retry → DOUBLE-BOOK (CONTINUUM: verify→reuse)
+duplicate_result      2160ms → 1050ms         51.4%   second delivery applied (CONTINUUM ignores it)
+
+naive-agent = src/continuum/baseline.py (2 LLM calls/turn, no versioning, no stale
+gate, no ledger verify, no retraction semantics) on the same scenario files; the
+analytic redo-all wall (old 46.9% table) is kept in comparison.json as
+baseline_analytic_ms for transparency. CONTINUUM selective reuse per delhi: 1/3
+invalidated, 2 reused; V1→V4 version chain.
+
 
 fast_ack_latency_ms p95 = 1ms  (Layer 0, <200ms target)
 dense gate p95 ~20ms (fallback) / ~35ms (MiniLM cached) — target <50ms
@@ -157,6 +165,7 @@ python -m continuum.cli replay data/scenarios/retract_after_commit.json --trace 
 python -m continuum.cli replay data/scenarios/timeout_booking.json --trace      # edge: UNKNOWN → verify finds COMMITTED → reuse, no retry
 python -m continuum.cli replay data/scenarios/rapid_burst.json --trace          # burst: 0→80→150ms (merge_rapid unit-tested)
 python -m continuum.cli replay data/scenarios/shadow_bangalore.json --trace     # budget: max2 shadow, depth3, READ/STAGE only
+python -m continuum.cli replay data/scenarios/duplicate_result.json --trace      # R-02: duplicate delivery applied once
 ```
 
 User turns + tool completions arrive **concurrently** (`at_ms` sorted) — Theme 05's core tension.
@@ -196,7 +205,10 @@ Full methodology in `docs/EVALUATION.md` (reproducible, anti-leakage, confusion 
 | **Fast ACK p95** | **1 ms** | <200 ms | `perception.py` `fast_ack_latency_ms` |
 | **Dense gate p95** | **20 ms** fallback / **~35 ms** cached | <50 ms | `tests/test_llm_adapter.py` (dense) |
 | **Gemini p95 (sim fallback)** | **674 ms** (+650ms vs offline) | <900 ms | `reports/arbiter_gemini.json` |
-| **Delhi→Bangalore saved** | **46.9%** | ≥35% | `reports/comparison.md` |
+| **Delhi→Bangalore saved** | **79.9%** vs naive agent (46.9% vs analytic redo-all) | ≥35% | `reports/comparison.md` |
+| **Baseline defects prevented** | stale-apply, retract-ignore, double-book, fake-undo — each demonstrated on `baseline.py`, blocked by CONTINUUM | — | `tests/test_baseline.py` (6) |
+| **ECE (10-bin, measured)** | **0.106** | honest | `reports/arbiter_accuracy.json` |
+| **Duplicate result (R-02)** | applied once; second ignored | 100% | `tests/test_replay.py::test_duplicate_result_ignored` |
 | **Shadow work reused** | **50.0%** (1 of 2 promoted — “is it worth the cost?”) | report | `reports/shadow_metrics.json` |
 | **Shadow work wasted** | **50.0%** (1 discarded + cleaned, zero leaked budget) | bounded | same |
 | **Branch cleanup p95** | **0.01 ms** (in-process, real timing) | <150 ms | `tests/test_branch_budget.py` |
@@ -237,6 +249,7 @@ src/continuum/
   policy.py           # FREE/STAGEABLE/MUTATING/IRREVERSIBLE + CommitGate + honest retraction messages
   dialogue.py         # 10 canned templates: clarify/ack/honest-retract/timeout — deterministic latency
   shadow.py           # ShadowScorer: [0.55,0.72) FlowContext gate + k_eff + top-2 hypotheses
+  baseline.py         # naive redo-all baseline agent (Phase 5) — 2-call LLM, no gates
   branch_manager.py   # budget 2×3, READ/STAGE-only kinds, pause-when-busy, cleanup timing, reused/wasted metrics
   ledger.py           # effect ledger sha256(v+tool+args) + verify_after_timeout
   replay.py           # stepped-clock deterministic replay (trace JSONL)
@@ -244,8 +257,8 @@ src/continuum/
   api.py              # FastAPI preview (CORS *, 0.0.0.0)
 data/
   gold/arbiter_100.jsonl           # frozen 100, 20/category, hash b8920267657a
-  scenarios/*.json                 # 6 deterministic traces
-tests/  # 130 tests — contract(22)+arbiter(8)+llm_adapter(24)+branch(6)+shadow(10)+branch_budget(6)+policy(6)+dialogue(5)+perception(5)+provenance(7)+replay(8)+versioned(7)+ledger(16)
+  scenarios/*.json                 # 7 deterministic traces (incl. R-02 duplicate)
+tests/  # 137 tests — contract(22)+arbiter(8)+llm_adapter(24)+branch(6)+shadow(10)+branch_budget(6)+policy(6)+dialogue(5)+perception(5)+provenance(7)+replay(9)+versioned(7)+ledger(16)+baseline(6)
 docs/   # 6 markdown docs (research, architecture, plan, evaluation, demo, status)
 reports/  # arbiter_accuracy.{json,md}, comparison.{json,md}, shadow_metrics.{json,md}, shadow_scores.jsonl, ablation.{json,md}
 examples/quickstart.py    # Phase 2: shows backend table + prompt + calibration + replay gemini
@@ -259,7 +272,7 @@ examples/quickstart.py    # Phase 2: shows backend table + prompt + calibration 
 2. ✅ **Phase 2 — Understanding (this checkout):** fused prompt (`SYSTEM_PROMPT`+5 few-shots), `llm.py` (calibrate `T=1.2`, `parse_structured_json` fences, httpx clients for `ollama`/`gemini`/`openai` + env fallback), dense MiniLM centroid gate (`local_files_only`, `<50ms`), `ArbiterBackend` for 5 backends, 24 new tests, `examples/quickstart.py` backend table
 3. ✅ **Phase 3 — Safety:** CommitGate risk levels, dialogue manager (10 templates), retraction-after-commit honesty in replay, timeout verify (10-case matrix)
 4. ✅ **Phase 4 — Speculation:** `shadow.py` Scorer + `READ/STAGE only` enforcement + reused/wasted/cleanup/slowdown metrics in reports & API
-5. ✅ **Phase 5 — Comparison:** baseline vs CONTINUUM + shadow columns in `compare`, `ablate` (stale gate & shadow cost), FastAPI preview (0.0.0.0, CORS \*) — Docker optional
+5. ✅ **Phase 5 — Comparison:** independent naive `baseline.py` agent (defect table), real 10-bin ECE, R-02 duplicate-result guard, shadow columns in `compare`, `ablate`, FastAPI preview (0.0.0.0, CORS \*) — Docker optional
 
 All five build-order items from the PRD are done for Engineer A's scope; every scenario is reproducible offline-fake in <10 s — `make eval` prints every table above.
 
