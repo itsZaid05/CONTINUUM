@@ -78,7 +78,8 @@ What each new piece does is normatively defined in `docs/ARCHITECTURE_A.md` (per
 
 ```bash
 git clone https://github.com/itsZaid05/new.git && cd new
-git checkout arena/01a0c653-new
+# judges: main after PR #2 merges; live branch meanwhile:
+git checkout arena/01a0c708-new
 
 # install (uv preferred, pip fallback)
 pip install --break-system-packages -e ".[dev]"   # or: uv sync --extra dev

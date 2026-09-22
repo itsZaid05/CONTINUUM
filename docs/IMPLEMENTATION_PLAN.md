@@ -379,7 +379,8 @@ Buffer: If behind, cut P4 shadows (keep budget constants but disable spawn), kee
 
 ```bash
 git clone https://github.com/itsZaid05/new.git && cd new
-git checkout arena/01a0c653-new
+# judges: main after PR #2 merges; live branch meanwhile:
+git checkout arena/01a0c708-new
 uv sync --extra dev          # or pip install -e .
 uv run pytest -q             # 22 contract + all phase tests
 uv run continuum replay data/scenarios/delhi_bangalore.json
