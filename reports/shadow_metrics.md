@@ -2,7 +2,7 @@
 
 | Scenario | Spawned | Promoted (reused) | Discarded+Abandoned (wasted) | Reused % | Wasted % | Cleanup p95 | Primary slowdown |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| shadow_bangalore | 2 | 1 | 1 | 50.0% | 50.0% | 0.009ms | 4.5% |
+| shadow_bangalore | 2 | 1 | 1 | 50.0% | 50.0% | 0.015ms | 4.5% |
 
 **Totals:** 2 spawned → 1 reused (50.0%), 1 wasted (50.0%).
 

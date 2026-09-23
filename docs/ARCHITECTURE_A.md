@@ -356,3 +356,96 @@ book call timed out @ T+2s (status UNKNOWN)
 
 All boxes A/B labeled; A in blue, B in orange.
 
+---
+
+## 13. Engineer B — Plan DAG, Shadow Execution & Reuse (Implemented)
+
+Owns steps 4(execution side)/5(graph exec)/7(manager+execution)/8/part-of-9, per
+§1's ownership split. This section documents what is now genuinely wired end
+to end (not just present as separate, unconnected pieces).
+
+### 13.1 Files
+
+| Responsibility | File | Notes |
+|---|---|---|
+| Plan DAG Generator | `planner.py` | `generate_plan()` — deterministic, zero-LLM, `Contract 2` `ref(step.field)` links. `step_for_hypothesis()` turns a scored hedge (`shadow.ScoredHypothesis`) into a real, executable `PlanStep`; shared by plan generation *and* the runtime so the two can't drift. `primary_search_params()` exposes the primary's intended query for genuine matching. |
+| Mock Tool Sandbox / async execution | `tools.py` | Unchanged — `MockToolSandbox`, `execute_plan()` (max-concurrency DAG dispatch via `asyncio.gather`), idempotency dedup, cancellation. Reused as-is by the new runtime layer. |
+| Shadow Branch Management / bounded speculation / budget | `branch_manager.py` | Unchanged — sole lifecycle + `SpeculationBudget` authority. |
+| Shadow result storage | `shadow_store.py` **(new)** | `ShadowResult` / `ShadowResultStore` — an in-memory `branch_id -> ShadowResult` map (tool, normalized params, `ToolResult`, `reused` flag). `find_match()` is the genuine "does a live shadow already answer this query?" lookup. |
+| Runtime integration | `orchestrator.py` **(new)** | The single integration point: dispatches shadow steps concurrently through the *existing* `execute_plan()`, re-checks `policy.risk_for()` immediately before every dispatch (belt-and-suspenders — `BranchManager`/`ShadowScorer` already filtered these), charges `BranchManager.record_call()`, and answers "which live branch matches this query?" via `promote_or_discard()`. Never mutates branch lifecycle itself — `BranchManager.promote/invalidate/cancel/cleanup` remain the only ones that do. |
+| Selective reuse / stale gate | `provenance.py` | Unchanged — `invalidate_affected()`, `ProvenanceGraph.gate()`. |
+| Runtime wiring | `replay.py` | Minimal, additive edit (not a rewrite): the shadow-spawn step now also builds `PlanStep`s via `step_for_hypothesis()` and dispatches them for real (`orchestrator.dispatch_shadow_branches`); the promotion step now matches the primary's *current* query (`planner.primary_search_params()`) against `shadow_store.find_match()` instead of scanning result text. All prior trace events (`shadow_spawn`, `shadow_promote`, `shadow_discard`) are preserved verbatim; two events were added (`shadow_result_ready`, `shadow_promoted_reused`). No other scenario's trace is affected — none of the other 6 gold scenarios ever spawn a shadow (their utterances sit outside `ShadowScorer`'s `[0.55, 0.72)` confidence gate). |
+
+### 13.2 What "genuine" means here
+
+Before this integration, a shadow branch was a `Branch` record with a score
+and a label — no tool call was ever dispatched for it, and "promotion" chose
+a winner by checking whether the *first word* of its label appeared in the
+scripted scenario JSON's result text (a check that, for `shadow_bangalore`,
+matched **both** candidates equally, since both labels start with
+"Bangalore" — it degenerated to "highest score always wins").
+
+Now, for every spawned shadow branch:
+
+1. `planner.step_for_hypothesis()` turns its hypothesis into a real
+   `PlanStep` (`search_flights` with structured `{"to", "slot"}` params).
+2. `orchestrator.dispatch_shadow_branches()` runs every newly-spawned
+   branch's step **concurrently**, in one `asyncio.gather` wave, through the
+   real `MockToolSandbox` — a real coroutine, a real simulated network delay,
+   a real `ToolResult`.
+3. The result is persisted in `ShadowResultStore`, tagged with
+   `branch_id`, `base_version`, `tool`, and normalized `params`.
+4. When the user's next turn lands, `planner.primary_search_params(state)`
+   computes what the *primary* would now search for; `store.find_match()`
+   checks it against every live shadow's *actually-executed* params.
+5. A match is promoted (`BranchManager.promote`) and its stored result is
+   marked `reused=True` — the primary never dispatches `search_flights`
+   again for that query. A non-match is invalidated → cancelled → cleaned up
+   (existing `BranchManager` lifecycle, unchanged).
+
+### 13.3 Trace shape (shadow_bangalore.json)
+
+```
+shadow_spawn        Bangalore morning   score 0.65
+shadow_spawn        Bangalore evening   score 0.24
+shadow_result_ready branch=...9d16bc  search_flights {to: Bangalore, slot: morning}
+shadow_result_ready branch=...29deec  search_flights {to: Bangalore, slot: evening}
+tool_result         search:2:1  gate=APPLY
+shadow_promote      branch=...9d16bc  reused=true
+shadow_promoted_reused  saved_tool_call=true  based_on_version=2  promoted_to_version=2
+shadow_discard       branch=...29deec  wasted=true  cleanup_latency_ms=0.03
+tool_result          search:1:0 (late Delhi, based_on=1)  gate=DISCARD
+stale_discarded      search:1:0
+```
+
+### 13.4 Safety invariants preserved
+
+- **Policy authority never moves.** `orchestrator.py` imports and calls
+  `policy.risk_for()` and reads `BranchManager.budget.allowed_levels`; it
+  defines no risk table of its own. A shadow step whose kind resolves to
+  `MUTATING`/`IRREVERSIBLE` raises `SpeculationPolicyError` before any
+  dispatch — verified by `tests/test_shadow_integration.py`.
+- **Budget is unchanged.** 2 shadows / depth 3 / 6 calls per shadow — the
+  orchestrator calls `BranchManager.spawn_shadow` / `record_call` exactly as
+  before; it adds no second budget.
+- **Idempotency & cancellation are the sandbox's, reused.** The orchestrator
+  passes through `MockToolSandbox`'s existing idempotency-key dedup and lets
+  `asyncio.CancelledError` propagate untouched.
+- **Stale gate is `ProvenanceGraph`'s, reused.** No second staleness system
+  was added; a late result from an invalidated node is still discarded by
+  `ProvenanceGraph.gate()` alone.
+
+### 13.5 Metrics now backed by real execution
+
+`replay_scenario()`'s summary gained two fields, both derived from actual
+`ShadowResultStore` state (never fabricated):
+
+- `shadow_results`: every stored shadow result (tool, params, payload, reused flag).
+- `tool_calls_saved`: count of shadow results marked `reused=True` — a real
+  "we didn't have to search again" count, not an estimate.
+
+`BranchManager.shadow_metrics()` (spawned/promoted/discarded/reused_pct/
+wasted_pct/cleanup_p95_ms/primary_slowdown_pct) is unchanged and still the
+source of truth for the aggregate speculation numbers in
+`reports/shadow_metrics.md`.
+

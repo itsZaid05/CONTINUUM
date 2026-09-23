@@ -33,7 +33,7 @@ from typing import Any
 
 from .contracts import ArbiterCategory, ArbiterDecision, RiskLevel, StateVersion
 from .policy import risk_for
-from .shadow import ShadowScorer
+from .shadow import ScoredHypothesis, ShadowScorer
 
 # ---------------------------------------------------------------------------
 # Plan shape
@@ -136,6 +136,18 @@ def _destination_for(decision: ArbiterDecision, state: StateVersion | None) -> s
     return None
 
 
+def primary_search_params(state: StateVersion | None) -> dict[str, Any]:
+    """The ``{"to", "slot"}`` params the primary ``search_flights`` step would
+    dispatch for the given state — the same shape `_build_primary` uses for
+    ``p_1``. Exposed so the runtime can ask "does a live shadow already
+    answer *this exact* query?" without recomputing/duplicating the logic.
+    """
+    return {
+        "to": (state.state.get("destination") if state else None) or "unknown",
+        "slot": _slot_for(state),
+    }
+
+
 # ---------------------------------------------------------------------------
 # Primary chain
 # ---------------------------------------------------------------------------
@@ -209,6 +221,32 @@ def _prefetch_shadow(
     )
 
 
+def _params_for_hypothesis(h: ScoredHypothesis) -> dict[str, Any]:
+    """Structured params when the label is parseable as "<city> <slot>"
+    (the shape ShadowScorer always produces for search/filter hypotheses —
+    see shadow.py's 'Bangalore morning' / 'Bangalore evening' labels), so the
+    step is genuinely executable and genuinely matchable against a later
+    primary query — not just a free-text hint no one can compare against.
+    """
+    if h.kind in {"search", "filter"}:
+        city, sep, slot = h.label.rpartition(" ")
+        if sep and slot in {"morning", "evening"} and city:
+            return {"to": city, "slot": slot}
+    return {"hint": h.label}
+
+
+def step_for_hypothesis(h: ScoredHypothesis, step_id: str) -> PlanStep:
+    """Turn a scored ambiguity hypothesis into a real, executable PlanStep.
+
+    Shared by `_ambiguity_shadows` (plan generation) and the replay runtime
+    (genuine shadow dispatch via orchestrator.py) so the two can never drift:
+    the step a shadow branch actually executes is exactly the step the plan
+    says it should.
+    """
+    tool = "search_flights" if h.kind in {"search", "filter"} else "hold_seat"
+    return PlanStep(step_id=step_id, tool=tool, kind=h.kind, params=_params_for_hypothesis(h))
+
+
 def _ambiguity_shadows(
     decision: ArbiterDecision,
     state: StateVersion | None,
@@ -224,12 +262,7 @@ def _ambiguity_shadows(
         return []
     out: list[ShadowBranchPlan] = []
     for i, h in enumerate(scorer.score(decision, state)[:slots_left], start=2):
-        step = PlanStep(
-            step_id=f"sh_{i}",
-            tool="search_flights" if h.kind in {"search", "filter"} else "hold_seat",
-            kind=h.kind,
-            params={"hint": h.label},
-        )
+        step = step_for_hypothesis(h, f"sh_{i}")
         out.append(
             ShadowBranchPlan(
                 branch_id=f"SHADOW_{i}",
