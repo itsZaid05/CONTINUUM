@@ -289,11 +289,6 @@ All five build-order items from the PRD are done for Engineer A's scope; every s
 
 ---
 
-## Acknowledgments
-
-Reuse & learnings from **AccessFlow** (`MridulNegi2005`), **`prism_rt`** (`itsramhere`), **FlowContext** (`Madhumasa84`), **TriFusion** (`Samrudhp`), **RECAP** (Megagon Labs, EACL’26), **NADST** (Le et al., ICLR’20), **FreshCtx** (IndieHackers), **Parallax** (Shield/Chronicle), **OODA-Tool**, **Cost-Aware Speculative Execution** (2606.07846), **LiveKit/Agora** interruption handling, **Stage** (graph execution), CLINC150/BANKING77, and Samsung SmartThings Family Care.
-
----
 
 ## License
 
