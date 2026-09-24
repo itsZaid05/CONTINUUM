@@ -30,10 +30,14 @@ from .contracts import (
 from .delta_arbiter import ArbiterBackend
 from .dialogue import respond, respond_to_turn
 from .ledger import EffectLedger, effect_id_for
+from .orchestrator import dispatch_shadow_branches, promote_or_discard
 from .perception import perceive_text
+from .planner import primary_search_params, step_for_hypothesis
 from .policy import risk_for
 from .provenance import ProvenanceGraph
 from .shadow import ShadowScorer, hypothesis_to_row
+from .shadow_store import ShadowResultStore
+from .tools import MockToolSandbox
 from .versioned_state import VersionedStore
 
 # Simulated tool latency (ms) for wall-time calc
@@ -87,6 +91,7 @@ def replay_scenario(
     output_path: Path | None = None,
     disable_shadows: bool = False,
     disable_stale_gate: bool = False,
+    shadow_speed: float = 0.02,
 ) -> dict[str, Any]:
     import json as _json
 
@@ -103,6 +108,8 @@ def replay_scenario(
     ledger = EffectLedger()
     arbiter = ArbiterBackend(backend)
     scorer = ShadowScorer()
+    sandbox = MockToolSandbox()  # real async tool sandbox — genuine shadow execution
+    shadow_store = ShadowResultStore()  # branch_id -> real, reusable ToolResult
     shadow_meta: dict[str, dict[str, Any]] = {}  # branch_id → {label, score, version}
     shadow_rows: list[dict[str, Any]] = []
     stale_leaks = 0
@@ -245,48 +252,74 @@ def replay_scenario(
                                 "node_id": gate_node.id,
                             }
                         )
-                    # ---- Phase 4: first APPLY at the patched version settles shadows ----
+                    # ---- Phase 4/B: first APPLY at the patched version settles shadows.
+                    # Genuine reuse: match the primary's CURRENT intended query against
+                    # already-computed shadow results (shadow_store), not the scripted
+                    # result's text — a real "does an existing shadow answer this?" check.
                     if shadow_meta:
-                        payload_blob = _json.dumps(result_payload, default=str).lower()
                         live = bm.shadow_branches()
-                        matched = [
-                            b
-                            for b in live
-                            if shadow_meta[b.id]["label"].split(" ")[0].lower() in payload_blob
-                        ]
-                        pool = matched or live
-                        winner = max(pool, key=lambda b: (shadow_meta[b.id]["score"], b.id))
-                        wb = bm.promote(winner.id)
-                        if wb is not None:
-                            emit(
-                                {
-                                    "event": "shadow_promote",
-                                    "at_ms": at_ms,
-                                    "branch_id": wb.id,
-                                    "label": shadow_meta[winner.id]["label"],
-                                    "reused": True,
-                                    "node_id": gate_node.id,
-                                }
+                        unsettled = [b for b in live if not shadow_meta[b.id]["settled"]]
+                        if unsettled:
+                            state_now = store.get(current_version)
+                            current_params = primary_search_params(state_now)
+                            live_ids = {b.id for b in unsettled}
+                            winner_id, loser_ids = promote_or_discard(
+                                shadow_store, "search_flights", current_params, live_ids
                             )
-                        for loser in [x for x in live if x.id != winner.id]:
-                            bm.invalidate(loser.id)
-                            bm.cancel(loser.id)
-                            t0 = _time.perf_counter()
-                            cb = bm.cleanup(loser.id)
-                            latency_ms = round((_time.perf_counter() - t0) * 1000, 3)
-                            if cb is not None:
+                            if winner_id is None:
+                                # no genuine query match — fall back to the best-scored
+                                # live shadow so a promotion decision is always made
+                                # (never silently drop the budget's only candidate)
+                                winner_id = max(
+                                    unsettled, key=lambda b: (shadow_meta[b.id]["score"], b.id)
+                                ).id
+                                loser_ids = [bid for bid in live_ids if bid != winner_id]
+                            wb = bm.promote(winner_id)
+                            if wb is not None:
                                 emit(
                                     {
-                                        "event": "shadow_discard",
+                                        "event": "shadow_promote",
                                         "at_ms": at_ms,
-                                        "branch_id": loser.id,
-                                        "label": shadow_meta[loser.id]["label"],
-                                        "wasted": True,
-                                        "cleanup_latency_ms": latency_ms,
+                                        "branch_id": wb.id,
+                                        "label": shadow_meta[winner_id]["label"],
+                                        "reused": True,
+                                        "node_id": gate_node.id,
                                     }
                                 )
-                        for bid in [winner.id, *(lb.id for lb in live if lb.id != winner.id)]:
-                            shadow_meta[bid]["settled"] = True
+                                winner_sr = shadow_store.get(winner_id)
+                                if winner_sr is not None:
+                                    shadow_store.mark_reused(winner_id)
+                                    emit(
+                                        {
+                                            "event": "shadow_promoted_reused",
+                                            "at_ms": at_ms,
+                                            "branch_id": winner_id,
+                                            "tool": winner_sr.tool,
+                                            "params": winner_sr.params,
+                                            "saved_tool_call": True,
+                                            "based_on_version": winner_sr.base_version,
+                                            "promoted_to_version": current_version,
+                                        }
+                                    )
+                            for loser_id in loser_ids:
+                                bm.invalidate(loser_id)
+                                bm.cancel(loser_id)
+                                t0 = _time.perf_counter()
+                                cb = bm.cleanup(loser_id)
+                                latency_ms = round((_time.perf_counter() - t0) * 1000, 3)
+                                if cb is not None:
+                                    emit(
+                                        {
+                                            "event": "shadow_discard",
+                                            "at_ms": at_ms,
+                                            "branch_id": loser_id,
+                                            "label": shadow_meta[loser_id]["label"],
+                                            "wasted": True,
+                                            "cleanup_latency_ms": latency_ms,
+                                        }
+                                    )
+                            for bid in [winner_id, *loser_ids]:
+                                shadow_meta[bid]["settled"] = True
                 else:
                     emit({"event": "stale_discarded", "at_ms": at_ms, "node_id": gate_node.id})
 
@@ -494,6 +527,7 @@ def replay_scenario(
                     branches = bm.spawn_shadows_for_decision(
                         arbiter_decision, current_version, state_now, scorer, force=True
                     )
+                    branch_steps: list[tuple[str, int, Any]] = []
                     for b in branches:
                         h = next((x for x in hyps if x.label == bm.label_of(b.id)), None)
                         shadow_meta[b.id] = {
@@ -514,6 +548,28 @@ def replay_scenario(
                                 "parent_version": current_version,
                             }
                         )
+                        if h is not None:
+                            step = step_for_hypothesis(h, f"{b.id}_s0")
+                            branch_steps.append((b.id, current_version, step))
+                    # ---- Engineer B: real shadow execution — actually dispatch each
+                    # shadow's tool call (concurrently, via the existing execute_plan
+                    # DAG executor) and persist the real result for later reuse.
+                    if branch_steps:
+                        shadow_results = dispatch_shadow_branches(
+                            bm, shadow_store, sandbox, branch_steps, speed=shadow_speed
+                        )
+                        for sr in shadow_results:
+                            emit(
+                                {
+                                    "event": "shadow_result_ready",
+                                    "at_ms": at_ms + 10,
+                                    "branch_id": sr.branch_id,
+                                    "tool": sr.tool,
+                                    "params": sr.params,
+                                    "based_on_version": sr.base_version,
+                                    "status": sr.result.status,
+                                }
+                            )
                 if arbiter_decision.category in {
                     ArbiterCategory.MODIFY,
                     ArbiterCategory.ADD_CONSTRAINT,
@@ -560,6 +616,8 @@ def replay_scenario(
         "branch_stats": bm.stats(),
         "shadow_metrics": bm.shadow_metrics(wall_ms=continuum_wall),
         "shadow_rows": shadow_rows,
+        "shadow_results": [sr.to_dict() for sr in shadow_store.all()],
+        "tool_calls_saved": sum(1 for sr in shadow_store.all() if sr.reused),
         "force_shadow": force_shadow,
         "stale_leaks": stale_leaks,
         "duplicate_ignored": duplicate_ignored,

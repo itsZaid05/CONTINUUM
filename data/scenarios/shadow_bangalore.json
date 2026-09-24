@@ -1,6 +1,6 @@
 {
   "name": "shadow_bangalore",
-  "description": "Shadow speculation: after Delhi (with morning history), user says 'Actually, Bangalore' → spawn Bangalore-morning vs Bangalore-evening shadows. Morning search result lands → promote morning (reused), discard evening (wasted, cleaned <150ms). force_shadow bypasses the [0.55,0.72) confidence gate for this demo only — READ/STAGE-only + capacity caps always apply.",
+  "description": "Shadow speculation, now genuinely executed (Engineer B): after Delhi (with morning history), user says 'Actually, Bangalore' → spawn Bangalore-morning vs Bangalore-evening shadows, each REALLY dispatched via the mock tool sandbox and stored. The new intent's search_flights(to=Bangalore, slot=morning) query genuinely matches the already-computed morning shadow result -> promoted + reused, no duplicate search; the evening shadow is discarded (wasted, cleaned <150ms). A late Delhi result (based_on V1) then arrives after V2 and is rejected by the stale-result gate. force_shadow bypasses the [0.55,0.72) confidence gate for this demo only — READ/STAGE-only + capacity caps always apply.",
   "force_shadow": true,
   "initial_state": { "destination": "Delhi", "dates": "next Monday", "constraints": ["morning"], "goal_domain": "flights" },
   "turns": [
@@ -8,6 +8,7 @@
     { "at_ms": 50, "tool_start": "search:Delhi" },
     { "at_ms": 200, "user": "Actually, Bangalore" },
     { "at_ms": 250, "tool_start": "search:Bangalore" },
-    { "at_ms": 900, "tool_result": { "id": "search:2:1", "payload": { "flights": ["AI-201 Bangalore morning"] }, "based_on": 2 } }
+    { "at_ms": 900, "tool_result": { "id": "search:2:1", "payload": { "flights": ["AI-201 Bangalore morning"] }, "based_on": 2 } },
+    { "at_ms": 920, "tool_result": { "id": "search:1:0", "payload": { "flights": ["AI-101 Delhi late"] }, "based_on": 1 } }
   ]
 }

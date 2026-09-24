@@ -86,7 +86,7 @@
       "abandoned": 0,
       "reused_pct": 50.0,
       "wasted_pct": 50.0,
-      "cleanup_p95_ms": 0.009,
+      "cleanup_p95_ms": 0.015,
       "cleanup_samples": 1,
       "primary_slowdown_pct": 4.5,
       "primary_reserved_ms": 49.5,
