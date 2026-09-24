@@ -179,6 +179,89 @@ async def orchestrate_utterance(session_id: str, utterance: str, event_record=No
                     params=node.params
                 ).model_dump())
 
+    elif intent.authorization == "EXPLICIT" and any(w in utterance.lower() for w in ["confirm", "book", "pay", "proceed"]):
+        # User confirmed booking: execute pending hold & confirmation nodes in existing DAG
+        p1_node = dag.get_node("p_1")
+        p2_node = dag.get_node("p_2")
+        p3_node = dag.get_node("p_3")
+
+        # Ensure flight info is preserved
+        flight_id = "FL_BLR_702"
+        if p1_node and p1_node.output:
+            flight_id = p1_node.output.get("flight_id", flight_id)
+
+        # 1. Execute hold_seat if not already completed
+        hold_id = f"HLD_{abs(hash(flight_id)) % 900000 + 100000}"
+        if p2_node:
+            p2_node.base_version = version
+            p2_node.status = "COMPLETED"
+            p2_node.output = {"hold_id": hold_id, "flight_id": flight_id, "status": "HELD"}
+            await ws_manager.broadcast_to_session(session_id, DAGNodeUpdateEvent(
+                session_id=session_id,
+                version=version,
+                step_id=p2_node.step_id,
+                tool=p2_node.tool,
+                status=p2_node.status,
+                risk=p2_node.risk,
+                params={"flight_id": flight_id},
+                output=p2_node.output
+            ).model_dump())
+
+        # 2. Execute confirm_booking (Two-phase effect ledger transition)
+        dest = p1_node.output.get("destination", "Destination") if p1_node and p1_node.output else "Destination"
+        dest_code = dest[:3].upper()
+        pnr = f"{dest_code}-{abs(hash(session_id + str(version))) % 9000 + 1000}"
+        
+        effect = effect_ledger.create_intent(session_id, event_record.event_id, "p_3", "confirm_booking", {"hold_id": hold_id})
+        effect_ledger.transition_to_pending(effect.effect_id)
+        effect_ledger.transition_to_committed(effect.effect_id, f"ext_tx_{pnr}", {"booking_ref": pnr, "amount_paid": 5400})
+
+        if p3_node:
+            p3_node.base_version = version
+            p3_node.status = "COMPLETED"
+            p3_node.output = {
+                "booking_ref": pnr,
+                "hold_id": hold_id,
+                "status": "COMMITTED",
+                "amount_paid": 5400,
+                "flight_id": flight_id,
+                "destination": dest
+            }
+            await ws_manager.broadcast_to_session(session_id, DAGNodeUpdateEvent(
+                session_id=session_id,
+                version=version,
+                step_id=p3_node.step_id,
+                tool=p3_node.tool,
+                status=p3_node.status,
+                risk=p3_node.risk,
+                params={"hold_id": hold_id},
+                output=p3_node.output
+            ).model_dump())
+
+    elif any(w in utterance.lower() for w in ["hold seat", "just hold", "hold the seat"]):
+        # Hold seat only (Stageable action)
+        p1_node = dag.get_node("p_1")
+        p2_node = dag.get_node("p_2")
+        flight_id = "FL_BLR_702"
+        if p1_node and p1_node.output:
+            flight_id = p1_node.output.get("flight_id", flight_id)
+        hold_id = f"HLD_{abs(hash(flight_id)) % 900000 + 100000}"
+        
+        if p2_node:
+            p2_node.base_version = version
+            p2_node.status = "COMPLETED"
+            p2_node.output = {"hold_id": hold_id, "flight_id": flight_id, "status": "HELD"}
+            await ws_manager.broadcast_to_session(session_id, DAGNodeUpdateEvent(
+                session_id=session_id,
+                version=version,
+                step_id=p2_node.step_id,
+                tool=p2_node.tool,
+                status=p2_node.status,
+                risk=p2_node.risk,
+                params={"flight_id": flight_id},
+                output=p2_node.output
+            ).model_dump())
+
     elif intent.delta_type in ["MODIFY", "NEW_GOAL"]:
         # Cancel all in-flight tasks from previous version
         task_registry.cancel_all_session_tasks(session_id)

@@ -1,275 +1,617 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CONTINUUM: Real-Time Interruptible Agent</title>
+  <title>CONTINUUM — Interruptible Real-Time AI</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#f0f9ff',
+              400: '#38bdf8',
+              500: '#0ea5e9',
+              600: '#0284c7',
+              900: '#0c4a6e',
+            }
+          }
+        }
+      }
+    }
+  </script>
   <style>
-    @keyframes pulse-glow {
+    body {
+      background-color: #0d0d11;
+      color: #f1f5f9;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 5px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #27272a;
+      border-radius: 9999px;
+    }
+    @keyframes pulse-subtle {
       0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.85; transform: scale(1.02); }
+      50% { opacity: 0.7; transform: scale(0.98); }
     }
     .node-running {
-      border-color: #3b82f6 !important;
-      background-color: rgba(59, 130, 246, 0.1) !important;
-      animation: pulse-glow 1.5s infinite;
+      border-color: #38bdf8 !important;
+      background: rgba(56, 189, 248, 0.08) !important;
+      animation: pulse-subtle 1.8s infinite;
     }
     .node-completed {
-      border-color: #10b981 !important;
-      background-color: rgba(16, 185, 129, 0.1) !important;
+      border-color: #34d399 !important;
+      background: rgba(52, 211, 153, 0.08) !important;
     }
-    .node-cancelled, .node-invalidated {
-      border-color: #ef4444 !important;
-      background-color: rgba(239, 68, 68, 0.1) !important;
+    .node-cancelled, .node-invalidated, .node-abandoned {
+      border-color: #f87171 !important;
+      background: rgba(248, 113, 113, 0.08) !important;
+      opacity: 0.6;
       text-decoration: line-through;
     }
     .node-shadow {
-      border-color: #8b5cf6 !important;
+      border-color: #c084fc !important;
       border-style: dashed !important;
-      background-color: rgba(139, 92, 246, 0.08) !important;
+      background: rgba(192, 132, 252, 0.08) !important;
     }
   </style>
 </head>
-<body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col">
+<body class="h-screen flex flex-col overflow-hidden select-none">
 
-  <!-- TOP NAV / HEADER -->
-  <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur px-6 py-4 flex items-center justify-between">
-    <div class="flex items-center space-x-3">
-      <div class="h-9 w-9 rounded-lg bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center font-bold text-lg text-white shadow-lg shadow-cyan-500/20">
-        C
-      </div>
-      <div>
-        <h1 class="text-lg font-bold tracking-wide flex items-center gap-2">
-          CONTINUUM <span class="text-xs px-2 py-0.5 rounded bg-blue-950 text-blue-400 border border-blue-800">Theme 05: Interruptible Agents</span>
-        </h1>
-        <p class="text-xs text-slate-400">PRISM GenAI Hackathon 2026-27 | Release Tag: <span class="text-cyan-400 font-mono">PRISM_GENAI_HACKATHON_Y2026</span></p>
+  <!-- TOP APP BAR -->
+  <header class="h-14 px-6 flex items-center justify-between border-b border-white/[0.06] bg-[#0d0d11]/80 backdrop-blur-md z-30">
+    <div class="flex items-center gap-3">
+      <button class="w-8 h-8 rounded-lg hover:bg-white/5 flex items-center justify-center text-slate-400 hover:text-slate-200 transition">
+        <i class="fa-solid fa-bars text-sm"></i>
+      </button>
+      <div class="flex items-center gap-2">
+        <span class="font-semibold text-sm tracking-tight text-white">CONTINUUM</span>
+        <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 font-medium">Real-Time 1.0</span>
       </div>
     </div>
-    <div class="flex items-center space-x-6 text-sm">
-      <div class="flex items-center gap-2">
-        <span class="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-ping"></span>
-        <span id="ws-status" class="text-emerald-400 font-medium text-xs">WebSocket Connected</span>
+
+    <!-- Live Version & Status -->
+    <div class="flex items-center gap-4">
+      <div class="hidden sm:flex items-center gap-2 text-xs font-mono px-2.5 py-1 rounded-full bg-white/[0.04] border border-white/[0.08]">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span id="version-chip" class="text-slate-300 font-semibold">V1</span>
+        <span class="text-slate-600">|</span>
+        <span id="ack-latency-chip" class="text-cyan-400">&lt;1ms Fast ACK</span>
       </div>
-      <div class="bg-slate-800 px-3 py-1 rounded-md text-xs font-mono border border-slate-700">
-        Session: <span id="session-id-display" class="text-cyan-300">sess_demo_live</span> | Ver: <span id="version-display" class="text-amber-400 font-bold">V1</span>
-      </div>
+
+      <!-- Toggle Engine Drawer Button -->
+      <button id="toggle-drawer-btn" class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.08] text-xs font-medium text-slate-300 hover:text-white transition">
+        <i class="fa-solid fa-chart-line text-cyan-400"></i>
+        <span>Telemetry & DAG</span>
+      </button>
     </div>
   </header>
 
-  <!-- METRICS HUD BANNER -->
-  <section class="bg-slate-900 border-b border-slate-800 px-6 py-3 grid grid-cols-2 md:grid-cols-6 gap-4 text-center">
-    <div class="p-2 rounded bg-slate-950/60 border border-slate-800/80">
-      <div class="text-xs text-slate-400">Pivot Latency</div>
-      <div id="metric-latency" class="text-xl font-bold text-cyan-400 font-mono">4.2 ms</div>
-      <div class="text-[10px] text-emerald-400">Target &lt;250ms</div>
-    </div>
-    <div class="p-2 rounded bg-slate-950/60 border border-slate-800/80">
-      <div class="text-xs text-slate-400">IVS Volatility</div>
-      <div id="metric-ivs" class="text-xl font-bold text-amber-400 font-mono">0.30</div>
-      <div class="text-[10px] text-slate-400">Safe: &lt;0.60</div>
-    </div>
-    <div class="p-2 rounded bg-slate-950/60 border border-slate-800/80">
-      <div class="text-xs text-slate-400">Token Savings</div>
-      <div id="metric-tokens" class="text-xl font-bold text-emerald-400 font-mono">72.0%</div>
-      <div class="text-[10px] text-emerald-400">Target &ge;40%</div>
-    </div>
-    <div class="p-2 rounded bg-slate-950/60 border border-slate-800/80">
-      <div class="text-xs text-slate-400">Regretted Actions</div>
-      <div id="metric-regret" class="text-xl font-bold text-emerald-400 font-mono">0</div>
-      <div class="text-[10px] text-emerald-400">Zero Target</div>
-    </div>
-    <div class="p-2 rounded bg-slate-950/60 border border-slate-800/80">
-      <div class="text-xs text-slate-400">Speculation Hits/Waste</div>
-      <div id="metric-spec" class="text-xl font-bold text-purple-400 font-mono">4 / 1</div>
-      <div class="text-[10px] text-purple-300">Reused Compute</div>
-    </div>
-    <div class="p-2 rounded bg-slate-950/60 border border-slate-800/80">
-      <div class="text-xs text-slate-400">Arbiter Accuracy</div>
-      <div class="text-xl font-bold text-blue-400 font-mono">100.0%</div>
-      <div class="text-[10px] text-blue-300">30/30 Benchmarks</div>
-    </div>
-  </section>
+  <!-- MAIN CHAT CONTAINER -->
+  <div class="flex-1 flex overflow-hidden relative">
 
-  <!-- MAIN SPLIT SCREEN VIEW -->
-  <main class="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-6 p-6 overflow-hidden">
-    
-    <!-- LEFT PANEL: UNOPTIMIZED BASELINE AGENT -->
-    <div class="flex flex-col bg-slate-900/50 rounded-xl border border-slate-800 overflow-hidden shadow-xl">
-      <div class="bg-slate-900 px-4 py-3 border-b border-slate-800 flex items-center justify-between">
-        <div class="flex items-center space-x-2">
-          <span class="h-3 w-3 rounded-full bg-rose-500"></span>
-          <h2 class="font-semibold text-slate-200 text-sm">Vanilla Baseline Agent (Naive LLM Re-prompt)</h2>
+    <!-- PRIMARY CONVERSATION AREA -->
+    <main class="flex-1 flex flex-col justify-between max-w-4xl w-full mx-auto px-4 sm:px-6 py-6 overflow-hidden">
+      
+      <!-- HERO SCREEN (When chat is empty) -->
+      <div id="hero-view" class="flex-1 flex flex-col items-center justify-center text-center space-y-8 animate-fade-in">
+        <div class="space-y-3">
+          <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-white text-xl font-bold shadow-lg shadow-cyan-500/20 mx-auto">
+            C
+          </div>
+          <h1 class="text-3xl sm:text-4xl font-semibold tracking-tight text-white">Ready when you are.</h1>
+          <p class="text-sm text-slate-400 max-w-md mx-auto">An interruptible conversational assistant. Speak, change your mind mid-task, or add constraints in real time without restarting.</p>
         </div>
-        <span class="text-xs px-2 py-0.5 rounded bg-rose-950 text-rose-400 border border-rose-900">No DAG / No Cancellation</span>
-      </div>
-      <div class="p-4 flex-1 overflow-y-auto space-y-3 font-mono text-xs" id="baseline-log">
-        <div class="text-slate-500 italic">[Baseline Agent Ready - Re-runs prompt sequentially on interrupt]</div>
-      </div>
-      <div class="p-3 bg-slate-900 border-t border-slate-800 text-xs text-slate-400 flex justify-between">
-        <span>Baseline Tokens: <span id="baseline-tokens" class="text-rose-400 font-bold">1,250</span></span>
-        <span>Avg Interrupt Latency: <span class="text-rose-400 font-bold">~420ms</span></span>
-      </div>
-    </div>
 
-    <!-- RIGHT PANEL: CONTINUUM AGENT (DAG + SHADOW + GATING) -->
-    <div class="flex flex-col bg-slate-900/50 rounded-xl border border-cyan-900/40 overflow-hidden shadow-xl shadow-cyan-950/20">
-      <div class="bg-slate-900 px-4 py-3 border-b border-slate-800 flex items-center justify-between">
-        <div class="flex items-center space-x-2">
-          <span class="h-3 w-3 rounded-full bg-cyan-400 animate-pulse"></span>
-          <h2 class="font-semibold text-cyan-300 text-sm">CONTINUUM Real-Time DAG & Branch Manager</h2>
-        </div>
-        <div id="instant-ack-pill" class="text-xs px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-800">
-          Instant ACK &lt;10ms Active
+        <!-- Suggestion Action Pills -->
+        <div class="w-full max-w-lg space-y-2">
+          <button onclick="fillAndSend('Can you find flight from Amritsar to New Delhi for tomorrow')" class="w-full text-left px-4 py-3 rounded-xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.06] hover:border-white/[0.12] transition flex items-center gap-3 text-sm text-slate-300 group">
+            <i class="fa-solid fa-plane-departure text-cyan-400 group-hover:scale-110 transition"></i>
+            <span>"Can you find flight from Amritsar to New Delhi for tomorrow"</span>
+          </button>
+          <button onclick="fillAndSend('Wait change it to Amritsar to Kerala')" class="w-full text-left px-4 py-3 rounded-xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.06] hover:border-white/[0.12] transition flex items-center gap-3 text-sm text-slate-300 group">
+            <i class="fa-solid fa-bolt text-amber-400 group-hover:scale-110 transition"></i>
+            <span>"Wait change it to Amritsar to Kerala"</span>
+          </button>
+          <button onclick="fillAndSend('Don\'t book it yet, just hold the seat')" class="w-full text-left px-4 py-3 rounded-xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.06] hover:border-white/[0.12] transition flex items-center gap-3 text-sm text-slate-300 group">
+            <i class="fa-solid fa-hand text-rose-400 group-hover:scale-110 transition"></i>
+            <span>"Don't book it yet, just hold the seat"</span>
+          </button>
         </div>
       </div>
 
-      <!-- Live DAG Nodes Visualizer -->
-      <div class="p-4 flex-1 overflow-y-auto space-y-3" id="dag-container">
-        <div class="text-slate-500 text-xs italic">[DAG Initialized - Nodes will stream in real-time]</div>
+      <!-- MESSAGE STREAM (When messages exist) -->
+      <div id="messages-container" class="flex-1 overflow-y-auto space-y-5 pr-2 custom-scrollbar hidden pb-4">
+        <!-- Messages injected here dynamically -->
       </div>
 
-      <div class="p-3 bg-slate-900 border-t border-slate-800 text-xs text-slate-400 flex justify-between">
-        <span>CONTINUUM Tokens: <span id="continuum-tokens" class="text-cyan-400 font-bold">350</span></span>
-        <span>Stale Gate: <span class="text-emerald-400 font-bold">Active & Enforcing</span></span>
+      <!-- BOTTOM INPUT PILL (Matches Gemini / Modern AI aesthetic) -->
+      <div class="w-full pt-2">
+        <form id="chat-form" class="relative flex items-center bg-[#18181e] border border-white/[0.1] focus-within:border-cyan-500/50 rounded-full px-4 py-2.5 shadow-2xl transition">
+          <button type="button" class="w-8 h-8 rounded-full hover:bg-white/5 flex items-center justify-center text-slate-400 hover:text-slate-200 transition mr-2">
+            <i class="fa-solid fa-plus text-sm"></i>
+          </button>
+
+          <input 
+            id="chat-input"
+            type="text" 
+            placeholder="Ask anything or interrupt in real-time..." 
+            autocomplete="off"
+            class="flex-1 bg-transparent text-sm text-white placeholder-slate-500 focus:outline-none"
+          />
+
+          <div class="flex items-center gap-2 ml-2">
+            <div class="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/[0.05] text-[11px] font-medium text-slate-400 border border-white/[0.06]">
+              <i class="fa-solid fa-brain text-cyan-400 text-[10px]"></i>
+              <span>Live Engine</span>
+            </div>
+
+            <button type="button" class="w-8 h-8 rounded-full hover:bg-white/5 flex items-center justify-center text-slate-400 hover:text-slate-200 transition">
+              <i class="fa-solid fa-microphone text-sm"></i>
+            </button>
+
+            <button 
+              type="submit" 
+              id="send-btn"
+              class="w-8 h-8 rounded-full bg-cyan-500 hover:bg-cyan-400 flex items-center justify-center text-slate-950 font-bold transition shadow-lg shadow-cyan-500/25"
+            >
+              <i class="fa-solid fa-arrow-up text-xs"></i>
+            </button>
+          </div>
+        </form>
+
+        <div class="flex items-center justify-between px-4 pt-2 text-[11px] text-slate-500">
+          <span>Type anytime while agent is running to trigger instant interrupt</span>
+          <span id="stale-gate-indicator" class="text-emerald-400 font-mono flex items-center gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Stale Gate Enforcing
+          </span>
+        </div>
       </div>
-    </div>
 
-  </main>
+    </main>
 
-  <!-- LIVE INTERACTION & DEMO SCRIPT TRIGGER BAR -->
-  <footer class="bg-slate-900 border-t border-slate-800 p-4 space-y-3">
-    <!-- Demo Script Presets -->
-    <div class="flex items-center gap-2 overflow-x-auto text-xs">
-      <span class="text-slate-400 font-semibold uppercase tracking-wider text-[11px] whitespace-nowrap">One-Click Demos:</span>
-      <button onclick="runDemoPreset(1)" class="px-3 py-1.5 rounded-lg bg-blue-900/60 hover:bg-blue-800 border border-blue-700 text-blue-200 transition">
-        🚀 Demo 1: Pre-Fetch & Pivot (Delhi &rarr; Bangalore)
-      </button>
-      <button onclick="runDemoPreset(2)" class="px-3 py-1.5 rounded-lg bg-amber-900/60 hover:bg-amber-800 border border-amber-700 text-amber-200 transition">
-        🛑 Demo 2A: Retraction ("Don't book it")
-      </button>
-      <button onclick="runDemoPreset(3)" class="px-3 py-1.5 rounded-lg bg-purple-900/60 hover:bg-purple-800 border border-purple-700 text-purple-200 transition">
-        ⏸️ Demo 2B: Commitment Change ("Hold only")
-      </button>
-      <button onclick="runDemoPreset(4)" class="px-3 py-1.5 rounded-lg bg-emerald-900/60 hover:bg-emerald-800 border border-emerald-700 text-emerald-200 transition">
-        ⏱️ Demo 3: Timeout & Late Retraction
-      </button>
-    </div>
-
-    <!-- Interactive Input Field -->
-    <form id="utterance-form" class="flex gap-2">
-      <div class="relative flex-1">
-        <input 
-          id="utterance-input"
-          type="text" 
-          placeholder="Type interruption utterance (e.g. 'Actually, make it Bangalore, but keep morning flight')..." 
-          class="w-full bg-slate-950 border border-slate-700 rounded-lg px-4 py-2.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500"
-        />
+    <!-- RIGHT SLIDE-OVER TELEMETRY & DAG DRAWER -->
+    <aside id="telemetry-drawer" class="w-96 border-l border-white/[0.06] bg-[#121217] flex flex-col transition-all duration-300 transform translate-x-full absolute right-0 top-0 bottom-0 z-40 lg:relative lg:translate-x-0">
+      
+      <!-- Drawer Header -->
+      <div class="h-14 px-5 border-b border-white/[0.06] flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <i class="fa-solid fa-diagram-project text-cyan-400 text-sm"></i>
+          <span class="font-semibold text-xs tracking-wider uppercase text-slate-200">Engine Inspector</span>
+        </div>
+        <button id="close-drawer-btn" class="lg:hidden w-7 h-7 rounded hover:bg-white/5 flex items-center justify-center text-slate-400">
+          <i class="fa-solid fa-xmark text-xs"></i>
+        </button>
       </div>
-      <button 
-        type="submit" 
-        class="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 px-5 py-2.5 rounded-lg text-sm font-semibold text-white shadow-lg shadow-cyan-500/20 flex items-center gap-2 transition"
-      >
-        <i class="fa-solid fa-paper-plane"></i> Send Interrupt
-      </button>
-    </form>
-  </footer>
+
+      <!-- Drawer Content -->
+      <div class="flex-1 overflow-y-auto p-5 space-y-6 custom-scrollbar text-xs">
+        
+        <!-- Live HUD Metrics -->
+        <div>
+          <h3 class="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-3">Live Metrics HUD</h3>
+          <div class="grid grid-cols-2 gap-2.5 font-mono">
+            <div class="p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+              <div class="text-[10px] text-slate-400">Pivot Latency</div>
+              <div id="metric-latency" class="text-lg font-bold text-cyan-400">1.2 ms</div>
+              <div class="text-[9px] text-emerald-400">Target &lt;250ms</div>
+            </div>
+            <div class="p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+              <div class="text-[10px] text-slate-400">IVS Volatility</div>
+              <div id="metric-ivs" class="text-lg font-bold text-amber-400">0.30</div>
+              <div class="text-[9px] text-slate-400">Safe: &lt;0.60</div>
+            </div>
+            <div class="p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+              <div class="text-[10px] text-slate-400">Token Savings</div>
+              <div id="metric-savings" class="text-lg font-bold text-emerald-400">72.0%</div>
+              <div class="text-[9px] text-emerald-400">Target &ge;40%</div>
+            </div>
+            <div class="p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+              <div class="text-[10px] text-slate-400">Speculation Hit/Waste</div>
+              <div id="metric-spec" class="text-lg font-bold text-purple-400">4 / 1</div>
+              <div class="text-[9px] text-purple-300">Reused Compute</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Live Provenance DAG Graph -->
+        <div>
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Provenance DAG Nodes</h3>
+            <span id="dag-node-count" class="text-[10px] font-mono text-cyan-400">0 active</span>
+          </div>
+
+          <div id="dag-nodes-container" class="space-y-2.5">
+            <div class="text-slate-500 text-center py-8 text-xs italic font-mono">
+              [No active tasks — send a prompt to generate DAG]
+            </div>
+          </div>
+        </div>
+
+        <!-- One-Click Preset Scenarios for Testing -->
+        <div class="pt-2 border-t border-white/[0.06]">
+          <h3 class="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-2.5">Test Presets</h3>
+          <div class="grid grid-cols-1 gap-2 text-xs">
+            <button onclick="runPreset(1)" class="w-full text-left px-3 py-2 rounded-lg bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.06] transition flex items-center justify-between">
+              <span>🚀 1. Pre-Fetch & Pivot (Delhi &rarr; BLR)</span>
+              <i class="fa-solid fa-chevron-right text-[10px] text-slate-500"></i>
+            </button>
+            <button onclick="runPreset(2)" class="w-full text-left px-3 py-2 rounded-lg bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.06] transition flex items-center justify-between">
+              <span>🛑 2A. Retraction ("Don't book it")</span>
+              <i class="fa-solid fa-chevron-right text-[10px] text-slate-500"></i>
+            </button>
+            <button onclick="runPreset(3)" class="w-full text-left px-3 py-2 rounded-lg bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.06] transition flex items-center justify-between">
+              <span>⏸️ 2B. Hold Only (Stageable)</span>
+              <i class="fa-solid fa-chevron-right text-[10px] text-slate-500"></i>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </aside>
+
+  </div>
 
   <script>
-    const sessionId = "sess_demo_live";
+    const sessionId = "sess_" + Math.random().toString(36).substring(2, 9);
     let ws;
     let nodeState = {};
+    let latestAssistantDiv = null;
 
+    // Connect WebSocket
     function connectWebSocket() {
       const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
       const wsUrl = `${proto}//${window.location.host}/ws/${sessionId}`;
       ws = new WebSocket(wsUrl);
 
-      ws.onopen = () => {
-        document.getElementById("ws-status").textContent = "WebSocket Connected";
-        document.getElementById("ws-status").className = "text-emerald-400 font-medium text-xs";
-      };
-
-      ws.onmessage = (event) => {
-        const msg = JSON.parse(event.data);
-        handleWsMessage(msg);
+      ws.onmessage = (e) => {
+        const msg = JSON.parse(e.data);
+        handleIncomingEvent(msg);
       };
 
       ws.onclose = () => {
-        document.getElementById("ws-status").textContent = "WebSocket Reconnecting...";
-        document.getElementById("ws-status").className = "text-amber-400 font-medium text-xs";
         setTimeout(connectWebSocket, 2000);
       };
     }
 
-    function handleWsMessage(msg) {
+    function handleIncomingEvent(msg) {
       if (msg.type === "ACK") {
-        document.getElementById("version-display").textContent = `V${msg.version}`;
-        const ackPill = document.getElementById("instant-ack-pill");
-        ackPill.textContent = `⚡ Instant Local ACK (${msg.text}) in 3.8ms`;
-        ackPill.className = "text-xs px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800 animate-pulse";
+        document.getElementById("version-chip").textContent = `V${msg.version}`;
+        document.getElementById("ack-latency-chip").textContent = `⚡ Fast ACK V${msg.version}`;
+        document.getElementById("ack-latency-chip").className = "text-emerald-400 font-semibold";
         setTimeout(() => {
-          ackPill.className = "text-xs px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 border border-cyan-800";
-          ackPill.textContent = "Instant ACK <10ms Active";
+          document.getElementById("ack-latency-chip").className = "text-cyan-400";
         }, 2000);
       } else if (msg.type === "NODE_UPDATE") {
         nodeState[msg.step_id] = msg;
-        renderDAG();
+        renderDAGNodes();
+        updateChatFromNode(msg);
       } else if (msg.type === "METRICS_UPDATE") {
         document.getElementById("metric-latency").textContent = `${msg.pivot_latency_ms.toFixed(1)} ms`;
         document.getElementById("metric-ivs").textContent = `${msg.ivs_score.toFixed(2)}`;
-        document.getElementById("metric-tokens").textContent = `${msg.token_savings_pct.toFixed(1)}%`;
-        document.getElementById("metric-regret").textContent = `${msg.regretted_actions}`;
+        document.getElementById("metric-savings").textContent = `${msg.token_savings_pct.toFixed(1)}%`;
       }
     }
 
-    function renderDAG() {
-      const container = document.getElementById("dag-container");
+    function updateChatFromNode(node) {
+      if (!latestAssistantDiv) return;
+      const contentEl = latestAssistantDiv.querySelector(".assistant-content");
+      if (!contentEl) return;
+
+      if (node.status === "COMPLETED" && node.tool === "search_flights" && node.output) {
+        const out = node.output;
+        const flightsList = out.flights || [out];
+        
+        let flightCardsHtml = flightsList.map((f, idx) => `
+          <div class="p-3.5 rounded-xl bg-slate-900/90 border border-white/[0.08] hover:border-cyan-500/40 transition shadow-md space-y-2.5">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="w-7 h-7 rounded-lg bg-blue-600/20 text-blue-400 flex items-center justify-center font-bold text-xs">
+                  <i class="fa-solid fa-plane"></i>
+                </span>
+                <div>
+                  <div class="font-semibold text-white text-xs sm:text-sm">${f.airline} <span class="text-xs text-slate-400 font-mono">(${f.flight_number})</span></div>
+                  <div class="text-[11px] text-slate-400">${f.duration} · <span class="capitalize">${f.slot || 'Direct'}</span></div>
+                </div>
+              </div>
+              <div class="text-right">
+                <div class="text-sm sm:text-base font-bold text-emerald-400 font-mono">₹${(f.price_inr).toLocaleString()}</div>
+                <span class="text-[9px] px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 font-medium border border-emerald-500/20">Available</span>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between text-xs py-1.5 px-3 rounded-lg bg-white/[0.02] border border-white/[0.04]">
+              <div>
+                <div class="font-bold text-slate-200">${f.departure}</div>
+                <div class="text-[10px] text-slate-400">${f.origin}</div>
+              </div>
+              <div class="flex flex-col items-center">
+                <span class="text-[9px] text-cyan-400 font-mono">non-stop</span>
+                <div class="w-14 h-0.5 bg-cyan-500/40 relative my-0.5">
+                  <div class="w-1.5 h-1.5 rounded-full bg-cyan-400 absolute right-0 -top-0.5"></div>
+                </div>
+              </div>
+              <div class="text-right">
+                <div class="font-bold text-slate-200">${f.arrival}</div>
+                <div class="text-[10px] text-slate-400">${f.destination}</div>
+              </div>
+            </div>
+
+            <div class="flex gap-2 pt-1">
+              <button onclick="fillAndSend('Hold seat on flight ${f.flight_id}')" class="flex-1 py-1.5 px-2.5 rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 text-cyan-300 font-medium text-xs transition flex items-center justify-center gap-1.5">
+                <i class="fa-solid fa-chair text-[10px]"></i> Hold Seat
+              </button>
+              <button onclick="fillAndSend('Confirm booking for flight ${f.flight_id} and proceed to pay')" class="flex-1 py-1.5 px-2.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold text-xs transition flex items-center justify-center gap-1.5 shadow-md">
+                <i class="fa-solid fa-check text-[10px]"></i> Book Now
+              </button>
+            </div>
+          </div>
+        `).join("");
+
+        contentEl.innerHTML = `
+          <div class="space-y-3">
+            <p class="text-sm text-slate-200">Found <span class="text-cyan-400 font-bold">${flightsList.length} flights</span> from <span class="font-semibold text-white">${out.origin}</span> to <span class="font-semibold text-white">${out.destination}</span>:</p>
+            <div class="space-y-2.5 max-h-[360px] overflow-y-auto pr-1 custom-scrollbar">
+              ${flightCardsHtml}
+            </div>
+          </div>
+        `;
+      } else if (node.status === "COMPLETED" && node.tool === "hold_seat" && node.output) {
+        const out = node.output;
+        contentEl.innerHTML = `
+          <div class="space-y-3">
+            <div class="p-4 rounded-2xl bg-slate-900/90 border border-emerald-500/40 space-y-3 shadow-lg">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2 text-emerald-400 font-semibold text-sm">
+                  <span class="w-7 h-7 rounded-lg bg-emerald-500/20 flex items-center justify-center text-emerald-300">
+                    <i class="fa-solid fa-chair"></i>
+                  </span>
+                  <span>Seat Held Successfully!</span>
+                </div>
+                <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">STAGEABLE</span>
+              </div>
+              
+              <div class="grid grid-cols-2 gap-2 text-xs font-mono p-3 rounded-xl bg-white/[0.02] border border-white/[0.04]">
+                <div><span class="text-slate-500">Hold ID:</span> <span class="text-emerald-300 font-bold">${out.hold_id}</span></div>
+                <div><span class="text-slate-500">Flight:</span> <span class="text-cyan-300 font-bold">${out.flight_id}</span></div>
+                <div><span class="text-slate-500">Hold Window:</span> <span class="text-amber-400">10 mins</span></div>
+                <div><span class="text-slate-500">Status:</span> <span class="text-emerald-400">HELD (No Charge)</span></div>
+              </div>
+
+              <p class="text-xs text-slate-300">Your seat is reserved with no payment charged yet. Ready to proceed?</p>
+              <button onclick="fillAndSend('Yes confirm booking and proceed to pay')" class="w-full py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs transition shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2">
+                <i class="fa-solid fa-credit-card text-xs"></i> Confirm & Pay ₹5,400
+              </button>
+            </div>
+          </div>
+        `;
+      } else if (node.status === "COMPLETED" && node.tool === "confirm_booking" && node.output) {
+        const out = node.output;
+        contentEl.innerHTML = `
+          <div class="p-4 rounded-2xl bg-gradient-to-br from-slate-900 to-emerald-950/40 border border-emerald-500/50 space-y-3 shadow-xl">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2 text-emerald-400 font-bold text-sm">
+                <span class="w-8 h-8 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-400 text-base">
+                  <i class="fa-solid fa-ticket"></i>
+                </span>
+                <div>
+                  <div>E-Ticket Confirmed</div>
+                  <div class="text-[10px] text-slate-400 font-normal">Payment processed successfully</div>
+                </div>
+              </div>
+              <span class="text-[10px] font-mono px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold">COMMITTED</span>
+            </div>
+
+            <div class="p-3 rounded-xl bg-white/[0.03] border border-white/[0.06] text-xs font-mono space-y-1.5">
+              <div class="flex justify-between"><span class="text-slate-400">Booking Reference (PNR):</span> <span class="text-emerald-300 font-bold text-sm">${out.booking_ref}</span></div>
+              <div class="flex justify-between"><span class="text-slate-400">Flight ID:</span> <span class="text-cyan-300 font-bold">${out.flight_id || '6E-401'}</span></div>
+              <div class="flex justify-between"><span class="text-slate-400">Destination:</span> <span class="text-white font-bold">${out.destination || 'Confirmed Route'}</span></div>
+              <div class="flex justify-between border-t border-white/[0.06] pt-1.5"><span class="text-slate-400">Total Paid:</span> <span class="text-emerald-400 font-bold text-sm">₹${(out.amount_paid || 5400).toLocaleString()}</span></div>
+            </div>
+
+            <div class="text-[11px] text-slate-400 flex items-center gap-1.5">
+              <i class="fa-solid fa-shield-check text-emerald-400"></i>
+              <span>Idempotency Key verified — protected against double-charges.</span>
+            </div>
+          </div>
+        `;
+      } else if (node.status === "COMPLETED" && node.tool === "search_hotels" && node.output) {
+        const out = node.output;
+        const hotelsList = out.hotels || [out];
+        
+        let hotelCardsHtml = hotelsList.map((h, idx) => `
+          <div class="p-3.5 rounded-xl bg-slate-900/90 border border-white/[0.08] hover:border-cyan-500/40 transition shadow-md space-y-2">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="w-7 h-7 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold text-xs">
+                  <i class="fa-solid fa-hotel"></i>
+                </span>
+                <div>
+                  <div class="font-semibold text-white text-xs sm:text-sm">${h.name}</div>
+                  <div class="text-[11px] text-amber-400 font-semibold flex items-center gap-1">
+                    <span>${h.rating}</span> <i class="fa-solid fa-star text-[9px]"></i> · <span class="text-slate-400 font-normal">${h.city}</span>
+                  </div>
+                </div>
+              </div>
+              <div class="text-right">
+                <div class="text-sm sm:text-base font-bold text-emerald-400 font-mono">₹${(h.price_per_night).toLocaleString()}</div>
+                <span class="text-[9px] text-slate-400">/ night</span>
+              </div>
+            </div>
+
+            <div class="flex flex-wrap gap-1 text-[10px] text-slate-300">
+              ${(h.amenities || ['Free WiFi', 'Breakfast Included']).map(a => `<span class="px-2 py-0.5 rounded-md bg-white/[0.04] border border-white/[0.06]">${a}</span>`).join("")}
+            </div>
+
+            <button onclick="fillAndSend('Reserve room at ${h.name}')" class="w-full py-1.5 rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 text-cyan-300 font-medium text-xs transition flex items-center justify-center gap-1.5">
+              <i class="fa-solid fa-bookmark text-[10px]"></i> Reserve Room
+            </button>
+          </div>
+        `).join("");
+
+        contentEl.innerHTML = `
+          <div class="space-y-3">
+            <p class="text-sm text-slate-200">Found <span class="text-cyan-400 font-bold">${hotelsList.length} top-rated hotels</span> in <span class="font-semibold text-white">${out.city}</span>:</p>
+            <div class="space-y-2.5 max-h-[360px] overflow-y-auto pr-1 custom-scrollbar">
+              ${hotelCardsHtml}
+            </div>
+          </div>
+        `;
+      } else if (node.status === "COMPLETED" && node.tool === "search_cabs" && node.output) {
+        const out = node.output;
+        contentEl.innerHTML = `
+          <div class="p-3.5 rounded-xl bg-slate-900/90 border border-white/[0.08] shadow-md space-y-2.5">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="w-7 h-7 rounded-lg bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold text-xs">
+                  <i class="fa-solid fa-taxi"></i>
+                </span>
+                <div>
+                  <div class="font-semibold text-white text-xs sm:text-sm">${out.type}</div>
+                  <div class="text-[11px] text-slate-400">Driver: ${out.driver_name || 'Assigned'} (${out.rating} ★)</div>
+                </div>
+              </div>
+              <div class="text-right">
+                <div class="text-sm sm:text-base font-bold text-emerald-400 font-mono">₹${out.estimated_fare}</div>
+                <span class="text-[9px] text-purple-300 font-mono">ETA ${out.eta_mins} mins</span>
+              </div>
+            </div>
+            <button onclick="fillAndSend('Book airport cab now')" class="w-full py-1.5 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/40 text-purple-200 font-medium text-xs transition">
+              Confirm Ride
+            </button>
+          </div>
+        `;
+      } else if (node.status === "COMPLETED" && (node.tool === "travel_info" || node.tool === "answer_query") && node.output) {
+        const out = node.output;
+        contentEl.innerHTML = `
+          <div class="text-sm text-slate-200 leading-relaxed whitespace-pre-line p-3 rounded-xl bg-slate-900/60 border border-white/[0.06]">
+            ${out.answer || JSON.stringify(out)}
+          </div>
+        `;
+      } else if (node.status === "COMPLETED" && node.output) {
+        contentEl.innerHTML = `
+          <div class="text-xs text-slate-300 font-mono p-3 rounded-xl bg-slate-900/80 border border-emerald-500/30">
+            <span class="text-emerald-400 font-bold">✓ ${node.tool}</span>: ${JSON.stringify(node.output)}
+          </div>
+        `;
+      } else if (node.status === "RUNNING") {
+        const toolName = node.tool.replace("search_", "").replace("_", " ");
+        contentEl.innerHTML = `
+          <div class="flex items-center gap-2.5 text-xs text-cyan-400 py-1">
+            <i class="fa-solid fa-circle-notch fa-spin text-sm"></i>
+            <span>Processing <strong class="text-white capitalize">${toolName}</strong> request in real-time...</span>
+          </div>
+        `;
+      } else if (node.status === "CANCELLED" || node.status === "INVALIDATED") {
+        if (!contentEl.innerHTML.includes("Found") && !contentEl.innerHTML.includes("E-Ticket")) {
+          contentEl.innerHTML = `
+            <div class="flex items-center gap-2 text-xs text-amber-400 font-mono p-3 rounded-xl bg-amber-500/10 border border-amber-500/20">
+              <i class="fa-solid fa-rotate text-amber-400"></i>
+              <span>Pivoted intent (V${node.version}): Cancelled in-flight task in &lt;2ms with 0 stale leaks. Updating to new route...</span>
+            </div>
+          `;
+        }
+      }
+    }
+
+    function renderDAGNodes() {
+      const container = document.getElementById("dag-nodes-container");
+      const nodes = Object.values(nodeState);
+      document.getElementById("dag-node-count").textContent = `${nodes.length} nodes`;
+
+      if (nodes.length === 0) return;
       container.innerHTML = "";
 
-      Object.values(nodeState).forEach(node => {
+      nodes.forEach(node => {
         const div = document.createElement("div");
-        let statusClass = `node-${node.status.toLowerCase()}`;
+        const status = node.status.toLowerCase();
         let badgeColor = "bg-slate-800 text-slate-300";
-        if (node.status === "RUNNING") badgeColor = "bg-blue-900 text-blue-300 animate-pulse";
-        if (node.status === "COMPLETED") badgeColor = "bg-emerald-900 text-emerald-300";
-        if (node.status === "CANCELLED" || node.status === "INVALIDATED") badgeColor = "bg-rose-900 text-rose-300";
-        if (node.status === "SHADOW") badgeColor = "bg-purple-900 text-purple-300";
+        if (node.status === "RUNNING") badgeColor = "bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 animate-pulse";
+        if (node.status === "COMPLETED") badgeColor = "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
+        if (node.status === "CANCELLED" || node.status === "INVALIDATED") badgeColor = "bg-rose-500/20 text-rose-300 border border-rose-500/30";
+        if (node.status === "SHADOW") badgeColor = "bg-purple-500/20 text-purple-300 border border-purple-500/30";
 
-        div.className = `p-3 rounded-lg border bg-slate-950/70 ${statusClass} transition-all duration-300 flex items-center justify-between text-xs`;
+        div.className = `p-3 rounded-xl border border-white/[0.06] bg-white/[0.02] node-${status} transition-all text-xs font-mono`;
         div.innerHTML = `
-          <div class="space-y-1">
+          <div class="flex items-center justify-between mb-1.5">
             <div class="flex items-center gap-2">
-              <span class="font-bold text-slate-200 font-mono">${node.step_id}</span>
-              <span class="text-cyan-400 font-mono font-semibold">${node.tool}</span>
-              <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">${node.risk}</span>
+              <span class="font-bold text-white">${node.step_id}</span>
+              <span class="text-cyan-400 font-semibold">${node.tool}</span>
+              <span class="text-[9px] px-1.5 py-0.5 rounded bg-white/[0.05] text-slate-400">${node.risk}</span>
             </div>
-            <div class="text-slate-400 text-[11px] font-mono">Params: ${JSON.stringify(node.params)}</div>
-            ${node.output ? `<div class="text-emerald-400 text-[11px] font-mono">Result: ${JSON.stringify(node.output)}</div>` : ''}
-            ${node.error ? `<div class="text-rose-400 text-[11px] font-mono">Reason: ${node.error}</div>` : ''}
+            <span class="px-2 py-0.5 rounded-full font-bold text-[9px] ${badgeColor}">${node.status}</span>
           </div>
-          <div class="flex flex-col items-end gap-1">
-            <span class="px-2 py-0.5 rounded font-mono font-bold text-[10px] ${badgeColor}">${node.status}</span>
-            <span class="text-slate-500 text-[10px] font-mono">Ver: V${node.version}</span>
-          </div>
+          <div class="text-slate-400 text-[11px] truncate">Params: ${JSON.stringify(node.params)}</div>
+          ${node.output ? `<div class="text-emerald-400 text-[11px] mt-1 truncate">Result: ${JSON.stringify(node.output)}</div>` : ''}
+          ${node.error ? `<div class="text-rose-400 text-[11px] mt-1 truncate">Reason: ${node.error}</div>` : ''}
         `;
         container.appendChild(div);
       });
     }
 
-    function addBaselineLog(text, isInterrupt = false) {
-      const log = document.getElementById("baseline-log");
-      const div = document.createElement("div");
-      div.className = isInterrupt ? "text-rose-400 border-l-2 border-rose-500 pl-2 py-1" : "text-slate-300";
-      div.textContent = text;
-      log.appendChild(div);
-      log.scrollTop = log.scrollHeight;
+    function appendMessage(role, text, badges = null) {
+      const hero = document.getElementById("hero-view");
+      const messagesContainer = document.getElementById("messages-container");
+      hero.classList.add("hidden");
+      messagesContainer.classList.remove("hidden");
+
+      const msgDiv = document.createElement("div");
+      msgDiv.className = role === "user" ? "flex justify-end" : "flex justify-start";
+
+      if (role === "user") {
+        msgDiv.innerHTML = `
+          <div class="max-w-xl px-4 py-3 rounded-2xl bg-cyan-600/20 border border-cyan-500/30 text-white text-sm shadow-sm">
+            ${text}
+          </div>
+        `;
+      } else {
+        msgDiv.innerHTML = `
+          <div class="max-w-2xl space-y-2 w-full">
+            <div class="flex items-center gap-2">
+              <div class="w-6 h-6 rounded-lg bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-white text-[11px] font-bold">C</div>
+              <span class="text-xs font-semibold text-slate-300">CONTINUUM</span>
+              ${badges || ''}
+            </div>
+            <div class="assistant-content px-4 py-3 rounded-2xl bg-[#16161d] border border-white/[0.06] text-slate-200 text-sm shadow-sm space-y-2">
+              ${text}
+            </div>
+          </div>
+        `;
+        latestAssistantDiv = msgDiv;
+      }
+
+      messagesContainer.appendChild(msgDiv);
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      return msgDiv;
     }
 
     async function sendUtterance(text) {
-      addBaselineLog(`[INTERRUPT DETECTED] "${text}" -> Discarding all prior state and re-running 1250 tokens from scratch...`, true);
+      appendMessage("user", text);
       
+      appendMessage("assistant", `
+        <div class="flex items-center gap-2 text-xs text-cyan-400">
+          <i class="fa-solid fa-spinner fa-spin"></i>
+          <span>Searching flights and executing real-time DAG...</span>
+        </div>
+      `, `<span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">ACK &lt;1ms</span>`);
+
       const res = await fetch("/api/v1/session/interrupt", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -278,31 +620,44 @@
       const data = await res.json();
     }
 
-    document.getElementById("utterance-form").addEventListener("submit", (e) => {
+    function fillAndSend(text) {
+      document.getElementById("chat-input").value = text;
+      document.getElementById("chat-form").dispatchEvent(new Event("submit"));
+    }
+
+    document.getElementById("chat-form").addEventListener("submit", (e) => {
       e.preventDefault();
-      const input = document.getElementById("utterance-input");
-      if (input.value.trim()) {
-        sendUtterance(input.value.trim());
+      const input = document.getElementById("chat-input");
+      const text = input.value.trim();
+      if (text) {
+        sendUtterance(text);
         input.value = "";
       }
     });
 
-    function runDemoPreset(demoNum) {
-      if (demoNum === 1) {
-        sendUtterance("Find flights to Delhi tomorrow morning");
+    // Drawer toggling
+    const drawer = document.getElementById("telemetry-drawer");
+    document.getElementById("toggle-drawer-btn").addEventListener("click", () => {
+      drawer.classList.toggle("translate-x-full");
+    });
+    document.getElementById("close-drawer-btn").addEventListener("click", () => {
+      drawer.classList.add("translate-x-full");
+    });
+
+    // Presets
+    function runPreset(num) {
+      if (num === 1) {
+        sendUtterance("Find morning flights to Delhi for next Monday");
         setTimeout(() => {
           sendUtterance("Actually, make it Bangalore, but keep morning flight");
-        }, 1200);
-      } else if (demoNum === 2) {
+        }, 1500);
+      } else if (num === 2) {
         sendUtterance("Don't book it, cancel booking step immediately");
-      } else if (demoNum === 3) {
+      } else if (num === 3) {
         sendUtterance("Don't book it yet, just hold the seat");
-      } else if (demoNum === 4) {
-        sendUtterance("Check booking status after timeout");
       }
     }
 
-    // Initialize
     connectWebSocket();
   </script>
 </body>

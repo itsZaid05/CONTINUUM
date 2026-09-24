@@ -102,20 +102,59 @@ class IntentArbiter:
             delta_type = "MODIFY"
             ivs_score = max(0.30, base_ivs)
             
-            # Extract destination pivot
-            if "bangalore" in text:
-                affected_fields.append("destination")
-                new_values["destination"] = "Bangalore"
-            elif "delhi" in text:
-                affected_fields.append("destination")
-                new_values["destination"] = "Delhi"
-            elif "mumbai" in text:
-                affected_fields.append("destination")
-                new_values["destination"] = "Mumbai"
+            # Dynamic destination and origin extraction
+            dest_match = re.search(r'\b(?:to|change it to|make it to|make it|switch to)\s+([a-zA-Z\s]+?)(?=\s+(?:for|tomorrow|today|next|morning|evening|afternoon|night|but|\,)|$)', text)
+            from_match = re.search(r'\bfrom\s+([a-zA-Z\s]+?)(?=\s+(?:to|for|tomorrow|today|\,)|$)', text)
+            
+            if dest_match:
+                extracted_dest = dest_match.group(1).strip().title()
+                # Clean up common filler words
+                extracted_dest = re.sub(r'^(?:the|a|an)\s+', '', extracted_dest, flags=re.IGNORECASE)
+                if extracted_dest and len(extracted_dest) > 1:
+                    affected_fields.append("destination")
+                    new_values["destination"] = extracted_dest
+            
+            if from_match:
+                extracted_from = from_match.group(1).strip().title()
+                if extracted_from and len(extracted_from) > 1:
+                    affected_fields.append("origin")
+                    new_values["origin"] = extracted_from
 
-            # Check preserved constraints
+            # Known city dictionary fallback & aliases
+            known_cities = {
+                "amritsar": "Amritsar", "kerala": "Kerala", "new delhi": "New Delhi", "delhi": "Delhi",
+                "bangalore": "Bangalore", "banglore": "Bangalore", "bengaluru": "Bangalore", "blr": "Bangalore",
+                "mumbai": "Mumbai", "bombay": "Mumbai", "bom": "Mumbai",
+                "goa": "Goa", "chennai": "Chennai", "madras": "Chennai", "maa": "Chennai",
+                "kolkata": "Kolkata", "calcutta": "Kolkata", "ccu": "Kolkata",
+                "hyderabad": "Hyderabad", "hyd": "Hyderabad",
+                "pune": "Pune", "jaipur": "Jaipur", "srinagar": "Srinagar", "kochi": "Kochi", "cochin": "Kochi",
+                "ahmedabad": "Ahmedabad", "chandigarh": "Chandigarh", "varanasi": "Varanasi", "lucknow": "Lucknow",
+                "london": "London", "paris": "Paris", "dubai": "Dubai", "singapore": "Singapore", "new york": "New York"
+            }
+            for key, val in known_cities.items():
+                if key in text:
+                    if "from " + key in text or "departing " + key in text:
+                        new_values["origin"] = val
+                        if "origin" not in affected_fields: affected_fields.append("origin")
+                    else:
+                        new_values["destination"] = val
+                        if "destination" not in affected_fields: affected_fields.append("destination")
+                    break
+
+            # Check preserved constraints & time slot
             if "morning" in text:
                 preserved_constraints.append("departure_time: morning")
+                new_values["slot"] = "morning"
+            elif "evening" in text:
+                preserved_constraints.append("departure_time: evening")
+                new_values["slot"] = "evening"
+            
+            if "tomorrow" in text:
+                new_values["date"] = "tomorrow"
+            elif "next monday" in text:
+                new_values["date"] = "next monday"
+
             if "direct" in text:
                 preserved_constraints.append("flight_type: direct")
 
