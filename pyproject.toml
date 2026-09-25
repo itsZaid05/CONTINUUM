@@ -73,6 +73,10 @@ ignore = ["B008"]  # Typer idiom uses function calls in defaults by design
 "src/continuum/ledger.py" = ["E501"]
 "src/continuum/versioned_state.py" = ["E501"]
 "src/continuum/replay.py" = ["E501", "SIM108"]
+"src/continuum/runtime.py" = ["E501"]
+"src/continuum/generic_planner.py" = ["E501"]
+"src/continuum/slots.py" = ["E501"]
+"src/continuum/evaluation/*.py" = ["E501"]
 "tests/test_contract.py" = ["B017", "E501"]
 "tests/*" = ["B017", "E501", "E702", "F841"]
 

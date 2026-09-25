@@ -1,0 +1,68 @@
+[
+  {
+    "name": "lookup_manual",
+    "description": "Look up the manual section for a device model and error code",
+    "domain": "troubleshooting",
+    "keywords": ["manual", "error", "code", "guide", "instructions", "fix", "blinking", "light"],
+    "mutation_class": "READ_ONLY",
+    "delay_s": 0.6,
+    "arguments": {
+      "type": "object",
+      "properties": {
+        "model": {"type": "string", "pattern": "^[A-Z]{1,4}-?\\d{2,5}[A-Z]?$", "description": "device model number"},
+        "error_code": {"type": "string", "pattern": "^[A-Z]\\d{1,3}$", "description": "error code shown on the device"}
+      },
+      "required": ["model"]
+    },
+    "returns": {"properties": {"section": {"type": "string"}, "steps": {"type": "string"}}}
+  },
+  {
+    "name": "run_diagnostic",
+    "description": "Run a remote diagnostic check on a registered device",
+    "domain": "troubleshooting",
+    "keywords": ["diagnostic", "diagnostics", "test", "scan"],
+    "mutation_class": "READ_ONLY",
+    "delay_s": 1.0,
+    "arguments": {
+      "type": "object",
+      "properties": {"model": {"type": "string", "pattern": "^[A-Z]{1,4}-?\\d{2,5}[A-Z]?$"}},
+      "required": ["model"]
+    },
+    "returns": {"properties": {"health": {"type": "string"}, "fault": {"type": "string"}}}
+  },
+  {
+    "name": "schedule_technician",
+    "description": "Book a technician home visit to repair a device",
+    "domain": "troubleshooting",
+    "keywords": ["technician", "visit", "repair", "engineer", "appointment"],
+    "mutation_class": "IRREVERSIBLE",
+    "delay_s": 1.2,
+    "arguments": {
+      "type": "object",
+      "properties": {
+        "model": {"type": "string", "pattern": "^[A-Z]{1,4}-?\\d{2,5}[A-Z]?$"},
+        "date": {"type": "string", "format": "date"},
+        "slot": {"type": "string", "enum": ["morning", "afternoon", "evening"]}
+      },
+      "required": ["model", "date"]
+    },
+    "returns": {"properties": {"visit_id": {"type": "string"}, "status": {"type": "string"}}}
+  },
+  {
+    "name": "order_part",
+    "description": "Order a replacement spare part",
+    "domain": "troubleshooting",
+    "keywords": ["part", "replacement", "spare"],
+    "mutation_class": "IRREVERSIBLE",
+    "delay_s": 1.0,
+    "arguments": {
+      "type": "object",
+      "properties": {
+        "part_number": {"type": "string", "pattern": "^P-\\d{3,6}$"},
+        "quantity": {"type": "integer", "x-units": ["unit", "units", "piece", "pieces"]}
+      },
+      "required": ["part_number"]
+    },
+    "returns": {"properties": {"order_id": {"type": "string"}, "status": {"type": "string"}}}
+  }
+]

@@ -1,0 +1,5026 @@
+{
+  "planner": {
+    "system": "planner",
+    "gold": "data/gold/planner_gold.jsonl",
+    "gold_hash": "e92fa9a38623",
+    "reference_date": "2026-09-25",
+    "overall": {
+      "cases": 65,
+      "fully_correct": 0.9846,
+      "action_accuracy": 1.0,
+      "goal_accuracy": 0.9841,
+      "plan_exact_match": 0.9825,
+      "arg_precision": 1.0,
+      "arg_recall": 0.981,
+      "arg_f1": 0.9904,
+      "clarify_precision": 1.0,
+      "clarify_recall": 1.0,
+      "unnecessary_clarification_rate": 0.0,
+      "confirmation_accuracy": 1.0,
+      "unsafe_write_plans": 0,
+      "crashes": 0,
+      "latency_p50_ms": 0.355,
+      "latency_p95_ms": 1.115,
+      "latency_mean_ms": 0.444
+    },
+    "by_split": {
+      "dev": {
+        "cases": 37,
+        "fully_correct": 1.0,
+        "action_accuracy": 1.0,
+        "goal_accuracy": 1.0,
+        "plan_exact_match": 1.0,
+        "arg_precision": 1.0,
+        "arg_recall": 1.0,
+        "arg_f1": 1.0,
+        "clarify_precision": 1.0,
+        "clarify_recall": 1.0,
+        "unnecessary_clarification_rate": 0.0,
+        "confirmation_accuracy": 1.0,
+        "unsafe_write_plans": 0,
+        "crashes": 0,
+        "latency_p50_ms": 0.362,
+        "latency_p95_ms": 1.282,
+        "latency_mean_ms": 0.515
+      },
+      "heldout": {
+        "cases": 28,
+        "fully_correct": 0.9643,
+        "action_accuracy": 1.0,
+        "goal_accuracy": 0.963,
+        "plan_exact_match": 0.9583,
+        "arg_precision": 1.0,
+        "arg_recall": 0.9592,
+        "arg_f1": 0.9792,
+        "clarify_precision": 1.0,
+        "clarify_recall": 1.0,
+        "unnecessary_clarification_rate": 0.0,
+        "confirmation_accuracy": 1.0,
+        "unsafe_write_plans": 0,
+        "crashes": 0,
+        "latency_p50_ms": 0.347,
+        "latency_p95_ms": 0.538,
+        "latency_mean_ms": 0.349
+      }
+    },
+    "by_domain": {
+      "builtin": {
+        "cases": 15,
+        "fully_correct": 1.0,
+        "action_accuracy": 1.0,
+        "goal_accuracy": 1.0,
+        "plan_exact_match": 1.0,
+        "arg_precision": 1.0,
+        "arg_recall": 1.0,
+        "arg_f1": 1.0,
+        "clarify_precision": 0.0,
+        "clarify_recall": 0.0,
+        "unnecessary_clarification_rate": 0.0,
+        "confirmation_accuracy": 1.0,
+        "unsafe_write_plans": 0,
+        "crashes": 0,
+        "latency_p50_ms": 0.458,
+        "latency_p95_ms": 1.282,
+        "latency_mean_ms": 0.62
+      },
+      "dining": {
+        "cases": 5,
+        "fully_correct": 1.0,
+        "action_accuracy": 1.0,
+        "goal_accuracy": 1.0,
+        "plan_exact_match": 1.0,
+        "arg_precision": 1.0,
+        "arg_recall": 1.0,
+        "arg_f1": 1.0,
+        "clarify_precision": 1.0,
+        "clarify_recall": 1.0,
+        "unnecessary_clarification_rate": 0.0,
+        "confirmation_accuracy": 1.0,
+        "unsafe_write_plans": 0,
+        "crashes": 0,
+        "latency_p50_ms": 0.295,
+        "latency_p95_ms": 0.426,
+        "latency_mean_ms": 0.306
+      },
+      "home": {
+        "cases": 11,
+        "fully_correct": 1.0,
+        "action_accuracy": 1.0,
+        "goal_accuracy": 1.0,
+        "plan_exact_match": 1.0,
+        "arg_precision": 1.0,
+        "arg_recall": 1.0,
+        "arg_f1": 1.0,
+        "clarify_precision": 1.0,
+        "clarify_recall": 1.0,
+        "unnecessary_clarification_rate": 0.0,
+        "confirmation_accuracy": 1.0,
+        "unsafe_write_plans": 0,
+        "crashes": 0,
+        "latency_p50_ms": 0.332,
+        "latency_p95_ms": 0.651,
+        "latency_mean_ms": 0.344
+      },
+      "incar": {
+        "cases": 12,
+        "fully_correct": 1.0,
+        "action_accuracy": 1.0,
+        "goal_accuracy": 1.0,
+        "plan_exact_match": 1.0,
+        "arg_precision": 1.0,
+        "arg_recall": 1.0,
+        "arg_f1": 1.0,
+        "clarify_precision": 1.0,
+        "clarify_recall": 1.0,
+        "unnecessary_clarification_rate": 0.0,
+        "confirmation_accuracy": 1.0,
+        "unsafe_write_plans": 0,
+        "crashes": 0,
+        "latency_p50_ms": 0.416,
+        "latency_p95_ms": 0.56,
+        "latency_mean_ms": 0.412
+      },
+      "support": {
+        "cases": 13,
+        "fully_correct": 0.9231,
+        "action_accuracy": 1.0,
+        "goal_accuracy": 0.9231,
+        "plan_exact_match": 0.9167,
+        "arg_precision": 1.0,
+        "arg_recall": 0.8824,
+        "arg_f1": 0.9375,
+        "clarify_precision": 1.0,
+        "clarify_recall": 1.0,
+        "unnecessary_clarification_rate": 0.0,
+        "confirmation_accuracy": 1.0,
+        "unsafe_write_plans": 0,
+        "crashes": 0,
+        "latency_p50_ms": 0.361,
+        "latency_p95_ms": 0.538,
+        "latency_mean_ms": 0.423
+      },
+      "troubleshooting": {
+        "cases": 9,
+        "fully_correct": 1.0,
+        "action_accuracy": 1.0,
+        "goal_accuracy": 1.0,
+        "plan_exact_match": 1.0,
+        "arg_precision": 1.0,
+        "arg_recall": 1.0,
+        "arg_f1": 1.0,
+        "clarify_precision": 1.0,
+        "clarify_recall": 1.0,
+        "unnecessary_clarification_rate": 0.0,
+        "confirmation_accuracy": 1.0,
+        "unsafe_write_plans": 0,
+        "crashes": 0,
+        "latency_p50_ms": 0.299,
+        "latency_p95_ms": 1.437,
+        "latency_mean_ms": 0.419
+      }
+    },
+    "cases": [
+      {
+        "id": "t01",
+        "split": "dev",
+        "domain": "builtin",
+        "utterance": "Find flights to Delhi tomorrow morning",
+        "expected_action": "plan",
+        "predicted_action": "plan",
+        "action_ok": true,
+        "tp": 3,
+        "fp": 0,
+        "fn": 0,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 1.652799999646959,
+        "errors": [],
+        "goal_ok": true,
+        "tools_ok": true,
+        "correct": true,
+        "prediction": {
+          "action": "plan",
+          "goal": "search_flights",
+          "tools": [
+            "search_flights"
+          ],
+          "args": {
+            "search_flights": {
+              "to": "Delhi",
+              "date": "2026-09-26",
+              "slot": "morning"
+            }
+          },
+          "missing": [],
+          "needs_confirmation": false,
+          "arbiter": "NOISE",
+          "mode": "new"
+        }
+      },
+      {
+        "id": "t02",
+        "split": "dev",
+        "domain": "builtin",
+        "utterance": "Book Delhi flights for next Monday morning",
+        "expected_action": "plan",
+        "predicted_action": "plan",
+        "action_ok": true,
+        "tp": 3,
+        "fp": 0,
+        "fn": 0,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 1.2822999997297302,
+        "errors": [],
+        "goal_ok": true,
+        "tools_ok": true,
+        "correct": true,
+        "prediction": {
+          "action": "plan",
+          "goal": "confirm_booking",
+          "tools": [
+            "search_flights",
+            "hold_seat",
+            "confirm_booking"
+          ],
+          "args": {
+            "search_flights": {
+              "to": "Delhi",
+              "date": "2026-09-28",
+              "slot": "morning"
+            },
+            "hold_seat": {
+              "flight_id": "ref(search_flights.flight_id)"
+            },
+            "confirm_booking": {
+              "hold_id": "ref(hold_seat.hold_id)"
+            }
+          },
+          "missing": [],
+          "needs_confirmation": false,
+          "arbiter": "MODIFY",
+          "mode": "new"
+        }
+      },
+      {
+        "id": "t03",
+        "split": "dev",
+        "domain": "builtin",
+        "utterance": "Actually, Bangalore",
+        "expected_action": "plan",
+        "predicted_action": "plan",
+        "action_ok": true,
+        "tp": 3,
+        "fp": 0,
+        "fn": 0,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.7607999996253056,
+        "errors": [],
+        "goal_ok": true,
+        "tools_ok": true,
+        "correct": true,
+        "prediction": {
+          "action": "plan",
+          "goal": "search_flights",
+          "tools": [
+            "search_flights"
+          ],
+          "args": {
+            "search_flights": {
+              "to": "Bangalore",
+              "date": "2026-09-26",
+              "slot": "morning"
+            }
+          },
+          "missing": [],
+          "needs_confirmation": false,
+          "arbiter": "MODIFY",
+          "mode": "modify"
+        }
+      },
+      {
+        "id": "t04",
+        "split": "dev",
+        "domain": "builtin",
+        "utterance": "make it evening instead",
+        "expected_action": "plan",
+        "predicted_action": "plan",
+        "action_ok": true,
+        "tp": 2,
+        "fp": 0,
+        "fn": 0,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.6425999999919441,
+        "errors": [],
+        "goal_ok": true,
+        "tools_ok": true,
+        "correct": true,
+        "prediction": {
+          "action": "plan",
+          "goal": "search_flights",
+          "tools": [
+            "search_flights"
+          ],
+          "args": {
+            "search_flights": {
+              "to": "Goa",
+              "slot": "evening"
+            }
+          },
+          "missing": [],
+          "needs_confirmation": false,
+          "arbiter": "MODIFY",
+          "mode": "modify"
+        }
+      },
+      {
+        "id": "t05",
+        "split": "dev",
+        "domain": "builtin",
+        "utterance": "Is there a hotel in Pune for Saturday?",
+        "expected_action": "plan",
+        "predicted_action": "plan",
+        "action_ok": true,
+        "tp": 2,
+        "fp": 0,
+        "fn": 0,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.33939999957510736,
+        "errors": [],
+        "goal_ok": true,
+        "tools_ok": true,
+        "correct": true,
+        "prediction": {
+          "action": "plan",
+          "goal": "search_hotels",
+          "tools": [
+            "search_hotels"
+          ],
+          "args": {
+            "search_hotels": {
+              "city": "Pune",
+              "checkin": "2026-09-26"
+            }
+          },
+          "missing": [],
+          "needs_confirmation": false,
+          "arbiter": "MODIFY",
+          "mode": "new"
+        }
+      },
+      {
+        "id": "t06",
+        "split": "dev",
+        "domain": "builtin",
+        "utterance": "I need a cab to the airport",
+        "expected_action": "plan",
+        "predicted_action": "plan",
+        "action_ok": true,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.3644999997050036,
+        "errors": [],
+        "goal_ok": true,
+        "tools_ok": true,
+        "correct": true,
+        "prediction": {
+          "action": "plan",
+          "goal": "search_cabs",
+          "tools": [
+            "search_cabs"
+          ],
+          "args": {
+            "search_cabs": {
+              "to": "airport"
+            }
+          },
+          "missing": [],
+          "needs_confirmation": false,
+          "arbiter": "MODIFY",
+          "mode": "new"
+        }
+      },
+      {
+        "id": "t07",
+        "split": "dev",
+        "domain": "builtin",
+        "utterance": "Am I free on Monday?",
+        "expected_action": "plan",
+        "predicted_action": "plan",
+        "action_ok": true,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.45820000013918616,
+        "errors": [],
+        "goal_ok": true,
+        "tools_ok": true,
+        "correct": true,
+        "prediction": {
+          "action": "plan",
+          "goal": "check_calendar",
+          "tools": [
+            "check_calendar"
+          ],
+          "args": {
+            "check_calendar": {
+              "date": "2026-09-28"
+            }
+          },
+          "missing": [],
+          "needs_confirmation": false,
+          "arbiter": "MODIFY",
+          "mode": "new"
+        }
+      },
+      {
+        "id": "t08",
+        "split": "dev",
+        "domain": "builtin",
+        "utterance": "Don't book it, just show me the options",
+        "expected_action": "plan",
+        "predicted_action": "plan",
+        "action_ok": true,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.5784999993920792,
+        "errors": [],
+        "goal_ok": true,
+        "tools_ok": true,
+        "correct": true,
+        "prediction": {
+          "action": "plan",
+          "goal": "search_flights",
+          "tools": [
+            "search_flights"
+          ],
+          "args": {
+            "search_flights": {
+              "to": "Delhi"
+            }
+          },
+          "missing": [],
+          "needs_confirmation": false,
+          "arbiter": "RETRACT",
+          "mode": "retract"
+        }
+      },
+      {
+        "id": "t09",
+        "split": "dev",
+        "domain": "builtin",
+        "utterance": "hmm okay",
+        "expected_action": "noop",
+        "predicted_action": "noop",
+        "action_ok": true,
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "unsafe_write": false,
+        "confirm_ok": null,
+        "latency_ms": 0.004499999704421498,
+        "errors": [],
+        "correct": true,
+        "prediction": {
+          "action": "noop",
+          "goal": "search_flights",
+          "tools": [],
+          "args": {},
+          "missing": [],
+          "needs_confirmation": false,
+          "arbiter": "NOISE",
+          "mode": "noop"
+        }
+      },
+      {
+        "id": "t10",
+        "split": "dev",
+        "domain": "builtin",
+        "utterance": "Find flights from Mumbai to Chennai on Wednesday",
+        "expected_action": "plan",
+        "predicted_action": "plan",
+        "action_ok": true,
+        "tp": 3,
+        "fp": 0,
+        "fn": 0,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.3620999996201135,
+        "errors": [],
+        "goal_ok": true,
+        "tools_ok": true,
+        "correct": true,
+        "prediction": {
+          "action": "plan",
+          "goal": "search_flights",
+          "tools": [
+            "search_flights"
+          ],
+          "args": {
+            "search_flights": {
+              "to": "Chennai",
+              "from": "Mumbai",
+              "date": "2026-09-30"
+            }
+          },
+          "missing": [],
+          "needs_confirmation": false,
+          "arbiter": "NOISE",
+          "mode": "new"
+        }
+      },
+      {
+        "id": "t11",
+        "split": "dev",
+        "domain": "builtin",
+        "utterance": "Forget flights, find me a hotel in Jaipur instead",
+        "expected_action": "plan",
+        "predicted_action": "plan",
+        "action_ok": true,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.8701999995537335,
+        "errors": [],
+        "goal_ok": true,
+        "tools_ok": true,
+        "correct": true,
+        "prediction": {
+          "action": "plan",
+          "goal": "search_hotels",
+          "tools": [
+            "search_hotels"
+          ],
+          "args": {
+            "search_hotels": {
+              "city": "Jaipur"
+            }
+          },
+          "missing": [],
+          "needs_confirmation": false,
+          "arbiter": "NEW_GOAL",
+          "mode": "new"
+        }
+      },
+      {
+        "id": "t12",
+        "split": "dev",
+        "domain": "builtin",
+        "utterance": "also find a hotel there",
+        "expected_action": "plan",
+        "predicted_action": "plan",
+        "action_ok": true,
+        "tp": 2,
+        "fp": 0,
+        "fn": 0,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.7835000014893012,
+        "errors": [],
+        "goal_ok": true,
+        "tools_ok": true,
+        "correct": true,
+        "prediction": {
+          "action": "plan",
+          "goal": "search_hotels",
+          "tools": [
+            "search_flights",
+            "search_hotels"
+          ],
+          "args": {
+            "search_flights": {
+              "to": "Goa"
+            },
+            "search_hotels": {
+              "city": "Goa"
+            }
+          },
+          "missing": [],
+          "needs_confirmation": false,
+          "arbiter": "MODIFY",
+          "mode": "additive"
+        }
+      },
+      {
+        "id": "s01",
+        "split": "dev",
+        "domain": "support",
+        "utterance": "My router keeps dropping wifi, please open a ticket with high priority",
+        "expected_action": "plan",
+        "predicted_action": "plan",
+        "action_ok": true,
+        "tp": 2,
+        "fp": 0,
+        "fn": 0,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 1.1147000004712027,
+        "errors": [],
+        "goal_ok": true,
+        "tools_ok": true,
+        "correct": true,
+        "prediction": {
+          "action": "plan",
+          "goal": "create_ticket",
+          "tools": [
+            "create_ticket"
+          ],
+          "args": {
+            "create_ticket": {
+              "issue": "My router keeps dropping wifi",
+              "priority": "high"
+            }
+          },
+          "missing": [],
+          "needs_confirmation": false,
+          "arbiter": "MODIFY",
+          "mode": "new"
+        }
+      },
+      {
+        "id": "s02",
+        "split": "dev",
+        "domain": "support",
+        "utterance": "Open a ticket",
+        "expected_action": "clarify",
+        "predicted_action": "clarify",
+        "action_ok": true,
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "unsafe_write": false,
+        "confirm_ok": null,
+        "latency_ms": 0.36999999974796083,
+        "errors": [],
+        "goal_ok": true,
+        "missing_ok": true,
+        "correct": true,
+        "prediction": {
+          "action": "clarify",
+          "goal": "create_ticket",
+          "tools": [
+            "create_ticket"
+          ],
+          "args": {
+            "create_ticket": {}
+          },
+          "missing": [
+            "issue"
+          ],
+          "needs_confirmation": false,
+          "arbiter": "MODIFY",
+          "mode": "new"
+        }
+      },
+      {
+        "id": "s03",
+        "split": "dev",
+        "domain": "support",
+        "utterance": "what's the status of my ticket?",
+        "expected_action": "plan",
+        "predicted_action": "plan",
+        "action_ok": true,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.3544999999576248,
+        "errors": [],
+        "goal_ok": true,
+        "tools_ok": true,
+        "correct": true,
+        "prediction": {
+          "action": "plan",
+          "goal": "get_ticket_status",
+          "tools": [
+            "get_ticket_status"
+          ],
+          "args": {
+            "get_ticket_status": {
+              "ticket_id": "TCK-1042"
+            }
+          },
+          "missing": [],
+          "needs_confirmation": false,
+          "arbiter": "MODIFY",
+          "mode": "new"
+        }
+      },
+      {
+        "id": "s04",
+        "split": "dev",
+        "domain": "support",
+        "utterance": "Check ticket TCK-2231",
+        "expected_action": "plan",
+        "predicted_action": "plan",
+        "action_ok": true,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.3347999991092365,
+        "errors": [],
+        "goal_ok": true,
+        "tools_ok": true,
+        "correct": true,
+        "prediction": {
+          "action": "plan",
+          "goal": "get_ticket_status",
+          "tools": [
+            "get_ticket_status"
+          ],
+          "args": {
+            "get_ticket_status": {
+              "ticket_id": "TCK-2231"
+            }
+          },
+          "missing": [],
+          "needs_confirmation": false,
+          "arbiter": "MODIFY",
+          "mode": "new"
+        }
+      },
+      {
+        "id": "s05a",
+        "split": "dev",
+        "domain": "support",
+        "utterance": "make it high priority",
+        "expected_action": "plan",
+        "predicted_action": "plan",
+        "action_ok": true,
+        "tp": 2,
+        "fp": 0,
+        "fn": 0,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.36539999928209,
+        "errors": [],
+        "goal_ok": true,
+        "tools_ok": true,
+        "correct": true,
+        "prediction": {
+          "action": "plan",
+          "goal": "update_ticket",
+          "tools": [
+            "update_ticket"
+          ],
+          "args": {
+            "update_ticket": {
+              "ticket_id": "TCK-1042",
+              "priority": "high"
+            }
+          },
+          "missing": [],
+          "needs_confirmation": false,
+          "arbiter": "MODIFY",
+          "mode": "new"
+        }
+      },
+      {
+        "id": "s05b",
+        "split": "dev",
+        "domain": "support",
+        "utterance": "actually make it high priority",
+        "expected_action": "plan",
+        "predicted_action": "plan",
+        "action_ok": true,
+        "tp": 2,
+        "fp": 0,
+        "fn": 0,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.35509999906935263,
+        "errors": [],
+        "goal_ok": true,
+        "tools_ok": true,
+        "correct": true,
+        "prediction": {
+          "action": "plan",
+          "goal": "create_ticket",
+          "tools": [
+            "create_ticket"
+          ],
+          "args": {
+            "create_ticket": {
+              "issue": "printer is jammed",
+              "priority": "high"
+            }
+          },
+          "missing": [],
+          "needs_confirmation": false,
+          "arbiter": "MODIFY",
+          "mode": "modify"
+        }
+      },
+      {
+        "id": "s06",
+        "split": "dev",
+        "domain": "support",
+        "utterance": "How do I reset my password?",
+        "expected_action": "plan",
+        "predicted_action": "plan",
+        "action_ok": true,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.36110000110056717,
+        "errors": [],
+        "goal_ok": true,
+        "tools_ok": true,
+        "correct": true,
+        "prediction": {
+          "action": "plan",
+          "goal": "search_kb",
+          "tools": [
+            "search_kb"
+          ],
+          "args": {
+            "search_kb": {
+              "query": "How do I reset my password"
+            }
+          },
+          "missing": [],
+          "needs_confirmation": false,
+          "arbiter": "MODIFY",
+          "mode": "new"
+        }
+      },
+      {
+        "id": "s07",
+        "split": "dev",
+        "domain": "support",
+        "utterance": "close my ticket, it's resolved",
+        "expected_action": "plan",
+        "predicted_action": "plan",
+        "action_ok": true,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.330299999404815,
+        "errors": [],
+        "goal_ok": true,
+        "tools_ok": true,
+        "correct": true,
+        "prediction": {
+          "action": "plan",
+          "goal": "close_ticket",
+          "tools": [
+            "close_ticket"
+          ],
+          "args": {
+            "close_ticket": {
+              "ticket_id": "TCK-1042"
+            }
+          },
+          "missing": [],
+          "needs_confirmation": false,
+          "arbiter": "MODIFY",
+          "mode": "new"
+        }
+      },
+      {
+        "id": "s08",
+        "split": "dev",
+        "domain": "support",
+        "utterance": "please cancel that ticket",
+        "expected_action": "plan",
+        "predicted_action": "plan",
+        "action_ok": true,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.3173000004608184,
+        "errors": [],
+        "goal_ok": true,
+        "tools_ok": true,
+        "correct": true,
+        "prediction": {
+          "action": "plan",
+          "goal": "close_ticket",
+          "tools": [
+            "close_ticket"
+          ],
+          "args": {
+            "close_ticket": {
+              "ticket_id": "TCK-1042"
+            }
+          },
+          "missing": [],
+          "needs_confirmation": false,
+          "arbiter": "RETRACT",
+          "mode": "new"
+        }
+      },
+      {
+        "id": "s09",
+        "split": "dev",
+        "domain": "support",
+        "utterance": "Report a billing problem: I was charged twice",
+        "expected_action": "plan",
+        "predicted_action": "plan",
+        "action_ok": true,
+        "tp": 2,
+        "fp": 0,
+        "fn": 0,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.3853999987768475,
+        "errors": [],
+        "goal_ok": true,
+        "tools_ok": true,
+        "correct": true,
+        "prediction": {
+          "action": "plan",
+          "goal": "create_ticket",
+          "tools": [
+            "create_ticket"
+          ],
+          "args": {
+            "create_ticket": {
+              "issue": "I was charged twice",
+              "category": "billing"
+            }
+          },
+          "missing": [],
+          "needs_confirmation": false,
+          "arbiter": "MODIFY",
+          "mode": "new"
+        }
+      },
+      {
+        "id": "r01",
+        "split": "dev",
+        "domain": "troubleshooting",
+        "utterance": "my washer WM-4500 shows error E4",
+        "expected_action": "plan",
+        "predicted_action": "plan",
+        "action_ok": true,
+        "tp": 2,
+        "fp": 0,
+        "fn": 0,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 1.4370000008057104,
+        "errors": [],
+        "goal_ok": true,
+        "tools_ok": true,
+        "correct": true,
+        "prediction": {
+          "action": "plan",
+          "goal": "lookup_manual",
+          "tools": [
+            "lookup_manual"
+          ],
+          "args": {
+            "lookup_manual": {
+              "model": "WM-4500",
+              "error_code": "E4"
+            }
+          },
+          "missing": [],
+          "needs_confirmation": false,
+          "arbiter": "MODIFY",
+          "mode": "new"
+        }
+      },
+      {
+        "id": "r02",
+        "split": "dev",
+        "domain": "troubleshooting",
+        "utterance": "What does error E12 mean on the DW-220?",
+        "expected_action": "plan",
+        "predicted_action": "plan",
+        "action_ok": true,
+        "tp": 2,
+        "fp": 0,
+        "fn": 0,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.32780000037746504,
+        "errors": [],
+        "goal_ok": true,
+        "tools_ok": true,
+        "correct": true,
+        "prediction": {
+          "action": "plan",
+          "goal": "lookup_manual",
+          "tools": [
+            "lookup_manual"
+          ],
+          "args": {
+            "lookup_manual": {
+              "model": "DW-220",
+              "error_code": "E12"
+            }
+          },
+          "missing": [],
+          "needs_confirmation": false,
+          "arbiter": "MODIFY",
+          "mode": "new"
+        }
+      },
+      {
+        "id": "r03",
+        "split": "dev",
+        "domain": "troubleshooting",
+        "utterance": "Run a diagnostic on my AC-900",
+        "expected_action": "plan",
+        "predicted_action": "plan",
+        "action_ok": true,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.27630000113276765,
+        "errors": [],
+        "goal_ok": true,
+        "tools_ok": true,
+        "correct": true,
+        "prediction": {
+          "action": "plan",
+          "goal": "run_diagnostic",
+          "tools": [
+            "run_diagnostic"
+          ],
+          "args": {
+            "run_diagnostic": {
+              "model": "AC-900"
+            }
+          },
+          "missing": [],
+          "needs_confirmation": false,
+          "arbiter": "MODIFY",
+          "mode": "new"
+        }
+      },
+      {
+        "id": "r04",
+        "split": "dev",
+        "domain": "troubleshooting",
+        "utterance": "Book a technician for my WM-4500 tomorrow morning",
+        "expected_action": "plan",
+        "predicted_action": "plan",
+        "action_ok": true,
+        "tp": 3,
+        "fp": 0,
+        "fn": 0,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.29879999965487514,
+        "errors": [],
+        "goal_ok": true,
+        "tools_ok": true,
+        "correct": true,
+        "prediction": {
+          "action": "plan",
+          "goal": "schedule_technician",
+          "tools": [
+            "schedule_technician"
+          ],
+          "args": {
+            "schedule_technician": {
+              "model": "WM-4500",
+              "date": "2026-09-26",
+              "slot": "morning"
+            }
+          },
+          "missing": [],
+          "needs_confirmation": false,
+          "arbiter": "NOISE",
+          "mode": "new"
+        }
+      },
+      {
+        "id": "r05",
+        "split": "dev",
+        "domain": "troubleshooting",
+        "utterance": "can someone come and repair it on Monday?",
+        "expected_action": "plan",
+        "predicted_action": "plan",
+        "action_ok": true,
+        "tp": 2,
+        "fp": 0,
+        "fn": 0,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.265499998931773,
+        "errors": [],
+        "goal_ok": true,
+        "tools_ok": true,
+        "correct": true,
+        "prediction": {
+          "action": "plan",
+          "goal": "schedule_technician",
+          "tools": [
+            "schedule_technician"
+          ],
+          "args": {
+            "schedule_technician": {
+              "model": "WM-4500",
+              "date": "2026-09-28"
+            }
+          },
+          "missing": [],
+          "needs_confirmation": true,
+          "arbiter": "MODIFY",
+          "mode": "new"
+        }
+      },
+      {
+        "id": "r06",
+        "split": "dev",
+        "domain": "troubleshooting",
+        "utterance": "The light is blinking red on my router, what does the manual say?",
+        "expected_action": "clarify",
+        "predicted_action": "clarify",
+        "action_ok": true,
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "unsafe_write": false,
+        "confirm_ok": null,
+        "latency_ms": 0.3085999996983446,
+        "errors": [],
+        "goal_ok": true,
+        "missing_ok": true,
+        "correct": true,
+        "prediction": {
+          "action": "clarify",
+          "goal": "lookup_manual",
+          "tools": [
+            "lookup_manual"
+          ],
+          "args": {
+            "lookup_manual": {}
+          },
+          "missing": [
+            "model"
+          ],
+          "needs_confirmation": false,
+          "arbiter": "MODIFY",
+          "mode": "new"
+        }
+      },
+      {
+        "id": "r07",
+        "split": "dev",
+        "domain": "troubleshooting",
+        "utterance": "Order two P-3321 parts",
+        "expected_action": "plan",
+        "predicted_action": "plan",
+        "action_ok": true,
+        "tp": 2,
+        "fp": 0,
+        "fn": 0,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.27860000045620836,
+        "errors": [],
+        "goal_ok": true,
+        "tools_ok": true,
+        "correct": true,
+        "prediction": {
+          "action": "plan",
+          "goal": "order_part",
+          "tools": [
+            "order_part"
+          ],
+          "args": {
+            "order_part": {
+              "part_number": "P-3321",
+              "quantity": 2
+            }
+          },
+          "missing": [],
+          "needs_confirmation": false,
+          "arbiter": "MODIFY",
+          "mode": "new"
+        }
+      },
+      {
+        "id": "c01",
+        "split": "dev",
+        "domain": "incar",
+        "utterance": "Navigate to MG Road",
+        "expected_action": "plan",
+        "predicted_action": "plan",
+        "action_ok": true,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.5989999990561046,
+        "errors": [],
+        "goal_ok": true,
+        "tools_ok": true,
+        "correct": true,
+        "prediction": {
+          "action": "plan",
+          "goal": "start_navigation",
+          "tools": [
+            "compute_route",
+            "start_navigation"
+          ],
+          "args": {
+            "compute_route": {
+              "destination": "MG Road"
+            },
+            "start_navigation": {
+              "route_id": "ref(compute_route.route_id)"
+            }
+          },
+          "missing": [],
+          "needs_confirmation": false,
+          "arbiter": "MODIFY",
+          "mode": "new"
+        }
+      },
+      {
+        "id": "c02",
+        "split": "dev",
+        "domain": "incar",
+        "utterance": "no, take me to Indiranagar",
+        "expected_action": "plan",
+        "predicted_action": "plan",
+        "action_ok": true,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.2975999996124301,
+        "errors": [],
+        "goal_ok": true,
+        "tools_ok": true,
+        "correct": true,
+        "prediction": {
+          "action": "plan",
+          "goal": "start_navigation",
+          "tools": [
+            "compute_route",
+            "start_navigation"
+          ],
+          "args": {
+            "compute_route": {
+              "destination": "Indiranagar"
+            },
+            "start_navigation": {
+              "route_id": "ref(compute_route.route_id)"
+            }
+          },
+          "missing": [],
+          "needs_confirmation": false,
+          "arbiter": "MODIFY",
+          "mode": "modify"
+        }
+      },
+      {
+        "id": "c03",
+        "split": "dev",
+        "domain": "incar",
+        "utterance": "How long is the drive to Whitefield avoiding tolls?",
+        "expected_action": "plan",
+        "predicted_action": "plan",
+        "action_ok": true,
+        "tp": 2,
+        "fp": 0,
+        "fn": 0,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.34330000016780104,
+        "errors": [],
+        "goal_ok": true,
+        "tools_ok": true,
+        "correct": true,
+        "prediction": {
+          "action": "plan",
+          "goal": "compute_route",
+          "tools": [
+            "compute_route"
+          ],
+          "args": {
+            "compute_route": {
+              "destination": "Whitefield",
+              "avoid": "tolls"
+            }
+          },
+          "missing": [],
+          "needs_confirmation": false,
+          "arbiter": "MODIFY",
+          "mode": "new"
+        }
+      },
+      {
+        "id": "c04",
+        "split": "dev",
+        "domain": "incar",
+        "utterance": "Find parking near Brigade Road",
+        "expected_action": "plan",
+        "predicted_action": "plan",
+        "action_ok": true,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.28390000079525635,
+        "errors": [],
+        "goal_ok": true,
+        "tools_ok": true,
+        "correct": true,
+        "prediction": {
+          "action": "plan",
+          "goal": "find_parking",
+          "tools": [
+            "find_parking"
+          ],
+          "args": {
+            "find_parking": {
+              "near": "Brigade Road"
+            }
+          },
+          "missing": [],
+          "needs_confirmation": false,
+          "arbiter": "NOISE",
+          "mode": "new"
+        }
+      },
+      {
+        "id": "c05",
+        "split": "dev",
+        "domain": "incar",
+        "utterance": "I need to charge, find a CCS2 charger near Koramangala",
+        "expected_action": "plan",
+        "predicted_action": "plan",
+        "action_ok": true,
+        "tp": 2,
+        "fp": 0,
+        "fn": 0,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.340900000082911,
+        "errors": [],
+        "goal_ok": true,
+        "tools_ok": true,
+        "correct": true,
+        "prediction": {
+          "action": "plan",
+          "goal": "find_charging_station",
+          "tools": [
+            "find_charging_station"
+          ],
+          "args": {
+            "find_charging_station": {
+              "near": "Koramangala",
+              "connector": "ccs2"
+            }
+          },
+          "missing": [],
+          "needs_confirmation": false,
+          "arbiter": "MODIFY",
+          "mode": "new"
+        }
+      },
+      {
+        "id": "c06",
+        "split": "dev",
+        "domain": "incar",
+        "utterance": "Set the AC to 22 degrees",
+        "expected_action": "plan",
+        "predicted_action": "plan",
+        "action_ok": true,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.5461000000650529,
+        "errors": [],
+        "goal_ok": true,
+        "tools_ok": true,
+        "correct": true,
+        "prediction": {
+          "action": "plan",
+          "goal": "set_climate",
+          "tools": [
+            "set_climate"
+          ],
+          "args": {
+            "set_climate": {
+              "temperature": 22
+            }
+          },
+          "missing": [],
+          "needs_confirmation": false,
+          "arbiter": "MODIFY",
+          "mode": "new"
+        }
+      },
+      {
+        "id": "c07",
+        "split": "dev",
+        "domain": "incar",
+        "utterance": "make it 20",
+        "expected_action": "plan",
+        "predicted_action": "plan",
+        "action_ok": true,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.5596000009973068,
+        "errors": [],
+        "goal_ok": true,
+        "tools_ok": true,
+        "correct": true,
+        "prediction": {
+          "action": "plan",
+          "goal": "set_climate",
+          "tools": [
+            "set_climate"
+          ],
+          "args": {
+            "set_climate": {
+              "temperature": 20
+            }
+          },
+          "missing": [],
+          "needs_confirmation": false,
+          "arbiter": "MODIFY",
+          "mode": "modify"
+        }
+      },
+      {
+        "id": "c08",
+        "split": "dev",
+        "domain": "incar",
+        "utterance": "It's too cold, change the cabin temperature",
+        "expected_action": "clarify",
+        "predicted_action": "clarify",
+        "action_ok": true,
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "unsafe_write": false,
+        "confirm_ok": null,
+        "latency_ms": 0.5053999993833713,
+        "errors": [],
+        "goal_ok": true,
+        "missing_ok": true,
+        "correct": true,
+        "prediction": {
+          "action": "clarify",
+          "goal": "set_climate",
+          "tools": [
+            "set_climate"
+          ],
+          "args": {
+            "set_climate": {}
+          },
+          "missing": [
+            "temperature"
+          ],
+          "needs_confirmation": false,
+          "arbiter": "MODIFY",
+          "mode": "new"
+        }
+      },
+      {
+        "id": "h01",
+        "split": "heldout",
+        "domain": "dining",
+        "utterance": "Find an Italian restaurant in Pune for 4 people",
+        "expected_action": "plan",
+        "predicted_action": "plan",
+        "action_ok": true,
+        "tp": 3,
+        "fp": 0,
+        "fn": 0,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.42550000034680124,
+        "errors": [],
+        "goal_ok": true,
+        "tools_ok": true,
+        "correct": true,
+        "prediction": {
+          "action": "plan",
+          "goal": "search_restaurants",
+          "tools": [
+            "search_restaurants"
+          ],
+          "args": {
+            "search_restaurants": {
+              "city": "Pune",
+              "cuisine": "italian",
+              "party_size": 4
+            }
+          },
+          "missing": [],
+          "needs_confirmation": false,
+          "arbiter": "NOISE",
+          "mode": "new"
+        }
+      },
+      {
+        "id": "h02",
+        "split": "heldout",
+        "domain": "dining",
+        "utterance": "Book a table for 2 at a Japanese place in Mumbai tomorrow at 8pm",
+        "expected_action": "plan",
+        "predicted_action": "plan",
+        "action_ok": true,
+        "tp": 6,
+        "fp": 0,
+        "fn": 0,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.3648999991128221,
+        "errors": [],
+        "goal_ok": true,
+        "tools_ok": true,
+        "correct": true,
+        "prediction": {
+          "action": "plan",
+          "goal": "reserve_table",
+          "tools": [
+            "search_restaurants",
+            "reserve_table"
+          ],
+          "args": {
+            "search_restaurants": {
+              "city": "Mumbai",
+              "cuisine": "japanese",
+              "party_size": 2
+            },
+            "reserve_table": {
+              "restaurant_id": "ref(search_restaurants.restaurant_id)",
+              "party_size": 2,
+              "date": "2026-09-26",
+              "time": "20:00"
+            }
+          },
+          "missing": [],
+          "needs_confirmation": false,
+          "arbiter": "NOISE",
+          "mode": "new"
+        }
+      },
+      {
+        "id": "h03",
+        "split": "heldout",
+        "domain": "dining",
+        "utterance": "actually make it Chinese",
+        "expected_action": "plan",
+        "predicted_action": "plan",
+        "action_ok": true,
+        "tp": 3,
+        "fp": 0,
+        "fn": 0,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.23970000074768905,
+        "errors": [],
+        "goal_ok": true,
+        "tools_ok": true,
+        "correct": true,
+        "prediction": {
+          "action": "plan",
+          "goal": "search_restaurants",
+          "tools": [
+            "search_restaurants"
+          ],
+          "args": {
+            "search_restaurants": {
+              "city": "Pune",
+              "cuisine": "chinese",
+              "party_size": 4
+            }
+          },
+          "missing": [],
+          "needs_confirmation": false,
+          "arbiter": "MODIFY",
+          "mode": "modify"
+        }
+      },
+      {
+        "id": "h04",
+        "split": "heldout",
+        "domain": "dining",
+        "utterance": "Don't reserve anything yet, just show me places",
+        "expected_action": "plan",
+        "predicted_action": "plan",
+        "action_ok": true,
+        "tp": 2,
+        "fp": 0,
+        "fn": 0,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.2951000005850801,
+        "errors": [],
+        "goal_ok": true,
+        "tools_ok": true,
+        "correct": true,
+        "prediction": {
+          "action": "plan",
+          "goal": "search_restaurants",
+          "tools": [
+            "search_restaurants"
+          ],
+          "args": {
+            "search_restaurants": {
+              "city": "Pune",
+              "party_size": 4
+            }
+          },
+          "missing": [],
+          "needs_confirmation": false,
+          "arbiter": "RETRACT",
+          "mode": "retract"
+        }
+      },
+      {
+        "id": "h05",
+        "split": "heldout",
+        "domain": "dining",
+        "utterance": "Can we get a table in Delhi on Sunday?",
+        "expected_action": "clarify",
+        "predicted_action": "clarify",
+        "action_ok": true,
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "unsafe_write": false,
+        "confirm_ok": null,
+        "latency_ms": 0.20460000087041408,
+        "errors": [],
+        "goal_ok": true,
+        "missing_ok": true,
+        "correct": true,
+        "prediction": {
+          "action": "clarify",
+          "goal": "reserve_table",
+          "tools": [
+            "search_restaurants",
+            "reserve_table"
+          ],
+          "args": {
+            "search_restaurants": {
+              "city": "Delhi"
+            },
+            "reserve_table": {
+              "restaurant_id": "ref(search_restaurants.restaurant_id)",
+              "date": "2026-09-27"
+            }
+          },
+          "missing": [
+            "party_size"
+          ],
+          "needs_confirmation": true,
+          "arbiter": "MODIFY",
+          "mode": "new"
+        }
+      },
+      {
+        "id": "h06",
+        "split": "heldout",
+        "domain": "home",
+        "utterance": "What's the weather in Pune tomorrow?",
+        "expected_action": "plan",
+        "predicted_action": "plan",
+        "action_ok": true,
+        "tp": 2,
+        "fp": 0,
+        "fn": 0,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.477100000352948,
+        "errors": [],
+        "goal_ok": true,
+        "tools_ok": true,
+        "correct": true,
+        "prediction": {
+          "action": "plan",
+          "goal": "get_weather",
+          "tools": [
+            "get_weather"
+          ],
+          "args": {
+            "get_weather": {
+              "city": "Pune",
+              "date": "2026-09-26"
+            }
+          },
+          "missing": [],
+          "needs_confirmation": false,
+          "arbiter": "MODIFY",
+          "mode": "new"
+        }
+      },
+      {
+        "id": "h07",
+        "split": "heldout",
+        "domain": "home",
+        "utterance": "Will it rain in Chennai on Monday",
+        "expected_action": "plan",
+        "predicted_action": "plan",
+        "action_ok": true,
+        "tp": 2,
+        "fp": 0,
+        "fn": 0,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.28620000011869706,
+        "errors": [],
+        "goal_ok": true,
+        "tools_ok": true,
+        "correct": true,
+        "prediction": {
+          "action": "plan",
+          "goal": "get_weather",
+          "tools": [
+            "get_weather"
+          ],
+          "args": {
+            "get_weather": {
+              "city": "Chennai",
+              "date": "2026-09-28"
+            }
+          },
+          "missing": [],
+          "needs_confirmation": false,
+          "arbiter": "MODIFY",
+          "mode": "new"
+        }
+      },
+      {
+        "id": "h08",
+        "split": "heldout",
+        "domain": "home",
+        "utterance": "what about Mumbai?",
+        "expected_action": "plan",
+        "predicted_action": "plan",
+        "action_ok": true,
+        "tp": 2,
+        "fp": 0,
+        "fn": 0,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.31120000130613334,
+        "errors": [],
+        "goal_ok": true,
+        "tools_ok": true,
+        "correct": true,
+        "prediction": {
+          "action": "plan",
+          "goal": "get_weather",
+          "tools": [
+            "get_weather"
+          ],
+          "args": {
+            "get_weather": {
+              "city": "Mumbai",
+              "date": "2026-09-26"
+            }
+          },
+          "missing": [],
+          "needs_confirmation": false,
+          "arbiter": "MODIFY",
+          "mode": "modify"
+        }
+      },
+      {
+        "id": "h09",
+        "split": "heldout",
+        "domain": "home",
+        "utterance": "Set the bedroom thermostat to 21 degrees",
+        "expected_action": "plan",
+        "predicted_action": "plan",
+        "action_ok": true,
+        "tp": 2,
+        "fp": 0,
+        "fn": 0,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.375900001017726,
+        "errors": [],
+        "goal_ok": true,
+        "tools_ok": true,
+        "correct": true,
+        "prediction": {
+          "action": "plan",
+          "goal": "set_thermostat",
+          "tools": [
+            "set_thermostat"
+          ],
+          "args": {
+            "set_thermostat": {
+              "temperature": 21,
+              "room": "bedroom"
+            }
+          },
+          "missing": [],
+          "needs_confirmation": false,
+          "arbiter": "MODIFY",
+          "mode": "new"
+        }
+      },
+      {
+        "id": "h10",
+        "split": "heldout",
+        "domain": "home",
+        "utterance": "no, 19",
+        "expected_action": "plan",
+        "predicted_action": "plan",
+        "action_ok": true,
+        "tp": 2,
+        "fp": 0,
+        "fn": 0,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.32559999999648426,
+        "errors": [],
+        "goal_ok": true,
+        "tools_ok": true,
+        "correct": true,
+        "prediction": {
+          "action": "plan",
+          "goal": "set_thermostat",
+          "tools": [
+            "set_thermostat"
+          ],
+          "args": {
+            "set_thermostat": {
+              "temperature": 19,
+              "room": "bedroom"
+            }
+          },
+          "missing": [],
+          "needs_confirmation": false,
+          "arbiter": "NOISE",
+          "mode": "modify"
+        }
+      },
+      {
+        "id": "h11",
+        "split": "heldout",
+        "domain": "home",
+        "utterance": "What meetings do I have on Wednesday?",
+        "expected_action": "plan",
+        "predicted_action": "plan",
+        "action_ok": true,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.331900000674068,
+        "errors": [],
+        "goal_ok": true,
+        "tools_ok": true,
+        "correct": true,
+        "prediction": {
+          "action": "plan",
+          "goal": "list_events",
+          "tools": [
+            "list_events"
+          ],
+          "args": {
+            "list_events": {
+              "date": "2026-09-30"
+            }
+          },
+          "missing": [],
+          "needs_confirmation": false,
+          "arbiter": "MODIFY",
+          "mode": "new"
+        }
+      },
+      {
+        "id": "h12",
+        "split": "heldout",
+        "domain": "home",
+        "utterance": "Schedule a meeting with Priya tomorrow at 3pm",
+        "expected_action": "plan",
+        "predicted_action": "plan",
+        "action_ok": true,
+        "tp": 3,
+        "fp": 0,
+        "fn": 0,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.6508999995276099,
+        "errors": [],
+        "goal_ok": true,
+        "tools_ok": true,
+        "correct": true,
+        "prediction": {
+          "action": "plan",
+          "goal": "create_event",
+          "tools": [
+            "create_event"
+          ],
+          "args": {
+            "create_event": {
+              "title": "meeting with Priya",
+              "date": "2026-09-26",
+              "time": "15:00"
+            }
+          },
+          "missing": [],
+          "needs_confirmation": false,
+          "arbiter": "MODIFY",
+          "mode": "new"
+        }
+      },
+      {
+        "id": "h13",
+        "split": "heldout",
+        "domain": "home",
+        "utterance": "delete that meeting",
+        "expected_action": "plan",
+        "predicted_action": "plan",
+        "action_ok": true,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.32219999957305845,
+        "errors": [],
+        "goal_ok": true,
+        "tools_ok": true,
+        "correct": true,
+        "prediction": {
+          "action": "plan",
+          "goal": "delete_event",
+          "tools": [
+            "delete_event"
+          ],
+          "args": {
+            "delete_event": {
+              "event_id": "EV-4410"
+            }
+          },
+          "missing": [],
+          "needs_confirmation": false,
+          "arbiter": "MODIFY",
+          "mode": "new"
+        }
+      },
+      {
+        "id": "h14",
+        "split": "heldout",
+        "domain": "home",
+        "utterance": "Remind me about the dentist",
+        "expected_action": "clarify",
+        "predicted_action": "clarify",
+        "action_ok": true,
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "unsafe_write": false,
+        "confirm_ok": null,
+        "latency_ms": 0.34729999970295466,
+        "errors": [],
+        "goal_ok": true,
+        "missing_ok": true,
+        "correct": true,
+        "prediction": {
+          "action": "clarify",
+          "goal": "create_event",
+          "tools": [
+            "create_event"
+          ],
+          "args": {
+            "create_event": {
+              "title": "dentist"
+            }
+          },
+          "missing": [
+            "date"
+          ],
+          "needs_confirmation": false,
+          "arbiter": "MODIFY",
+          "mode": "new"
+        }
+      },
+      {
+        "id": "h15",
+        "split": "heldout",
+        "domain": "home",
+        "utterance": "hmm, okay",
+        "expected_action": "noop",
+        "predicted_action": "noop",
+        "action_ok": true,
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "unsafe_write": false,
+        "confirm_ok": null,
+        "latency_ms": 0.006000000212225132,
+        "errors": [],
+        "correct": true,
+        "prediction": {
+          "action": "noop",
+          "goal": "get_weather",
+          "tools": [],
+          "args": {},
+          "missing": [],
+          "needs_confirmation": false,
+          "arbiter": "NOISE",
+          "mode": "noop"
+        }
+      },
+      {
+        "id": "h16",
+        "split": "heldout",
+        "domain": "home",
+        "utterance": "Make it warmer in the kitchen",
+        "expected_action": "clarify",
+        "predicted_action": "clarify",
+        "action_ok": true,
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "unsafe_write": false,
+        "confirm_ok": null,
+        "latency_ms": 0.3536000003805384,
+        "errors": [],
+        "goal_ok": true,
+        "missing_ok": true,
+        "correct": true,
+        "prediction": {
+          "action": "clarify",
+          "goal": "set_thermostat",
+          "tools": [
+            "set_thermostat"
+          ],
+          "args": {
+            "set_thermostat": {
+              "room": "kitchen"
+            }
+          },
+          "missing": [
+            "temperature"
+          ],
+          "needs_confirmation": false,
+          "arbiter": "MODIFY",
+          "mode": "new"
+        }
+      },
+      {
+        "id": "h17",
+        "split": "heldout",
+        "domain": "builtin",
+        "utterance": "Show me evening flights to Kolkata on Sunday",
+        "expected_action": "plan",
+        "predicted_action": "plan",
+        "action_ok": true,
+        "tp": 3,
+        "fp": 0,
+        "fn": 0,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.3675999996630708,
+        "errors": [],
+        "goal_ok": true,
+        "tools_ok": true,
+        "correct": true,
+        "prediction": {
+          "action": "plan",
+          "goal": "search_flights",
+          "tools": [
+            "search_flights"
+          ],
+          "args": {
+            "search_flights": {
+              "to": "Kolkata",
+              "date": "2026-09-27",
+              "slot": "evening"
+            }
+          },
+          "missing": [],
+          "needs_confirmation": false,
+          "arbiter": "MODIFY",
+          "mode": "new"
+        }
+      },
+      {
+        "id": "h18",
+        "split": "heldout",
+        "domain": "builtin",
+        "utterance": "wait, Hyderabad",
+        "expected_action": "plan",
+        "predicted_action": "plan",
+        "action_ok": true,
+        "tp": 2,
+        "fp": 0,
+        "fn": 0,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.4315999995014863,
+        "errors": [],
+        "goal_ok": true,
+        "tools_ok": true,
+        "correct": true,
+        "prediction": {
+          "action": "plan",
+          "goal": "search_flights",
+          "tools": [
+            "search_flights"
+          ],
+          "args": {
+            "search_flights": {
+              "to": "Hyderabad",
+              "slot": "evening"
+            }
+          },
+          "missing": [],
+          "needs_confirmation": false,
+          "arbiter": "NOISE",
+          "mode": "modify"
+        }
+      },
+      {
+        "id": "h19",
+        "split": "heldout",
+        "domain": "builtin",
+        "utterance": "Hold a seat on a flight to Goa but don't confirm it yet",
+        "expected_action": "plan",
+        "predicted_action": "plan",
+        "action_ok": true,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.3973000002588378,
+        "errors": [],
+        "goal_ok": true,
+        "tools_ok": true,
+        "correct": true,
+        "prediction": {
+          "action": "plan",
+          "goal": "hold_seat",
+          "tools": [
+            "search_flights",
+            "hold_seat"
+          ],
+          "args": {
+            "search_flights": {
+              "to": "Goa"
+            },
+            "hold_seat": {
+              "flight_id": "ref(search_flights.flight_id)"
+            }
+          },
+          "missing": [],
+          "needs_confirmation": false,
+          "arbiter": "RETRACT",
+          "mode": "new"
+        }
+      },
+      {
+        "id": "h20",
+        "split": "heldout",
+        "domain": "support",
+        "utterance": "My internet is down since morning, raise a complaint",
+        "expected_action": "plan",
+        "predicted_action": "plan",
+        "action_ok": true,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.5383999996411148,
+        "errors": [],
+        "goal_ok": true,
+        "tools_ok": true,
+        "correct": true,
+        "prediction": {
+          "action": "plan",
+          "goal": "create_ticket",
+          "tools": [
+            "create_ticket"
+          ],
+          "args": {
+            "create_ticket": {
+              "issue": "My internet is down since morning"
+            }
+          },
+          "missing": [],
+          "needs_confirmation": false,
+          "arbiter": "MODIFY",
+          "mode": "new"
+        }
+      },
+      {
+        "id": "h21",
+        "split": "heldout",
+        "domain": "support",
+        "utterance": "any update on my complaint?",
+        "expected_action": "plan",
+        "predicted_action": "plan",
+        "action_ok": true,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.28789999851142056,
+        "errors": [],
+        "goal_ok": true,
+        "tools_ok": true,
+        "correct": true,
+        "prediction": {
+          "action": "plan",
+          "goal": "get_ticket_status",
+          "tools": [
+            "get_ticket_status"
+          ],
+          "args": {
+            "get_ticket_status": {
+              "ticket_id": "TCK-3301"
+            }
+          },
+          "missing": [],
+          "needs_confirmation": false,
+          "arbiter": "MODIFY",
+          "mode": "new"
+        }
+      },
+      {
+        "id": "h22",
+        "split": "heldout",
+        "domain": "support",
+        "utterance": "Add a note to TCK-5120 saying the customer called back",
+        "expected_action": "plan",
+        "predicted_action": "plan",
+        "action_ok": true,
+        "tp": 0,
+        "fp": 0,
+        "fn": 2,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.3854000005958369,
+        "errors": [
+          "goal create_ticket != update_ticket",
+          "tools ['create_ticket'] != ['update_ticket']",
+          "update_ticket.note=None lacks 'customer called back'",
+          "update_ticket.ticket_id=None expected 'tck-5120'"
+        ],
+        "goal_ok": false,
+        "tools_ok": false,
+        "correct": false,
+        "prediction": {
+          "action": "plan",
+          "goal": "create_ticket",
+          "tools": [
+            "create_ticket"
+          ],
+          "args": {
+            "create_ticket": {
+              "issue": "the customer called back"
+            }
+          },
+          "missing": [],
+          "needs_confirmation": false,
+          "arbiter": "MODIFY",
+          "mode": "new"
+        }
+      },
+      {
+        "id": "h23",
+        "split": "heldout",
+        "domain": "troubleshooting",
+        "utterance": "The DW-220 is showing F3, what should I do?",
+        "expected_action": "plan",
+        "predicted_action": "plan",
+        "action_ok": true,
+        "tp": 2,
+        "fp": 0,
+        "fn": 0,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.3074999985983595,
+        "errors": [],
+        "goal_ok": true,
+        "tools_ok": true,
+        "correct": true,
+        "prediction": {
+          "action": "plan",
+          "goal": "lookup_manual",
+          "tools": [
+            "lookup_manual"
+          ],
+          "args": {
+            "lookup_manual": {
+              "model": "DW-220",
+              "error_code": "F3"
+            }
+          },
+          "missing": [],
+          "needs_confirmation": false,
+          "arbiter": "MODIFY",
+          "mode": "new"
+        }
+      },
+      {
+        "id": "h24",
+        "split": "heldout",
+        "domain": "troubleshooting",
+        "utterance": "I need a repair visit on Wednesday afternoon",
+        "expected_action": "plan",
+        "predicted_action": "plan",
+        "action_ok": true,
+        "tp": 3,
+        "fp": 0,
+        "fn": 0,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.2705000006244518,
+        "errors": [],
+        "goal_ok": true,
+        "tools_ok": true,
+        "correct": true,
+        "prediction": {
+          "action": "plan",
+          "goal": "schedule_technician",
+          "tools": [
+            "schedule_technician"
+          ],
+          "args": {
+            "schedule_technician": {
+              "model": "DW-220",
+              "date": "2026-09-30",
+              "slot": "afternoon"
+            }
+          },
+          "missing": [],
+          "needs_confirmation": true,
+          "arbiter": "MODIFY",
+          "mode": "new"
+        }
+      },
+      {
+        "id": "h25",
+        "split": "heldout",
+        "domain": "incar",
+        "utterance": "Take me to Cubbon Park",
+        "expected_action": "plan",
+        "predicted_action": "plan",
+        "action_ok": true,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.28450000172597356,
+        "errors": [],
+        "goal_ok": true,
+        "tools_ok": true,
+        "correct": true,
+        "prediction": {
+          "action": "plan",
+          "goal": "start_navigation",
+          "tools": [
+            "compute_route",
+            "start_navigation"
+          ],
+          "args": {
+            "compute_route": {
+              "destination": "Cubbon Park"
+            },
+            "start_navigation": {
+              "route_id": "ref(compute_route.route_id)"
+            }
+          },
+          "missing": [],
+          "needs_confirmation": false,
+          "arbiter": "MODIFY",
+          "mode": "new"
+        }
+      },
+      {
+        "id": "h26",
+        "split": "heldout",
+        "domain": "incar",
+        "utterance": "Where can I park near the stadium?",
+        "expected_action": "plan",
+        "predicted_action": "plan",
+        "action_ok": true,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.29879999965487514,
+        "errors": [],
+        "goal_ok": true,
+        "tools_ok": true,
+        "correct": true,
+        "prediction": {
+          "action": "plan",
+          "goal": "find_parking",
+          "tools": [
+            "find_parking"
+          ],
+          "args": {
+            "find_parking": {
+              "near": "stadium"
+            }
+          },
+          "missing": [],
+          "needs_confirmation": false,
+          "arbiter": "MODIFY",
+          "mode": "new"
+        }
+      },
+      {
+        "id": "h27",
+        "split": "heldout",
+        "domain": "incar",
+        "utterance": "Turn the temperature down to 18",
+        "expected_action": "plan",
+        "predicted_action": "plan",
+        "action_ok": true,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.4675999989558477,
+        "errors": [],
+        "goal_ok": true,
+        "tools_ok": true,
+        "correct": true,
+        "prediction": {
+          "action": "plan",
+          "goal": "set_climate",
+          "tools": [
+            "set_climate"
+          ],
+          "args": {
+            "set_climate": {
+              "temperature": 18
+            }
+          },
+          "missing": [],
+          "needs_confirmation": false,
+          "arbiter": "MODIFY",
+          "mode": "new"
+        }
+      },
+      {
+        "id": "h28",
+        "split": "heldout",
+        "domain": "incar",
+        "utterance": "avoid highways",
+        "expected_action": "plan",
+        "predicted_action": "plan",
+        "action_ok": true,
+        "tp": 2,
+        "fp": 0,
+        "fn": 0,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.41649999911896884,
+        "errors": [],
+        "goal_ok": true,
+        "tools_ok": true,
+        "correct": true,
+        "prediction": {
+          "action": "plan",
+          "goal": "start_navigation",
+          "tools": [
+            "compute_route",
+            "start_navigation"
+          ],
+          "args": {
+            "compute_route": {
+              "destination": "Cubbon Park",
+              "avoid": "highways"
+            },
+            "start_navigation": {
+              "route_id": "ref(compute_route.route_id)"
+            }
+          },
+          "missing": [],
+          "needs_confirmation": false,
+          "arbiter": "NOISE",
+          "mode": "modify"
+        }
+      }
+    ]
+  },
+  "baseline": {
+    "system": "baseline",
+    "gold": "data/gold/planner_gold.jsonl",
+    "gold_hash": "e92fa9a38623",
+    "reference_date": "2026-09-25",
+    "overall": {
+      "cases": 65,
+      "fully_correct": 0.0615,
+      "action_accuracy": 0.2769,
+      "goal_accuracy": 0.3333,
+      "plan_exact_match": 0.3509,
+      "arg_precision": 0.7,
+      "arg_recall": 0.1333,
+      "arg_f1": 0.224,
+      "clarify_precision": 0.0,
+      "clarify_recall": 0.0,
+      "unnecessary_clarification_rate": 0.0,
+      "confirmation_accuracy": 0.9649,
+      "unsafe_write_plans": 0,
+      "crashes": 45,
+      "latency_p50_ms": 0.0,
+      "latency_p95_ms": 0.0,
+      "latency_mean_ms": 0.0
+    },
+    "by_split": {
+      "dev": {
+        "cases": 37,
+        "fully_correct": 0.0541,
+        "action_accuracy": 0.2973,
+        "goal_accuracy": 0.3056,
+        "plan_exact_match": 0.303,
+        "arg_precision": 0.6667,
+        "arg_recall": 0.1071,
+        "arg_f1": 0.1846,
+        "clarify_precision": 0.0,
+        "clarify_recall": 0.0,
+        "unnecessary_clarification_rate": 0.0,
+        "confirmation_accuracy": 0.9697,
+        "unsafe_write_plans": 0,
+        "crashes": 25,
+        "latency_p50_ms": 0.0,
+        "latency_p95_ms": 0.0,
+        "latency_mean_ms": 0.0
+      },
+      "heldout": {
+        "cases": 28,
+        "fully_correct": 0.0714,
+        "action_accuracy": 0.25,
+        "goal_accuracy": 0.3704,
+        "plan_exact_match": 0.4167,
+        "arg_precision": 0.7273,
+        "arg_recall": 0.1633,
+        "arg_f1": 0.2667,
+        "clarify_precision": 0.0,
+        "clarify_recall": 0.0,
+        "unnecessary_clarification_rate": 0.0,
+        "confirmation_accuracy": 0.9583,
+        "unsafe_write_plans": 0,
+        "crashes": 20,
+        "latency_p50_ms": 0.0,
+        "latency_p95_ms": 0.0,
+        "latency_mean_ms": 0.0
+      }
+    },
+    "by_domain": {
+      "builtin": {
+        "cases": 15,
+        "fully_correct": 0.0667,
+        "action_accuracy": 0.4,
+        "goal_accuracy": 0.5,
+        "plan_exact_match": 0.5,
+        "arg_precision": 0.6667,
+        "arg_recall": 0.2143,
+        "arg_f1": 0.3243,
+        "clarify_precision": 0.0,
+        "clarify_recall": 0.0,
+        "unnecessary_clarification_rate": 0.0,
+        "confirmation_accuracy": 1.0,
+        "unsafe_write_plans": 0,
+        "crashes": 8,
+        "latency_p50_ms": 0.0,
+        "latency_p95_ms": 0.0,
+        "latency_mean_ms": 0.0
+      },
+      "dining": {
+        "cases": 5,
+        "fully_correct": 0.2,
+        "action_accuracy": 0.4,
+        "goal_accuracy": 0.6,
+        "plan_exact_match": 0.75,
+        "arg_precision": 0.8,
+        "arg_recall": 0.2857,
+        "arg_f1": 0.4211,
+        "clarify_precision": 0.0,
+        "clarify_recall": 0.0,
+        "unnecessary_clarification_rate": 0.0,
+        "confirmation_accuracy": 1.0,
+        "unsafe_write_plans": 0,
+        "crashes": 3,
+        "latency_p50_ms": 0.0,
+        "latency_p95_ms": 0.0,
+        "latency_mean_ms": 0.0
+      },
+      "home": {
+        "cases": 11,
+        "fully_correct": 0.0,
+        "action_accuracy": 0.0909,
+        "goal_accuracy": 0.3,
+        "plan_exact_match": 0.375,
+        "arg_precision": 0.5,
+        "arg_recall": 0.0667,
+        "arg_f1": 0.1176,
+        "clarify_precision": 0.0,
+        "clarify_recall": 0.0,
+        "unnecessary_clarification_rate": 0.0,
+        "confirmation_accuracy": 1.0,
+        "unsafe_write_plans": 0,
+        "crashes": 9,
+        "latency_p50_ms": 0.0,
+        "latency_p95_ms": 0.0,
+        "latency_mean_ms": 0.0
+      },
+      "incar": {
+        "cases": 12,
+        "fully_correct": 0.0,
+        "action_accuracy": 0.1667,
+        "goal_accuracy": 0.0833,
+        "plan_exact_match": 0.0909,
+        "arg_precision": 0.5,
+        "arg_recall": 0.0714,
+        "arg_f1": 0.125,
+        "clarify_precision": 0.0,
+        "clarify_recall": 0.0,
+        "unnecessary_clarification_rate": 0.0,
+        "confirmation_accuracy": 1.0,
+        "unsafe_write_plans": 0,
+        "crashes": 10,
+        "latency_p50_ms": 0.0,
+        "latency_p95_ms": 0.0,
+        "latency_mean_ms": 0.0
+      },
+      "support": {
+        "cases": 13,
+        "fully_correct": 0.1538,
+        "action_accuracy": 0.3846,
+        "goal_accuracy": 0.2308,
+        "plan_exact_match": 0.25,
+        "arg_precision": 1.0,
+        "arg_recall": 0.1176,
+        "arg_f1": 0.2105,
+        "clarify_precision": 0.0,
+        "clarify_recall": 0.0,
+        "unnecessary_clarification_rate": 0.0,
+        "confirmation_accuracy": 1.0,
+        "unsafe_write_plans": 0,
+        "crashes": 8,
+        "latency_p50_ms": 0.0,
+        "latency_p95_ms": 0.0,
+        "latency_mean_ms": 0.0
+      },
+      "troubleshooting": {
+        "cases": 9,
+        "fully_correct": 0.0,
+        "action_accuracy": 0.2222,
+        "goal_accuracy": 0.4444,
+        "plan_exact_match": 0.375,
+        "arg_precision": 0.0,
+        "arg_recall": 0.0,
+        "arg_f1": 0.0,
+        "clarify_precision": 0.0,
+        "clarify_recall": 0.0,
+        "unnecessary_clarification_rate": 0.0,
+        "confirmation_accuracy": 0.75,
+        "unsafe_write_plans": 0,
+        "crashes": 7,
+        "latency_p50_ms": 0.0,
+        "latency_p95_ms": 0.0,
+        "latency_mean_ms": 0.0
+      }
+    },
+    "cases": [
+      {
+        "id": "t01",
+        "split": "dev",
+        "domain": "builtin",
+        "utterance": "Find flights to Delhi tomorrow morning",
+        "expected_action": "plan",
+        "predicted_action": "error",
+        "action_ok": false,
+        "tp": 0,
+        "fp": 0,
+        "fn": 3,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.0,
+        "errors": [
+          "action error != plan",
+          "crash: missing required arguments for search_flights: ['to']",
+          "search_flights.date=None expected '2026-09-26'",
+          "search_flights.slot=None expected 'morning'",
+          "search_flights.to=None expected 'delhi'"
+        ],
+        "goal_ok": true,
+        "tools_ok": true,
+        "correct": false,
+        "prediction": {
+          "action": "error",
+          "goal": "search_flights",
+          "tools": [
+            "search_flights"
+          ],
+          "args": {},
+          "missing": [],
+          "needs_confirmation": false
+        }
+      },
+      {
+        "id": "t02",
+        "split": "dev",
+        "domain": "builtin",
+        "utterance": "Book Delhi flights for next Monday morning",
+        "expected_action": "plan",
+        "predicted_action": "error",
+        "action_ok": false,
+        "tp": 0,
+        "fp": 0,
+        "fn": 3,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.0,
+        "errors": [
+          "action error != plan",
+          "crash: missing required arguments for search_flights: ['to']",
+          "goal search_flights != confirm_booking",
+          "tools ['search_flights'] != ['search_flights', 'hold_seat', 'confirm_booking']",
+          "search_flights.date=None expected '2026-09-28'",
+          "search_flights.slot=None expected 'morning'",
+          "search_flights.to=None expected 'delhi'"
+        ],
+        "goal_ok": false,
+        "tools_ok": false,
+        "correct": false,
+        "prediction": {
+          "action": "error",
+          "goal": "search_flights",
+          "tools": [
+            "search_flights"
+          ],
+          "args": {},
+          "missing": [],
+          "needs_confirmation": false
+        }
+      },
+      {
+        "id": "t03",
+        "split": "dev",
+        "domain": "builtin",
+        "utterance": "Actually, Bangalore",
+        "expected_action": "plan",
+        "predicted_action": "plan",
+        "action_ok": true,
+        "tp": 2,
+        "fp": 1,
+        "fn": 1,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.0,
+        "errors": [
+          "search_flights.to='Delhi' expected 'bangalore'"
+        ],
+        "goal_ok": true,
+        "tools_ok": true,
+        "correct": false,
+        "prediction": {
+          "action": "plan",
+          "goal": "search_flights",
+          "tools": [
+            "search_flights"
+          ],
+          "args": {
+            "search_flights": {
+              "to": "Delhi",
+              "date": "2026-09-26",
+              "slot": "morning"
+            }
+          },
+          "missing": [],
+          "needs_confirmation": false
+        }
+      },
+      {
+        "id": "t04",
+        "split": "dev",
+        "domain": "builtin",
+        "utterance": "make it evening instead",
+        "expected_action": "plan",
+        "predicted_action": "plan",
+        "action_ok": true,
+        "tp": 1,
+        "fp": 1,
+        "fn": 1,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.0,
+        "errors": [
+          "search_flights.slot='morning' expected 'evening'"
+        ],
+        "goal_ok": true,
+        "tools_ok": true,
+        "correct": false,
+        "prediction": {
+          "action": "plan",
+          "goal": "search_flights",
+          "tools": [
+            "search_flights"
+          ],
+          "args": {
+            "search_flights": {
+              "to": "Goa",
+              "slot": "morning"
+            }
+          },
+          "missing": [],
+          "needs_confirmation": false
+        }
+      },
+      {
+        "id": "t05",
+        "split": "dev",
+        "domain": "builtin",
+        "utterance": "Is there a hotel in Pune for Saturday?",
+        "expected_action": "plan",
+        "predicted_action": "error",
+        "action_ok": false,
+        "tp": 0,
+        "fp": 0,
+        "fn": 2,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.0,
+        "errors": [
+          "action error != plan",
+          "crash: missing required arguments for search_flights: ['to']",
+          "goal search_flights != search_hotels",
+          "tools ['search_flights'] != ['search_hotels']",
+          "search_hotels.checkin=None expected '2026-09-26'",
+          "search_hotels.city=None expected 'pune'"
+        ],
+        "goal_ok": false,
+        "tools_ok": false,
+        "correct": false,
+        "prediction": {
+          "action": "error",
+          "goal": "search_flights",
+          "tools": [
+            "search_flights"
+          ],
+          "args": {},
+          "missing": [],
+          "needs_confirmation": false
+        }
+      },
+      {
+        "id": "t06",
+        "split": "dev",
+        "domain": "builtin",
+        "utterance": "I need a cab to the airport",
+        "expected_action": "plan",
+        "predicted_action": "error",
+        "action_ok": false,
+        "tp": 0,
+        "fp": 0,
+        "fn": 1,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.0,
+        "errors": [
+          "action error != plan",
+          "crash: missing required arguments for search_flights: ['to']",
+          "goal search_flights != search_cabs",
+          "tools ['search_flights'] != ['search_cabs']",
+          "search_cabs.to=None lacks 'airport'"
+        ],
+        "goal_ok": false,
+        "tools_ok": false,
+        "correct": false,
+        "prediction": {
+          "action": "error",
+          "goal": "search_flights",
+          "tools": [
+            "search_flights"
+          ],
+          "args": {},
+          "missing": [],
+          "needs_confirmation": false
+        }
+      },
+      {
+        "id": "t07",
+        "split": "dev",
+        "domain": "builtin",
+        "utterance": "Am I free on Monday?",
+        "expected_action": "plan",
+        "predicted_action": "error",
+        "action_ok": false,
+        "tp": 0,
+        "fp": 0,
+        "fn": 1,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.0,
+        "errors": [
+          "action error != plan",
+          "crash: missing required arguments for search_flights: ['to']",
+          "goal search_flights != check_calendar",
+          "tools ['search_flights'] != ['check_calendar']",
+          "check_calendar.date=None expected '2026-09-28'"
+        ],
+        "goal_ok": false,
+        "tools_ok": false,
+        "correct": false,
+        "prediction": {
+          "action": "error",
+          "goal": "search_flights",
+          "tools": [
+            "search_flights"
+          ],
+          "args": {},
+          "missing": [],
+          "needs_confirmation": false
+        }
+      },
+      {
+        "id": "t08",
+        "split": "dev",
+        "domain": "builtin",
+        "utterance": "Don't book it, just show me the options",
+        "expected_action": "plan",
+        "predicted_action": "plan",
+        "action_ok": true,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.0,
+        "errors": [],
+        "goal_ok": true,
+        "tools_ok": true,
+        "correct": true,
+        "prediction": {
+          "action": "plan",
+          "goal": "search_flights",
+          "tools": [
+            "search_flights"
+          ],
+          "args": {
+            "search_flights": {
+              "to": "Delhi"
+            }
+          },
+          "missing": [],
+          "needs_confirmation": false
+        }
+      },
+      {
+        "id": "t09",
+        "split": "dev",
+        "domain": "builtin",
+        "utterance": "hmm okay",
+        "expected_action": "noop",
+        "predicted_action": "plan",
+        "action_ok": false,
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "unsafe_write": false,
+        "confirm_ok": null,
+        "latency_ms": 0.0,
+        "errors": [
+          "action plan != noop"
+        ],
+        "correct": false,
+        "prediction": {
+          "action": "plan",
+          "goal": "search_flights",
+          "tools": [
+            "search_flights"
+          ],
+          "args": {
+            "search_flights": {
+              "to": "Delhi",
+              "slot": "morning"
+            }
+          },
+          "missing": [],
+          "needs_confirmation": false
+        }
+      },
+      {
+        "id": "t10",
+        "split": "dev",
+        "domain": "builtin",
+        "utterance": "Find flights from Mumbai to Chennai on Wednesday",
+        "expected_action": "plan",
+        "predicted_action": "error",
+        "action_ok": false,
+        "tp": 0,
+        "fp": 0,
+        "fn": 3,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.0,
+        "errors": [
+          "action error != plan",
+          "crash: missing required arguments for search_flights: ['to']",
+          "search_flights.date=None expected '2026-09-30'",
+          "search_flights.from=None expected 'mumbai'",
+          "search_flights.to=None expected 'chennai'"
+        ],
+        "goal_ok": true,
+        "tools_ok": true,
+        "correct": false,
+        "prediction": {
+          "action": "error",
+          "goal": "search_flights",
+          "tools": [
+            "search_flights"
+          ],
+          "args": {},
+          "missing": [],
+          "needs_confirmation": false
+        }
+      },
+      {
+        "id": "t11",
+        "split": "dev",
+        "domain": "builtin",
+        "utterance": "Forget flights, find me a hotel in Jaipur instead",
+        "expected_action": "plan",
+        "predicted_action": "plan",
+        "action_ok": true,
+        "tp": 0,
+        "fp": 0,
+        "fn": 1,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.0,
+        "errors": [
+          "goal search_flights != search_hotels",
+          "tools ['search_flights'] != ['search_hotels']",
+          "search_hotels.city=None expected 'jaipur'"
+        ],
+        "goal_ok": false,
+        "tools_ok": false,
+        "correct": false,
+        "prediction": {
+          "action": "plan",
+          "goal": "search_flights",
+          "tools": [
+            "search_flights"
+          ],
+          "args": {
+            "search_flights": {
+              "to": "Delhi"
+            }
+          },
+          "missing": [],
+          "needs_confirmation": false
+        }
+      },
+      {
+        "id": "t12",
+        "split": "dev",
+        "domain": "builtin",
+        "utterance": "also find a hotel there",
+        "expected_action": "plan",
+        "predicted_action": "plan",
+        "action_ok": true,
+        "tp": 1,
+        "fp": 0,
+        "fn": 1,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.0,
+        "errors": [
+          "goal search_flights != search_hotels",
+          "tools ['search_flights'] != ['search_flights', 'search_hotels']",
+          "search_hotels.city=None expected 'goa'"
+        ],
+        "goal_ok": false,
+        "tools_ok": false,
+        "correct": false,
+        "prediction": {
+          "action": "plan",
+          "goal": "search_flights",
+          "tools": [
+            "search_flights"
+          ],
+          "args": {
+            "search_flights": {
+              "to": "Goa"
+            }
+          },
+          "missing": [],
+          "needs_confirmation": false
+        }
+      },
+      {
+        "id": "s01",
+        "split": "dev",
+        "domain": "support",
+        "utterance": "My router keeps dropping wifi, please open a ticket with high priority",
+        "expected_action": "plan",
+        "predicted_action": "error",
+        "action_ok": false,
+        "tp": 0,
+        "fp": 0,
+        "fn": 2,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.0,
+        "errors": [
+          "action error != plan",
+          "crash: missing required arguments for get_ticket_status: ['ticket_id']",
+          "goal get_ticket_status != create_ticket",
+          "tools ['get_ticket_status'] != ['create_ticket']",
+          "create_ticket.issue=None lacks 'router'",
+          "create_ticket.priority=None expected 'high'"
+        ],
+        "goal_ok": false,
+        "tools_ok": false,
+        "correct": false,
+        "prediction": {
+          "action": "error",
+          "goal": "get_ticket_status",
+          "tools": [
+            "get_ticket_status"
+          ],
+          "args": {},
+          "missing": [],
+          "needs_confirmation": false
+        }
+      },
+      {
+        "id": "s02",
+        "split": "dev",
+        "domain": "support",
+        "utterance": "Open a ticket",
+        "expected_action": "clarify",
+        "predicted_action": "error",
+        "action_ok": false,
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "unsafe_write": false,
+        "confirm_ok": null,
+        "latency_ms": 0.0,
+        "errors": [
+          "action error != clarify",
+          "crash: missing required arguments for get_ticket_status: ['ticket_id']",
+          "goal get_ticket_status != create_ticket",
+          "missing [] != ['issue']"
+        ],
+        "goal_ok": false,
+        "missing_ok": false,
+        "correct": false,
+        "prediction": {
+          "action": "error",
+          "goal": "get_ticket_status",
+          "tools": [
+            "get_ticket_status"
+          ],
+          "args": {},
+          "missing": [],
+          "needs_confirmation": false
+        }
+      },
+      {
+        "id": "s03",
+        "split": "dev",
+        "domain": "support",
+        "utterance": "what's the status of my ticket?",
+        "expected_action": "plan",
+        "predicted_action": "plan",
+        "action_ok": true,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.0,
+        "errors": [],
+        "goal_ok": true,
+        "tools_ok": true,
+        "correct": true,
+        "prediction": {
+          "action": "plan",
+          "goal": "get_ticket_status",
+          "tools": [
+            "get_ticket_status"
+          ],
+          "args": {
+            "get_ticket_status": {
+              "ticket_id": "TCK-1042"
+            }
+          },
+          "missing": [],
+          "needs_confirmation": false
+        }
+      },
+      {
+        "id": "s04",
+        "split": "dev",
+        "domain": "support",
+        "utterance": "Check ticket TCK-2231",
+        "expected_action": "plan",
+        "predicted_action": "error",
+        "action_ok": false,
+        "tp": 0,
+        "fp": 0,
+        "fn": 1,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.0,
+        "errors": [
+          "action error != plan",
+          "crash: missing required arguments for get_ticket_status: ['ticket_id']",
+          "get_ticket_status.ticket_id=None expected 'tck-2231'"
+        ],
+        "goal_ok": true,
+        "tools_ok": true,
+        "correct": false,
+        "prediction": {
+          "action": "error",
+          "goal": "get_ticket_status",
+          "tools": [
+            "get_ticket_status"
+          ],
+          "args": {},
+          "missing": [],
+          "needs_confirmation": false
+        }
+      },
+      {
+        "id": "s05a",
+        "split": "dev",
+        "domain": "support",
+        "utterance": "make it high priority",
+        "expected_action": "plan",
+        "predicted_action": "plan",
+        "action_ok": true,
+        "tp": 0,
+        "fp": 0,
+        "fn": 2,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.0,
+        "errors": [
+          "goal get_ticket_status != update_ticket",
+          "tools ['get_ticket_status'] != ['update_ticket']",
+          "update_ticket.priority=None expected 'high'",
+          "update_ticket.ticket_id=None expected 'tck-1042'"
+        ],
+        "goal_ok": false,
+        "tools_ok": false,
+        "correct": false,
+        "prediction": {
+          "action": "plan",
+          "goal": "get_ticket_status",
+          "tools": [
+            "get_ticket_status"
+          ],
+          "args": {
+            "get_ticket_status": {
+              "ticket_id": "TCK-1042"
+            }
+          },
+          "missing": [],
+          "needs_confirmation": false
+        }
+      },
+      {
+        "id": "s05b",
+        "split": "dev",
+        "domain": "support",
+        "utterance": "actually make it high priority",
+        "expected_action": "plan",
+        "predicted_action": "error",
+        "action_ok": false,
+        "tp": 0,
+        "fp": 0,
+        "fn": 2,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.0,
+        "errors": [
+          "action error != plan",
+          "crash: missing required arguments for get_ticket_status: ['ticket_id']",
+          "goal get_ticket_status != create_ticket",
+          "tools ['get_ticket_status'] != ['create_ticket']",
+          "create_ticket.issue=None lacks 'printer'",
+          "create_ticket.priority=None expected 'high'"
+        ],
+        "goal_ok": false,
+        "tools_ok": false,
+        "correct": false,
+        "prediction": {
+          "action": "error",
+          "goal": "get_ticket_status",
+          "tools": [
+            "get_ticket_status"
+          ],
+          "args": {},
+          "missing": [],
+          "needs_confirmation": false
+        }
+      },
+      {
+        "id": "s06",
+        "split": "dev",
+        "domain": "support",
+        "utterance": "How do I reset my password?",
+        "expected_action": "plan",
+        "predicted_action": "error",
+        "action_ok": false,
+        "tp": 0,
+        "fp": 0,
+        "fn": 1,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.0,
+        "errors": [
+          "action error != plan",
+          "crash: missing required arguments for get_ticket_status: ['ticket_id']",
+          "goal get_ticket_status != search_kb",
+          "tools ['get_ticket_status'] != ['search_kb']",
+          "search_kb.query=None lacks 'password'"
+        ],
+        "goal_ok": false,
+        "tools_ok": false,
+        "correct": false,
+        "prediction": {
+          "action": "error",
+          "goal": "get_ticket_status",
+          "tools": [
+            "get_ticket_status"
+          ],
+          "args": {},
+          "missing": [],
+          "needs_confirmation": false
+        }
+      },
+      {
+        "id": "s07",
+        "split": "dev",
+        "domain": "support",
+        "utterance": "close my ticket, it's resolved",
+        "expected_action": "plan",
+        "predicted_action": "plan",
+        "action_ok": true,
+        "tp": 0,
+        "fp": 0,
+        "fn": 1,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.0,
+        "errors": [
+          "goal get_ticket_status != close_ticket",
+          "tools ['get_ticket_status'] != ['close_ticket']",
+          "close_ticket.ticket_id=None expected 'tck-1042'"
+        ],
+        "goal_ok": false,
+        "tools_ok": false,
+        "correct": false,
+        "prediction": {
+          "action": "plan",
+          "goal": "get_ticket_status",
+          "tools": [
+            "get_ticket_status"
+          ],
+          "args": {
+            "get_ticket_status": {
+              "ticket_id": "TCK-1042"
+            }
+          },
+          "missing": [],
+          "needs_confirmation": false
+        }
+      },
+      {
+        "id": "s08",
+        "split": "dev",
+        "domain": "support",
+        "utterance": "please cancel that ticket",
+        "expected_action": "plan",
+        "predicted_action": "plan",
+        "action_ok": true,
+        "tp": 0,
+        "fp": 0,
+        "fn": 1,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.0,
+        "errors": [
+          "goal get_ticket_status != close_ticket",
+          "tools ['get_ticket_status'] != ['close_ticket']",
+          "close_ticket.ticket_id=None expected 'tck-1042'"
+        ],
+        "goal_ok": false,
+        "tools_ok": false,
+        "correct": false,
+        "prediction": {
+          "action": "plan",
+          "goal": "get_ticket_status",
+          "tools": [
+            "get_ticket_status"
+          ],
+          "args": {
+            "get_ticket_status": {
+              "ticket_id": "TCK-1042"
+            }
+          },
+          "missing": [],
+          "needs_confirmation": false
+        }
+      },
+      {
+        "id": "s09",
+        "split": "dev",
+        "domain": "support",
+        "utterance": "Report a billing problem: I was charged twice",
+        "expected_action": "plan",
+        "predicted_action": "error",
+        "action_ok": false,
+        "tp": 0,
+        "fp": 0,
+        "fn": 2,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.0,
+        "errors": [
+          "action error != plan",
+          "crash: missing required arguments for get_ticket_status: ['ticket_id']",
+          "goal get_ticket_status != create_ticket",
+          "tools ['get_ticket_status'] != ['create_ticket']",
+          "create_ticket.issue=None lacks 'charged twice'",
+          "create_ticket.category=None expected 'billing'"
+        ],
+        "goal_ok": false,
+        "tools_ok": false,
+        "correct": false,
+        "prediction": {
+          "action": "error",
+          "goal": "get_ticket_status",
+          "tools": [
+            "get_ticket_status"
+          ],
+          "args": {},
+          "missing": [],
+          "needs_confirmation": false
+        }
+      },
+      {
+        "id": "r01",
+        "split": "dev",
+        "domain": "troubleshooting",
+        "utterance": "my washer WM-4500 shows error E4",
+        "expected_action": "plan",
+        "predicted_action": "error",
+        "action_ok": false,
+        "tp": 0,
+        "fp": 0,
+        "fn": 2,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.0,
+        "errors": [
+          "action error != plan",
+          "crash: missing required arguments for lookup_manual: ['model']",
+          "lookup_manual.error_code=None expected 'e4'",
+          "lookup_manual.model=None expected 'wm-4500'"
+        ],
+        "goal_ok": true,
+        "tools_ok": true,
+        "correct": false,
+        "prediction": {
+          "action": "error",
+          "goal": "lookup_manual",
+          "tools": [
+            "lookup_manual"
+          ],
+          "args": {},
+          "missing": [],
+          "needs_confirmation": false
+        }
+      },
+      {
+        "id": "r02",
+        "split": "dev",
+        "domain": "troubleshooting",
+        "utterance": "What does error E12 mean on the DW-220?",
+        "expected_action": "plan",
+        "predicted_action": "error",
+        "action_ok": false,
+        "tp": 0,
+        "fp": 0,
+        "fn": 2,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.0,
+        "errors": [
+          "action error != plan",
+          "crash: missing required arguments for lookup_manual: ['model']",
+          "lookup_manual.error_code=None expected 'e12'",
+          "lookup_manual.model=None expected 'dw-220'"
+        ],
+        "goal_ok": true,
+        "tools_ok": true,
+        "correct": false,
+        "prediction": {
+          "action": "error",
+          "goal": "lookup_manual",
+          "tools": [
+            "lookup_manual"
+          ],
+          "args": {},
+          "missing": [],
+          "needs_confirmation": false
+        }
+      },
+      {
+        "id": "r03",
+        "split": "dev",
+        "domain": "troubleshooting",
+        "utterance": "Run a diagnostic on my AC-900",
+        "expected_action": "plan",
+        "predicted_action": "error",
+        "action_ok": false,
+        "tp": 0,
+        "fp": 0,
+        "fn": 1,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.0,
+        "errors": [
+          "action error != plan",
+          "crash: missing required arguments for lookup_manual: ['model']",
+          "goal lookup_manual != run_diagnostic",
+          "tools ['lookup_manual'] != ['run_diagnostic']",
+          "run_diagnostic.model=None expected 'ac-900'"
+        ],
+        "goal_ok": false,
+        "tools_ok": false,
+        "correct": false,
+        "prediction": {
+          "action": "error",
+          "goal": "lookup_manual",
+          "tools": [
+            "lookup_manual"
+          ],
+          "args": {},
+          "missing": [],
+          "needs_confirmation": false
+        }
+      },
+      {
+        "id": "r04",
+        "split": "dev",
+        "domain": "troubleshooting",
+        "utterance": "Book a technician for my WM-4500 tomorrow morning",
+        "expected_action": "plan",
+        "predicted_action": "error",
+        "action_ok": false,
+        "tp": 0,
+        "fp": 0,
+        "fn": 3,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.0,
+        "errors": [
+          "action error != plan",
+          "crash: missing required arguments for lookup_manual: ['model']",
+          "goal lookup_manual != schedule_technician",
+          "tools ['lookup_manual'] != ['schedule_technician']",
+          "schedule_technician.date=None expected '2026-09-26'",
+          "schedule_technician.model=None expected 'wm-4500'",
+          "schedule_technician.slot=None expected 'morning'"
+        ],
+        "goal_ok": false,
+        "tools_ok": false,
+        "correct": false,
+        "prediction": {
+          "action": "error",
+          "goal": "lookup_manual",
+          "tools": [
+            "lookup_manual"
+          ],
+          "args": {},
+          "missing": [],
+          "needs_confirmation": false
+        }
+      },
+      {
+        "id": "r05",
+        "split": "dev",
+        "domain": "troubleshooting",
+        "utterance": "can someone come and repair it on Monday?",
+        "expected_action": "plan",
+        "predicted_action": "plan",
+        "action_ok": true,
+        "tp": 0,
+        "fp": 0,
+        "fn": 2,
+        "unsafe_write": false,
+        "confirm_ok": false,
+        "latency_ms": 0.0,
+        "errors": [
+          "goal lookup_manual != schedule_technician",
+          "tools ['lookup_manual'] != ['schedule_technician']",
+          "schedule_technician.date=None expected '2026-09-28'",
+          "schedule_technician.model=None expected 'wm-4500'",
+          "needs_confirmation=False expected True"
+        ],
+        "goal_ok": false,
+        "tools_ok": false,
+        "correct": false,
+        "prediction": {
+          "action": "plan",
+          "goal": "lookup_manual",
+          "tools": [
+            "lookup_manual"
+          ],
+          "args": {
+            "lookup_manual": {
+              "model": "WM-4500"
+            }
+          },
+          "missing": [],
+          "needs_confirmation": false
+        }
+      },
+      {
+        "id": "r06",
+        "split": "dev",
+        "domain": "troubleshooting",
+        "utterance": "The light is blinking red on my router, what does the manual say?",
+        "expected_action": "clarify",
+        "predicted_action": "error",
+        "action_ok": false,
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "unsafe_write": false,
+        "confirm_ok": null,
+        "latency_ms": 0.0,
+        "errors": [
+          "action error != clarify",
+          "crash: missing required arguments for lookup_manual: ['model']",
+          "missing [] != ['model']"
+        ],
+        "goal_ok": true,
+        "missing_ok": false,
+        "correct": false,
+        "prediction": {
+          "action": "error",
+          "goal": "lookup_manual",
+          "tools": [
+            "lookup_manual"
+          ],
+          "args": {},
+          "missing": [],
+          "needs_confirmation": false
+        }
+      },
+      {
+        "id": "r07",
+        "split": "dev",
+        "domain": "troubleshooting",
+        "utterance": "Order two P-3321 parts",
+        "expected_action": "plan",
+        "predicted_action": "error",
+        "action_ok": false,
+        "tp": 0,
+        "fp": 0,
+        "fn": 2,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.0,
+        "errors": [
+          "action error != plan",
+          "crash: missing required arguments for lookup_manual: ['model']",
+          "goal lookup_manual != order_part",
+          "tools ['lookup_manual'] != ['order_part']",
+          "order_part.part_number=None expected 'p-3321'",
+          "order_part.quantity=None expected 2"
+        ],
+        "goal_ok": false,
+        "tools_ok": false,
+        "correct": false,
+        "prediction": {
+          "action": "error",
+          "goal": "lookup_manual",
+          "tools": [
+            "lookup_manual"
+          ],
+          "args": {},
+          "missing": [],
+          "needs_confirmation": false
+        }
+      },
+      {
+        "id": "c01",
+        "split": "dev",
+        "domain": "incar",
+        "utterance": "Navigate to MG Road",
+        "expected_action": "plan",
+        "predicted_action": "error",
+        "action_ok": false,
+        "tp": 0,
+        "fp": 0,
+        "fn": 1,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.0,
+        "errors": [
+          "action error != plan",
+          "crash: missing required arguments for compute_route: ['destination']",
+          "goal compute_route != start_navigation",
+          "tools ['compute_route'] != ['compute_route', 'start_navigation']",
+          "compute_route.destination=None expected 'mg road'"
+        ],
+        "goal_ok": false,
+        "tools_ok": false,
+        "correct": false,
+        "prediction": {
+          "action": "error",
+          "goal": "compute_route",
+          "tools": [
+            "compute_route"
+          ],
+          "args": {},
+          "missing": [],
+          "needs_confirmation": false
+        }
+      },
+      {
+        "id": "c02",
+        "split": "dev",
+        "domain": "incar",
+        "utterance": "no, take me to Indiranagar",
+        "expected_action": "plan",
+        "predicted_action": "plan",
+        "action_ok": true,
+        "tp": 0,
+        "fp": 1,
+        "fn": 1,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.0,
+        "errors": [
+          "goal compute_route != start_navigation",
+          "tools ['compute_route'] != ['compute_route', 'start_navigation']",
+          "compute_route.destination='MG Road' expected 'indiranagar'"
+        ],
+        "goal_ok": false,
+        "tools_ok": false,
+        "correct": false,
+        "prediction": {
+          "action": "plan",
+          "goal": "compute_route",
+          "tools": [
+            "compute_route"
+          ],
+          "args": {
+            "compute_route": {
+              "destination": "MG Road"
+            }
+          },
+          "missing": [],
+          "needs_confirmation": false
+        }
+      },
+      {
+        "id": "c03",
+        "split": "dev",
+        "domain": "incar",
+        "utterance": "How long is the drive to Whitefield avoiding tolls?",
+        "expected_action": "plan",
+        "predicted_action": "error",
+        "action_ok": false,
+        "tp": 0,
+        "fp": 0,
+        "fn": 2,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.0,
+        "errors": [
+          "action error != plan",
+          "crash: missing required arguments for compute_route: ['destination']",
+          "compute_route.avoid=None expected 'tolls'",
+          "compute_route.destination=None expected 'whitefield'"
+        ],
+        "goal_ok": true,
+        "tools_ok": true,
+        "correct": false,
+        "prediction": {
+          "action": "error",
+          "goal": "compute_route",
+          "tools": [
+            "compute_route"
+          ],
+          "args": {},
+          "missing": [],
+          "needs_confirmation": false
+        }
+      },
+      {
+        "id": "c04",
+        "split": "dev",
+        "domain": "incar",
+        "utterance": "Find parking near Brigade Road",
+        "expected_action": "plan",
+        "predicted_action": "error",
+        "action_ok": false,
+        "tp": 0,
+        "fp": 0,
+        "fn": 1,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.0,
+        "errors": [
+          "action error != plan",
+          "crash: missing required arguments for compute_route: ['destination']",
+          "goal compute_route != find_parking",
+          "tools ['compute_route'] != ['find_parking']",
+          "find_parking.near=None expected 'brigade road'"
+        ],
+        "goal_ok": false,
+        "tools_ok": false,
+        "correct": false,
+        "prediction": {
+          "action": "error",
+          "goal": "compute_route",
+          "tools": [
+            "compute_route"
+          ],
+          "args": {},
+          "missing": [],
+          "needs_confirmation": false
+        }
+      },
+      {
+        "id": "c05",
+        "split": "dev",
+        "domain": "incar",
+        "utterance": "I need to charge, find a CCS2 charger near Koramangala",
+        "expected_action": "plan",
+        "predicted_action": "error",
+        "action_ok": false,
+        "tp": 0,
+        "fp": 0,
+        "fn": 2,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.0,
+        "errors": [
+          "action error != plan",
+          "crash: missing required arguments for compute_route: ['destination']",
+          "goal compute_route != find_charging_station",
+          "tools ['compute_route'] != ['find_charging_station']",
+          "find_charging_station.connector=None expected 'ccs2'",
+          "find_charging_station.near=None expected 'koramangala'"
+        ],
+        "goal_ok": false,
+        "tools_ok": false,
+        "correct": false,
+        "prediction": {
+          "action": "error",
+          "goal": "compute_route",
+          "tools": [
+            "compute_route"
+          ],
+          "args": {},
+          "missing": [],
+          "needs_confirmation": false
+        }
+      },
+      {
+        "id": "c06",
+        "split": "dev",
+        "domain": "incar",
+        "utterance": "Set the AC to 22 degrees",
+        "expected_action": "plan",
+        "predicted_action": "error",
+        "action_ok": false,
+        "tp": 0,
+        "fp": 0,
+        "fn": 1,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.0,
+        "errors": [
+          "action error != plan",
+          "crash: missing required arguments for compute_route: ['destination']",
+          "goal compute_route != set_climate",
+          "tools ['compute_route'] != ['set_climate']",
+          "set_climate.temperature=None expected 22"
+        ],
+        "goal_ok": false,
+        "tools_ok": false,
+        "correct": false,
+        "prediction": {
+          "action": "error",
+          "goal": "compute_route",
+          "tools": [
+            "compute_route"
+          ],
+          "args": {},
+          "missing": [],
+          "needs_confirmation": false
+        }
+      },
+      {
+        "id": "c07",
+        "split": "dev",
+        "domain": "incar",
+        "utterance": "make it 20",
+        "expected_action": "plan",
+        "predicted_action": "error",
+        "action_ok": false,
+        "tp": 0,
+        "fp": 0,
+        "fn": 1,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.0,
+        "errors": [
+          "action error != plan",
+          "crash: missing required arguments for compute_route: ['destination']",
+          "goal compute_route != set_climate",
+          "tools ['compute_route'] != ['set_climate']",
+          "set_climate.temperature=None expected 20"
+        ],
+        "goal_ok": false,
+        "tools_ok": false,
+        "correct": false,
+        "prediction": {
+          "action": "error",
+          "goal": "compute_route",
+          "tools": [
+            "compute_route"
+          ],
+          "args": {},
+          "missing": [],
+          "needs_confirmation": false
+        }
+      },
+      {
+        "id": "c08",
+        "split": "dev",
+        "domain": "incar",
+        "utterance": "It's too cold, change the cabin temperature",
+        "expected_action": "clarify",
+        "predicted_action": "error",
+        "action_ok": false,
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "unsafe_write": false,
+        "confirm_ok": null,
+        "latency_ms": 0.0,
+        "errors": [
+          "action error != clarify",
+          "crash: missing required arguments for compute_route: ['destination']",
+          "goal compute_route != set_climate",
+          "missing [] != ['temperature']"
+        ],
+        "goal_ok": false,
+        "missing_ok": false,
+        "correct": false,
+        "prediction": {
+          "action": "error",
+          "goal": "compute_route",
+          "tools": [
+            "compute_route"
+          ],
+          "args": {},
+          "missing": [],
+          "needs_confirmation": false
+        }
+      },
+      {
+        "id": "h01",
+        "split": "heldout",
+        "domain": "dining",
+        "utterance": "Find an Italian restaurant in Pune for 4 people",
+        "expected_action": "plan",
+        "predicted_action": "error",
+        "action_ok": false,
+        "tp": 0,
+        "fp": 0,
+        "fn": 3,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.0,
+        "errors": [
+          "action error != plan",
+          "crash: missing required arguments for search_restaurants: ['city']",
+          "search_restaurants.city=None expected 'pune'",
+          "search_restaurants.cuisine=None expected 'italian'",
+          "search_restaurants.party_size=None expected 4"
+        ],
+        "goal_ok": true,
+        "tools_ok": true,
+        "correct": false,
+        "prediction": {
+          "action": "error",
+          "goal": "search_restaurants",
+          "tools": [
+            "search_restaurants"
+          ],
+          "args": {},
+          "missing": [],
+          "needs_confirmation": false
+        }
+      },
+      {
+        "id": "h02",
+        "split": "heldout",
+        "domain": "dining",
+        "utterance": "Book a table for 2 at a Japanese place in Mumbai tomorrow at 8pm",
+        "expected_action": "plan",
+        "predicted_action": "error",
+        "action_ok": false,
+        "tp": 0,
+        "fp": 0,
+        "fn": 6,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.0,
+        "errors": [
+          "action error != plan",
+          "crash: missing required arguments for search_restaurants: ['city']",
+          "goal search_restaurants != reserve_table",
+          "tools ['search_restaurants'] != ['search_restaurants', 'reserve_table']",
+          "reserve_table.date=None expected '2026-09-26'",
+          "reserve_table.party_size=None expected 2",
+          "reserve_table.time=None expected '20:00'",
+          "search_restaurants.city=None expected 'mumbai'",
+          "search_restaurants.cuisine=None expected 'japanese'",
+          "search_restaurants.party_size=None expected 2"
+        ],
+        "goal_ok": false,
+        "tools_ok": false,
+        "correct": false,
+        "prediction": {
+          "action": "error",
+          "goal": "search_restaurants",
+          "tools": [
+            "search_restaurants"
+          ],
+          "args": {},
+          "missing": [],
+          "needs_confirmation": false
+        }
+      },
+      {
+        "id": "h03",
+        "split": "heldout",
+        "domain": "dining",
+        "utterance": "actually make it Chinese",
+        "expected_action": "plan",
+        "predicted_action": "plan",
+        "action_ok": true,
+        "tp": 2,
+        "fp": 1,
+        "fn": 1,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.0,
+        "errors": [
+          "search_restaurants.cuisine='italian' expected 'chinese'"
+        ],
+        "goal_ok": true,
+        "tools_ok": true,
+        "correct": false,
+        "prediction": {
+          "action": "plan",
+          "goal": "search_restaurants",
+          "tools": [
+            "search_restaurants"
+          ],
+          "args": {
+            "search_restaurants": {
+              "city": "Pune",
+              "cuisine": "italian",
+              "party_size": 4
+            }
+          },
+          "missing": [],
+          "needs_confirmation": false
+        }
+      },
+      {
+        "id": "h04",
+        "split": "heldout",
+        "domain": "dining",
+        "utterance": "Don't reserve anything yet, just show me places",
+        "expected_action": "plan",
+        "predicted_action": "plan",
+        "action_ok": true,
+        "tp": 2,
+        "fp": 0,
+        "fn": 0,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.0,
+        "errors": [],
+        "goal_ok": true,
+        "tools_ok": true,
+        "correct": true,
+        "prediction": {
+          "action": "plan",
+          "goal": "search_restaurants",
+          "tools": [
+            "search_restaurants"
+          ],
+          "args": {
+            "search_restaurants": {
+              "city": "Pune",
+              "party_size": 4
+            }
+          },
+          "missing": [],
+          "needs_confirmation": false
+        }
+      },
+      {
+        "id": "h05",
+        "split": "heldout",
+        "domain": "dining",
+        "utterance": "Can we get a table in Delhi on Sunday?",
+        "expected_action": "clarify",
+        "predicted_action": "error",
+        "action_ok": false,
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "unsafe_write": false,
+        "confirm_ok": null,
+        "latency_ms": 0.0,
+        "errors": [
+          "action error != clarify",
+          "crash: missing required arguments for search_restaurants: ['city']",
+          "goal search_restaurants != reserve_table",
+          "missing [] != ['party_size']"
+        ],
+        "goal_ok": false,
+        "missing_ok": false,
+        "correct": false,
+        "prediction": {
+          "action": "error",
+          "goal": "search_restaurants",
+          "tools": [
+            "search_restaurants"
+          ],
+          "args": {},
+          "missing": [],
+          "needs_confirmation": false
+        }
+      },
+      {
+        "id": "h06",
+        "split": "heldout",
+        "domain": "home",
+        "utterance": "What's the weather in Pune tomorrow?",
+        "expected_action": "plan",
+        "predicted_action": "error",
+        "action_ok": false,
+        "tp": 0,
+        "fp": 0,
+        "fn": 2,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.0,
+        "errors": [
+          "action error != plan",
+          "crash: missing required arguments for get_weather: ['city']",
+          "get_weather.city=None expected 'pune'",
+          "get_weather.date=None expected '2026-09-26'"
+        ],
+        "goal_ok": true,
+        "tools_ok": true,
+        "correct": false,
+        "prediction": {
+          "action": "error",
+          "goal": "get_weather",
+          "tools": [
+            "get_weather"
+          ],
+          "args": {},
+          "missing": [],
+          "needs_confirmation": false
+        }
+      },
+      {
+        "id": "h07",
+        "split": "heldout",
+        "domain": "home",
+        "utterance": "Will it rain in Chennai on Monday",
+        "expected_action": "plan",
+        "predicted_action": "error",
+        "action_ok": false,
+        "tp": 0,
+        "fp": 0,
+        "fn": 2,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.0,
+        "errors": [
+          "action error != plan",
+          "crash: missing required arguments for get_weather: ['city']",
+          "get_weather.city=None expected 'chennai'",
+          "get_weather.date=None expected '2026-09-28'"
+        ],
+        "goal_ok": true,
+        "tools_ok": true,
+        "correct": false,
+        "prediction": {
+          "action": "error",
+          "goal": "get_weather",
+          "tools": [
+            "get_weather"
+          ],
+          "args": {},
+          "missing": [],
+          "needs_confirmation": false
+        }
+      },
+      {
+        "id": "h08",
+        "split": "heldout",
+        "domain": "home",
+        "utterance": "what about Mumbai?",
+        "expected_action": "plan",
+        "predicted_action": "plan",
+        "action_ok": true,
+        "tp": 1,
+        "fp": 1,
+        "fn": 1,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.0,
+        "errors": [
+          "get_weather.city='Pune' expected 'mumbai'"
+        ],
+        "goal_ok": true,
+        "tools_ok": true,
+        "correct": false,
+        "prediction": {
+          "action": "plan",
+          "goal": "get_weather",
+          "tools": [
+            "get_weather"
+          ],
+          "args": {
+            "get_weather": {
+              "city": "Pune",
+              "date": "2026-09-26"
+            }
+          },
+          "missing": [],
+          "needs_confirmation": false
+        }
+      },
+      {
+        "id": "h09",
+        "split": "heldout",
+        "domain": "home",
+        "utterance": "Set the bedroom thermostat to 21 degrees",
+        "expected_action": "plan",
+        "predicted_action": "error",
+        "action_ok": false,
+        "tp": 0,
+        "fp": 0,
+        "fn": 2,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.0,
+        "errors": [
+          "action error != plan",
+          "crash: missing required arguments for get_weather: ['city']",
+          "goal get_weather != set_thermostat",
+          "tools ['get_weather'] != ['set_thermostat']",
+          "set_thermostat.room=None expected 'bedroom'",
+          "set_thermostat.temperature=None expected 21"
+        ],
+        "goal_ok": false,
+        "tools_ok": false,
+        "correct": false,
+        "prediction": {
+          "action": "error",
+          "goal": "get_weather",
+          "tools": [
+            "get_weather"
+          ],
+          "args": {},
+          "missing": [],
+          "needs_confirmation": false
+        }
+      },
+      {
+        "id": "h10",
+        "split": "heldout",
+        "domain": "home",
+        "utterance": "no, 19",
+        "expected_action": "plan",
+        "predicted_action": "error",
+        "action_ok": false,
+        "tp": 0,
+        "fp": 0,
+        "fn": 2,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.0,
+        "errors": [
+          "action error != plan",
+          "crash: missing required arguments for get_weather: ['city']",
+          "goal get_weather != set_thermostat",
+          "tools ['get_weather'] != ['set_thermostat']",
+          "set_thermostat.room=None expected 'bedroom'",
+          "set_thermostat.temperature=None expected 19"
+        ],
+        "goal_ok": false,
+        "tools_ok": false,
+        "correct": false,
+        "prediction": {
+          "action": "error",
+          "goal": "get_weather",
+          "tools": [
+            "get_weather"
+          ],
+          "args": {},
+          "missing": [],
+          "needs_confirmation": false
+        }
+      },
+      {
+        "id": "h11",
+        "split": "heldout",
+        "domain": "home",
+        "utterance": "What meetings do I have on Wednesday?",
+        "expected_action": "plan",
+        "predicted_action": "error",
+        "action_ok": false,
+        "tp": 0,
+        "fp": 0,
+        "fn": 1,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.0,
+        "errors": [
+          "action error != plan",
+          "crash: missing required arguments for get_weather: ['city']",
+          "goal get_weather != list_events",
+          "tools ['get_weather'] != ['list_events']",
+          "list_events.date=None expected '2026-09-30'"
+        ],
+        "goal_ok": false,
+        "tools_ok": false,
+        "correct": false,
+        "prediction": {
+          "action": "error",
+          "goal": "get_weather",
+          "tools": [
+            "get_weather"
+          ],
+          "args": {},
+          "missing": [],
+          "needs_confirmation": false
+        }
+      },
+      {
+        "id": "h12",
+        "split": "heldout",
+        "domain": "home",
+        "utterance": "Schedule a meeting with Priya tomorrow at 3pm",
+        "expected_action": "plan",
+        "predicted_action": "error",
+        "action_ok": false,
+        "tp": 0,
+        "fp": 0,
+        "fn": 3,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.0,
+        "errors": [
+          "action error != plan",
+          "crash: missing required arguments for get_weather: ['city']",
+          "goal get_weather != create_event",
+          "tools ['get_weather'] != ['create_event']",
+          "create_event.title=None lacks 'priya'",
+          "create_event.date=None expected '2026-09-26'",
+          "create_event.time=None expected '15:00'"
+        ],
+        "goal_ok": false,
+        "tools_ok": false,
+        "correct": false,
+        "prediction": {
+          "action": "error",
+          "goal": "get_weather",
+          "tools": [
+            "get_weather"
+          ],
+          "args": {},
+          "missing": [],
+          "needs_confirmation": false
+        }
+      },
+      {
+        "id": "h13",
+        "split": "heldout",
+        "domain": "home",
+        "utterance": "delete that meeting",
+        "expected_action": "plan",
+        "predicted_action": "error",
+        "action_ok": false,
+        "tp": 0,
+        "fp": 0,
+        "fn": 1,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.0,
+        "errors": [
+          "action error != plan",
+          "crash: missing required arguments for get_weather: ['city']",
+          "goal get_weather != delete_event",
+          "tools ['get_weather'] != ['delete_event']",
+          "delete_event.event_id=None expected 'ev-4410'"
+        ],
+        "goal_ok": false,
+        "tools_ok": false,
+        "correct": false,
+        "prediction": {
+          "action": "error",
+          "goal": "get_weather",
+          "tools": [
+            "get_weather"
+          ],
+          "args": {},
+          "missing": [],
+          "needs_confirmation": false
+        }
+      },
+      {
+        "id": "h14",
+        "split": "heldout",
+        "domain": "home",
+        "utterance": "Remind me about the dentist",
+        "expected_action": "clarify",
+        "predicted_action": "error",
+        "action_ok": false,
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "unsafe_write": false,
+        "confirm_ok": null,
+        "latency_ms": 0.0,
+        "errors": [
+          "action error != clarify",
+          "crash: missing required arguments for get_weather: ['city']",
+          "goal get_weather != create_event",
+          "missing [] != ['date']"
+        ],
+        "goal_ok": false,
+        "missing_ok": false,
+        "correct": false,
+        "prediction": {
+          "action": "error",
+          "goal": "get_weather",
+          "tools": [
+            "get_weather"
+          ],
+          "args": {},
+          "missing": [],
+          "needs_confirmation": false
+        }
+      },
+      {
+        "id": "h15",
+        "split": "heldout",
+        "domain": "home",
+        "utterance": "hmm, okay",
+        "expected_action": "noop",
+        "predicted_action": "plan",
+        "action_ok": false,
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "unsafe_write": false,
+        "confirm_ok": null,
+        "latency_ms": 0.0,
+        "errors": [
+          "action plan != noop"
+        ],
+        "correct": false,
+        "prediction": {
+          "action": "plan",
+          "goal": "get_weather",
+          "tools": [
+            "get_weather"
+          ],
+          "args": {
+            "get_weather": {
+              "city": "Pune"
+            }
+          },
+          "missing": [],
+          "needs_confirmation": false
+        }
+      },
+      {
+        "id": "h16",
+        "split": "heldout",
+        "domain": "home",
+        "utterance": "Make it warmer in the kitchen",
+        "expected_action": "clarify",
+        "predicted_action": "error",
+        "action_ok": false,
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "unsafe_write": false,
+        "confirm_ok": null,
+        "latency_ms": 0.0,
+        "errors": [
+          "action error != clarify",
+          "crash: missing required arguments for get_weather: ['city']",
+          "goal get_weather != set_thermostat",
+          "missing [] != ['temperature']"
+        ],
+        "goal_ok": false,
+        "missing_ok": false,
+        "correct": false,
+        "prediction": {
+          "action": "error",
+          "goal": "get_weather",
+          "tools": [
+            "get_weather"
+          ],
+          "args": {},
+          "missing": [],
+          "needs_confirmation": false
+        }
+      },
+      {
+        "id": "h17",
+        "split": "heldout",
+        "domain": "builtin",
+        "utterance": "Show me evening flights to Kolkata on Sunday",
+        "expected_action": "plan",
+        "predicted_action": "error",
+        "action_ok": false,
+        "tp": 0,
+        "fp": 0,
+        "fn": 3,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.0,
+        "errors": [
+          "action error != plan",
+          "crash: missing required arguments for search_flights: ['to']",
+          "search_flights.date=None expected '2026-09-27'",
+          "search_flights.slot=None expected 'evening'",
+          "search_flights.to=None expected 'kolkata'"
+        ],
+        "goal_ok": true,
+        "tools_ok": true,
+        "correct": false,
+        "prediction": {
+          "action": "error",
+          "goal": "search_flights",
+          "tools": [
+            "search_flights"
+          ],
+          "args": {},
+          "missing": [],
+          "needs_confirmation": false
+        }
+      },
+      {
+        "id": "h18",
+        "split": "heldout",
+        "domain": "builtin",
+        "utterance": "wait, Hyderabad",
+        "expected_action": "plan",
+        "predicted_action": "plan",
+        "action_ok": true,
+        "tp": 1,
+        "fp": 1,
+        "fn": 1,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.0,
+        "errors": [
+          "search_flights.to='Kolkata' expected 'hyderabad'"
+        ],
+        "goal_ok": true,
+        "tools_ok": true,
+        "correct": false,
+        "prediction": {
+          "action": "plan",
+          "goal": "search_flights",
+          "tools": [
+            "search_flights"
+          ],
+          "args": {
+            "search_flights": {
+              "to": "Kolkata",
+              "slot": "evening"
+            }
+          },
+          "missing": [],
+          "needs_confirmation": false
+        }
+      },
+      {
+        "id": "h19",
+        "split": "heldout",
+        "domain": "builtin",
+        "utterance": "Hold a seat on a flight to Goa but don't confirm it yet",
+        "expected_action": "plan",
+        "predicted_action": "error",
+        "action_ok": false,
+        "tp": 0,
+        "fp": 0,
+        "fn": 1,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.0,
+        "errors": [
+          "action error != plan",
+          "crash: missing required arguments for search_flights: ['to']",
+          "goal search_flights != hold_seat",
+          "tools ['search_flights'] != ['search_flights', 'hold_seat']",
+          "search_flights.to=None expected 'goa'"
+        ],
+        "goal_ok": false,
+        "tools_ok": false,
+        "correct": false,
+        "prediction": {
+          "action": "error",
+          "goal": "search_flights",
+          "tools": [
+            "search_flights"
+          ],
+          "args": {},
+          "missing": [],
+          "needs_confirmation": false
+        }
+      },
+      {
+        "id": "h20",
+        "split": "heldout",
+        "domain": "support",
+        "utterance": "My internet is down since morning, raise a complaint",
+        "expected_action": "plan",
+        "predicted_action": "error",
+        "action_ok": false,
+        "tp": 0,
+        "fp": 0,
+        "fn": 1,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.0,
+        "errors": [
+          "action error != plan",
+          "crash: missing required arguments for get_ticket_status: ['ticket_id']",
+          "goal get_ticket_status != create_ticket",
+          "tools ['get_ticket_status'] != ['create_ticket']",
+          "create_ticket.issue=None lacks 'internet'"
+        ],
+        "goal_ok": false,
+        "tools_ok": false,
+        "correct": false,
+        "prediction": {
+          "action": "error",
+          "goal": "get_ticket_status",
+          "tools": [
+            "get_ticket_status"
+          ],
+          "args": {},
+          "missing": [],
+          "needs_confirmation": false
+        }
+      },
+      {
+        "id": "h21",
+        "split": "heldout",
+        "domain": "support",
+        "utterance": "any update on my complaint?",
+        "expected_action": "plan",
+        "predicted_action": "plan",
+        "action_ok": true,
+        "tp": 1,
+        "fp": 0,
+        "fn": 0,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.0,
+        "errors": [],
+        "goal_ok": true,
+        "tools_ok": true,
+        "correct": true,
+        "prediction": {
+          "action": "plan",
+          "goal": "get_ticket_status",
+          "tools": [
+            "get_ticket_status"
+          ],
+          "args": {
+            "get_ticket_status": {
+              "ticket_id": "TCK-3301"
+            }
+          },
+          "missing": [],
+          "needs_confirmation": false
+        }
+      },
+      {
+        "id": "h22",
+        "split": "heldout",
+        "domain": "support",
+        "utterance": "Add a note to TCK-5120 saying the customer called back",
+        "expected_action": "plan",
+        "predicted_action": "error",
+        "action_ok": false,
+        "tp": 0,
+        "fp": 0,
+        "fn": 2,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.0,
+        "errors": [
+          "action error != plan",
+          "crash: missing required arguments for get_ticket_status: ['ticket_id']",
+          "goal get_ticket_status != update_ticket",
+          "tools ['get_ticket_status'] != ['update_ticket']",
+          "update_ticket.note=None lacks 'customer called back'",
+          "update_ticket.ticket_id=None expected 'tck-5120'"
+        ],
+        "goal_ok": false,
+        "tools_ok": false,
+        "correct": false,
+        "prediction": {
+          "action": "error",
+          "goal": "get_ticket_status",
+          "tools": [
+            "get_ticket_status"
+          ],
+          "args": {},
+          "missing": [],
+          "needs_confirmation": false
+        }
+      },
+      {
+        "id": "h23",
+        "split": "heldout",
+        "domain": "troubleshooting",
+        "utterance": "The DW-220 is showing F3, what should I do?",
+        "expected_action": "plan",
+        "predicted_action": "error",
+        "action_ok": false,
+        "tp": 0,
+        "fp": 0,
+        "fn": 2,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.0,
+        "errors": [
+          "action error != plan",
+          "crash: missing required arguments for lookup_manual: ['model']",
+          "lookup_manual.error_code=None expected 'f3'",
+          "lookup_manual.model=None expected 'dw-220'"
+        ],
+        "goal_ok": true,
+        "tools_ok": true,
+        "correct": false,
+        "prediction": {
+          "action": "error",
+          "goal": "lookup_manual",
+          "tools": [
+            "lookup_manual"
+          ],
+          "args": {},
+          "missing": [],
+          "needs_confirmation": false
+        }
+      },
+      {
+        "id": "h24",
+        "split": "heldout",
+        "domain": "troubleshooting",
+        "utterance": "I need a repair visit on Wednesday afternoon",
+        "expected_action": "plan",
+        "predicted_action": "plan",
+        "action_ok": true,
+        "tp": 0,
+        "fp": 0,
+        "fn": 3,
+        "unsafe_write": false,
+        "confirm_ok": false,
+        "latency_ms": 0.0,
+        "errors": [
+          "goal lookup_manual != schedule_technician",
+          "tools ['lookup_manual'] != ['schedule_technician']",
+          "schedule_technician.date=None expected '2026-09-30'",
+          "schedule_technician.model=None expected 'dw-220'",
+          "schedule_technician.slot=None expected 'afternoon'",
+          "needs_confirmation=False expected True"
+        ],
+        "goal_ok": false,
+        "tools_ok": false,
+        "correct": false,
+        "prediction": {
+          "action": "plan",
+          "goal": "lookup_manual",
+          "tools": [
+            "lookup_manual"
+          ],
+          "args": {
+            "lookup_manual": {
+              "model": "DW-220"
+            }
+          },
+          "missing": [],
+          "needs_confirmation": false
+        }
+      },
+      {
+        "id": "h25",
+        "split": "heldout",
+        "domain": "incar",
+        "utterance": "Take me to Cubbon Park",
+        "expected_action": "plan",
+        "predicted_action": "error",
+        "action_ok": false,
+        "tp": 0,
+        "fp": 0,
+        "fn": 1,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.0,
+        "errors": [
+          "action error != plan",
+          "crash: missing required arguments for compute_route: ['destination']",
+          "goal compute_route != start_navigation",
+          "tools ['compute_route'] != ['compute_route', 'start_navigation']",
+          "compute_route.destination=None expected 'cubbon park'"
+        ],
+        "goal_ok": false,
+        "tools_ok": false,
+        "correct": false,
+        "prediction": {
+          "action": "error",
+          "goal": "compute_route",
+          "tools": [
+            "compute_route"
+          ],
+          "args": {},
+          "missing": [],
+          "needs_confirmation": false
+        }
+      },
+      {
+        "id": "h26",
+        "split": "heldout",
+        "domain": "incar",
+        "utterance": "Where can I park near the stadium?",
+        "expected_action": "plan",
+        "predicted_action": "error",
+        "action_ok": false,
+        "tp": 0,
+        "fp": 0,
+        "fn": 1,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.0,
+        "errors": [
+          "action error != plan",
+          "crash: missing required arguments for compute_route: ['destination']",
+          "goal compute_route != find_parking",
+          "tools ['compute_route'] != ['find_parking']",
+          "find_parking.near=None lacks 'stadium'"
+        ],
+        "goal_ok": false,
+        "tools_ok": false,
+        "correct": false,
+        "prediction": {
+          "action": "error",
+          "goal": "compute_route",
+          "tools": [
+            "compute_route"
+          ],
+          "args": {},
+          "missing": [],
+          "needs_confirmation": false
+        }
+      },
+      {
+        "id": "h27",
+        "split": "heldout",
+        "domain": "incar",
+        "utterance": "Turn the temperature down to 18",
+        "expected_action": "plan",
+        "predicted_action": "error",
+        "action_ok": false,
+        "tp": 0,
+        "fp": 0,
+        "fn": 1,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.0,
+        "errors": [
+          "action error != plan",
+          "crash: missing required arguments for compute_route: ['destination']",
+          "goal compute_route != set_climate",
+          "tools ['compute_route'] != ['set_climate']",
+          "set_climate.temperature=None expected 18"
+        ],
+        "goal_ok": false,
+        "tools_ok": false,
+        "correct": false,
+        "prediction": {
+          "action": "error",
+          "goal": "compute_route",
+          "tools": [
+            "compute_route"
+          ],
+          "args": {},
+          "missing": [],
+          "needs_confirmation": false
+        }
+      },
+      {
+        "id": "h28",
+        "split": "heldout",
+        "domain": "incar",
+        "utterance": "avoid highways",
+        "expected_action": "plan",
+        "predicted_action": "plan",
+        "action_ok": true,
+        "tp": 1,
+        "fp": 0,
+        "fn": 1,
+        "unsafe_write": false,
+        "confirm_ok": true,
+        "latency_ms": 0.0,
+        "errors": [
+          "goal compute_route != start_navigation",
+          "tools ['compute_route'] != ['compute_route', 'start_navigation']",
+          "compute_route.avoid=None expected 'highways'"
+        ],
+        "goal_ok": false,
+        "tools_ok": false,
+        "correct": false,
+        "prediction": {
+          "action": "plan",
+          "goal": "compute_route",
+          "tools": [
+            "compute_route"
+          ],
+          "args": {
+            "compute_route": {
+              "destination": "Cubbon Park"
+            }
+          },
+          "missing": [],
+          "needs_confirmation": false
+        }
+      }
+    ]
+  }
+}

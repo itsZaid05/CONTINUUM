@@ -184,10 +184,13 @@ python -m continuum.cli eval-arbiter --backend gemini --output reports/arbiter_g
 python -m continuum.cli compare [--output reports/comparison.json]  # glob data/scenarios/*.json + shadow metrics
 python -m continuum.cli ablate   # stale-gate + shadow ablation → reports/ablation.{md,json}
 python -m continuum.cli serve --host 0.0.0.0 --port 8000  # FastAPI preview (uvicorn)
+python -m continuum.cli eval-planner   # AI/ML B: manifest-driven planner on planner_gold (dev + held-out) vs baseline
+python -m continuum.cli eval-runtime   # AI/ML B: 18 timed scenarios through AgentRuntime + ablations (docs/AIML_B.md)
 
 # Makefile aliases
 make test      # pytest -q
 make lint      # ruff check + mypy
+make eval-b    # AI/ML B planner + runtime evaluation → reports/planner_eval.md, reports/runtime_eval.md
 make eval      # test + eval-arbiter + compare + ls reports/
 make replay    # delhi_bangalore --trace
 make demo      # uvicorn continuum.api:app --host 0.0.0.0 --port 8000  (preview: https://8000-*.e2b.app)

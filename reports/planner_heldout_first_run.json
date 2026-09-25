@@ -1,0 +1,1192 @@
+{
+  "system": "planner",
+  "gold": "data/gold/planner_gold.jsonl",
+  "gold_hash": "e92fa9a38623",
+  "reference_date": "2026-09-25",
+  "overall": {
+    "cases": 28,
+    "fully_correct": 0.9643,
+    "action_accuracy": 1.0,
+    "goal_accuracy": 0.963,
+    "plan_exact_match": 0.9583,
+    "arg_precision": 1.0,
+    "arg_recall": 0.9592,
+    "arg_f1": 0.9792,
+    "clarify_precision": 1.0,
+    "clarify_recall": 1.0,
+    "unnecessary_clarification_rate": 0.0,
+    "confirmation_accuracy": 1.0,
+    "unsafe_write_plans": 0,
+    "crashes": 0,
+    "latency_p50_ms": 0.436,
+    "latency_p95_ms": 1.566,
+    "latency_mean_ms": 0.589
+  },
+  "by_split": {
+    "heldout": {
+      "cases": 28,
+      "fully_correct": 0.9643,
+      "action_accuracy": 1.0,
+      "goal_accuracy": 0.963,
+      "plan_exact_match": 0.9583,
+      "arg_precision": 1.0,
+      "arg_recall": 0.9592,
+      "arg_f1": 0.9792,
+      "clarify_precision": 1.0,
+      "clarify_recall": 1.0,
+      "unnecessary_clarification_rate": 0.0,
+      "confirmation_accuracy": 1.0,
+      "unsafe_write_plans": 0,
+      "crashes": 0,
+      "latency_p50_ms": 0.436,
+      "latency_p95_ms": 1.566,
+      "latency_mean_ms": 0.589
+    }
+  },
+  "by_domain": {
+    "builtin": {
+      "cases": 3,
+      "fully_correct": 1.0,
+      "action_accuracy": 1.0,
+      "goal_accuracy": 1.0,
+      "plan_exact_match": 1.0,
+      "arg_precision": 1.0,
+      "arg_recall": 1.0,
+      "arg_f1": 1.0,
+      "clarify_precision": 0.0,
+      "clarify_recall": 0.0,
+      "unnecessary_clarification_rate": 0.0,
+      "confirmation_accuracy": 1.0,
+      "unsafe_write_plans": 0,
+      "crashes": 0,
+      "latency_p50_ms": 0.436,
+      "latency_p95_ms": 0.627,
+      "latency_mean_ms": 0.485
+    },
+    "dining": {
+      "cases": 5,
+      "fully_correct": 1.0,
+      "action_accuracy": 1.0,
+      "goal_accuracy": 1.0,
+      "plan_exact_match": 1.0,
+      "arg_precision": 1.0,
+      "arg_recall": 1.0,
+      "arg_f1": 1.0,
+      "clarify_precision": 1.0,
+      "clarify_recall": 1.0,
+      "unnecessary_clarification_rate": 0.0,
+      "confirmation_accuracy": 1.0,
+      "unsafe_write_plans": 0,
+      "crashes": 0,
+      "latency_p50_ms": 0.741,
+      "latency_p95_ms": 2.587,
+      "latency_mean_ms": 1.088
+    },
+    "home": {
+      "cases": 11,
+      "fully_correct": 1.0,
+      "action_accuracy": 1.0,
+      "goal_accuracy": 1.0,
+      "plan_exact_match": 1.0,
+      "arg_precision": 1.0,
+      "arg_recall": 1.0,
+      "arg_f1": 1.0,
+      "clarify_precision": 1.0,
+      "clarify_recall": 1.0,
+      "unnecessary_clarification_rate": 0.0,
+      "confirmation_accuracy": 1.0,
+      "unsafe_write_plans": 0,
+      "crashes": 0,
+      "latency_p50_ms": 0.359,
+      "latency_p95_ms": 0.794,
+      "latency_mean_ms": 0.389
+    },
+    "incar": {
+      "cases": 4,
+      "fully_correct": 1.0,
+      "action_accuracy": 1.0,
+      "goal_accuracy": 1.0,
+      "plan_exact_match": 1.0,
+      "arg_precision": 1.0,
+      "arg_recall": 1.0,
+      "arg_f1": 1.0,
+      "clarify_precision": 0.0,
+      "clarify_recall": 0.0,
+      "unnecessary_clarification_rate": 0.0,
+      "confirmation_accuracy": 1.0,
+      "unsafe_write_plans": 0,
+      "crashes": 0,
+      "latency_p50_ms": 0.543,
+      "latency_p95_ms": 0.615,
+      "latency_mean_ms": 0.479
+    },
+    "support": {
+      "cases": 3,
+      "fully_correct": 0.6667,
+      "action_accuracy": 1.0,
+      "goal_accuracy": 0.6667,
+      "plan_exact_match": 0.6667,
+      "arg_precision": 1.0,
+      "arg_recall": 0.5,
+      "arg_f1": 0.6667,
+      "clarify_precision": 0.0,
+      "clarify_recall": 0.0,
+      "unnecessary_clarification_rate": 0.0,
+      "confirmation_accuracy": 1.0,
+      "unsafe_write_plans": 0,
+      "crashes": 0,
+      "latency_p50_ms": 0.415,
+      "latency_p95_ms": 0.849,
+      "latency_mean_ms": 0.527
+    },
+    "troubleshooting": {
+      "cases": 2,
+      "fully_correct": 1.0,
+      "action_accuracy": 1.0,
+      "goal_accuracy": 1.0,
+      "plan_exact_match": 1.0,
+      "arg_precision": 1.0,
+      "arg_recall": 1.0,
+      "arg_f1": 1.0,
+      "clarify_precision": 0.0,
+      "clarify_recall": 0.0,
+      "unnecessary_clarification_rate": 0.0,
+      "confirmation_accuracy": 1.0,
+      "unsafe_write_plans": 0,
+      "crashes": 0,
+      "latency_p50_ms": 1.533,
+      "latency_p95_ms": 1.533,
+      "latency_mean_ms": 0.91
+    }
+  },
+  "cases": [
+    {
+      "id": "h01",
+      "split": "heldout",
+      "domain": "dining",
+      "utterance": "Find an Italian restaurant in Pune for 4 people",
+      "expected_action": "plan",
+      "predicted_action": "plan",
+      "action_ok": true,
+      "tp": 3,
+      "fp": 0,
+      "fn": 0,
+      "unsafe_write": false,
+      "confirm_ok": true,
+      "latency_ms": 2.5869999999486026,
+      "errors": [],
+      "goal_ok": true,
+      "tools_ok": true,
+      "correct": true,
+      "prediction": {
+        "action": "plan",
+        "goal": "search_restaurants",
+        "tools": [
+          "search_restaurants"
+        ],
+        "args": {
+          "search_restaurants": {
+            "city": "Pune",
+            "cuisine": "italian",
+            "party_size": 4
+          }
+        },
+        "missing": [],
+        "needs_confirmation": false,
+        "arbiter": "NOISE",
+        "mode": "new"
+      }
+    },
+    {
+      "id": "h02",
+      "split": "heldout",
+      "domain": "dining",
+      "utterance": "Book a table for 2 at a Japanese place in Mumbai tomorrow at 8pm",
+      "expected_action": "plan",
+      "predicted_action": "plan",
+      "action_ok": true,
+      "tp": 6,
+      "fp": 0,
+      "fn": 0,
+      "unsafe_write": false,
+      "confirm_ok": true,
+      "latency_ms": 0.7407000002785935,
+      "errors": [],
+      "goal_ok": true,
+      "tools_ok": true,
+      "correct": true,
+      "prediction": {
+        "action": "plan",
+        "goal": "reserve_table",
+        "tools": [
+          "search_restaurants",
+          "reserve_table"
+        ],
+        "args": {
+          "search_restaurants": {
+            "city": "Mumbai",
+            "cuisine": "japanese",
+            "party_size": 2
+          },
+          "reserve_table": {
+            "restaurant_id": "ref(search_restaurants.restaurant_id)",
+            "party_size": 2,
+            "date": "2026-09-26",
+            "time": "20:00"
+          }
+        },
+        "missing": [],
+        "needs_confirmation": false,
+        "arbiter": "NOISE",
+        "mode": "new"
+      }
+    },
+    {
+      "id": "h03",
+      "split": "heldout",
+      "domain": "dining",
+      "utterance": "actually make it Chinese",
+      "expected_action": "plan",
+      "predicted_action": "plan",
+      "action_ok": true,
+      "tp": 3,
+      "fp": 0,
+      "fn": 0,
+      "unsafe_write": false,
+      "confirm_ok": true,
+      "latency_ms": 1.565900000059628,
+      "errors": [],
+      "goal_ok": true,
+      "tools_ok": true,
+      "correct": true,
+      "prediction": {
+        "action": "plan",
+        "goal": "search_restaurants",
+        "tools": [
+          "search_restaurants"
+        ],
+        "args": {
+          "search_restaurants": {
+            "city": "Pune",
+            "cuisine": "chinese",
+            "party_size": 4
+          }
+        },
+        "missing": [],
+        "needs_confirmation": false,
+        "arbiter": "MODIFY",
+        "mode": "modify"
+      }
+    },
+    {
+      "id": "h04",
+      "split": "heldout",
+      "domain": "dining",
+      "utterance": "Don't reserve anything yet, just show me places",
+      "expected_action": "plan",
+      "predicted_action": "plan",
+      "action_ok": true,
+      "tp": 2,
+      "fp": 0,
+      "fn": 0,
+      "unsafe_write": false,
+      "confirm_ok": true,
+      "latency_ms": 0.32390000069426605,
+      "errors": [],
+      "goal_ok": true,
+      "tools_ok": true,
+      "correct": true,
+      "prediction": {
+        "action": "plan",
+        "goal": "search_restaurants",
+        "tools": [
+          "search_restaurants"
+        ],
+        "args": {
+          "search_restaurants": {
+            "city": "Pune",
+            "party_size": 4
+          }
+        },
+        "missing": [],
+        "needs_confirmation": false,
+        "arbiter": "RETRACT",
+        "mode": "retract"
+      }
+    },
+    {
+      "id": "h05",
+      "split": "heldout",
+      "domain": "dining",
+      "utterance": "Can we get a table in Delhi on Sunday?",
+      "expected_action": "clarify",
+      "predicted_action": "clarify",
+      "action_ok": true,
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "unsafe_write": false,
+      "confirm_ok": null,
+      "latency_ms": 0.2243999997517676,
+      "errors": [],
+      "goal_ok": true,
+      "missing_ok": true,
+      "correct": true,
+      "prediction": {
+        "action": "clarify",
+        "goal": "reserve_table",
+        "tools": [
+          "search_restaurants",
+          "reserve_table"
+        ],
+        "args": {
+          "search_restaurants": {
+            "city": "Delhi"
+          },
+          "reserve_table": {
+            "restaurant_id": "ref(search_restaurants.restaurant_id)",
+            "date": "2026-09-27"
+          }
+        },
+        "missing": [
+          "party_size"
+        ],
+        "needs_confirmation": true,
+        "arbiter": "MODIFY",
+        "mode": "new"
+      }
+    },
+    {
+      "id": "h06",
+      "split": "heldout",
+      "domain": "home",
+      "utterance": "What's the weather in Pune tomorrow?",
+      "expected_action": "plan",
+      "predicted_action": "plan",
+      "action_ok": true,
+      "tp": 2,
+      "fp": 0,
+      "fn": 0,
+      "unsafe_write": false,
+      "confirm_ok": true,
+      "latency_ms": 0.4951999999320833,
+      "errors": [],
+      "goal_ok": true,
+      "tools_ok": true,
+      "correct": true,
+      "prediction": {
+        "action": "plan",
+        "goal": "get_weather",
+        "tools": [
+          "get_weather"
+        ],
+        "args": {
+          "get_weather": {
+            "city": "Pune",
+            "date": "2026-09-26"
+          }
+        },
+        "missing": [],
+        "needs_confirmation": false,
+        "arbiter": "MODIFY",
+        "mode": "new"
+      }
+    },
+    {
+      "id": "h07",
+      "split": "heldout",
+      "domain": "home",
+      "utterance": "Will it rain in Chennai on Monday",
+      "expected_action": "plan",
+      "predicted_action": "plan",
+      "action_ok": true,
+      "tp": 2,
+      "fp": 0,
+      "fn": 0,
+      "unsafe_write": false,
+      "confirm_ok": true,
+      "latency_ms": 0.2875000000130967,
+      "errors": [],
+      "goal_ok": true,
+      "tools_ok": true,
+      "correct": true,
+      "prediction": {
+        "action": "plan",
+        "goal": "get_weather",
+        "tools": [
+          "get_weather"
+        ],
+        "args": {
+          "get_weather": {
+            "city": "Chennai",
+            "date": "2026-09-28"
+          }
+        },
+        "missing": [],
+        "needs_confirmation": false,
+        "arbiter": "MODIFY",
+        "mode": "new"
+      }
+    },
+    {
+      "id": "h08",
+      "split": "heldout",
+      "domain": "home",
+      "utterance": "what about Mumbai?",
+      "expected_action": "plan",
+      "predicted_action": "plan",
+      "action_ok": true,
+      "tp": 2,
+      "fp": 0,
+      "fn": 0,
+      "unsafe_write": false,
+      "confirm_ok": true,
+      "latency_ms": 0.35930000012740493,
+      "errors": [],
+      "goal_ok": true,
+      "tools_ok": true,
+      "correct": true,
+      "prediction": {
+        "action": "plan",
+        "goal": "get_weather",
+        "tools": [
+          "get_weather"
+        ],
+        "args": {
+          "get_weather": {
+            "city": "Mumbai",
+            "date": "2026-09-26"
+          }
+        },
+        "missing": [],
+        "needs_confirmation": false,
+        "arbiter": "MODIFY",
+        "mode": "modify"
+      }
+    },
+    {
+      "id": "h09",
+      "split": "heldout",
+      "domain": "home",
+      "utterance": "Set the bedroom thermostat to 21 degrees",
+      "expected_action": "plan",
+      "predicted_action": "plan",
+      "action_ok": true,
+      "tp": 2,
+      "fp": 0,
+      "fn": 0,
+      "unsafe_write": false,
+      "confirm_ok": true,
+      "latency_ms": 0.45140000020182924,
+      "errors": [],
+      "goal_ok": true,
+      "tools_ok": true,
+      "correct": true,
+      "prediction": {
+        "action": "plan",
+        "goal": "set_thermostat",
+        "tools": [
+          "set_thermostat"
+        ],
+        "args": {
+          "set_thermostat": {
+            "temperature": 21,
+            "room": "bedroom"
+          }
+        },
+        "missing": [],
+        "needs_confirmation": false,
+        "arbiter": "MODIFY",
+        "mode": "new"
+      }
+    },
+    {
+      "id": "h10",
+      "split": "heldout",
+      "domain": "home",
+      "utterance": "no, 19",
+      "expected_action": "plan",
+      "predicted_action": "plan",
+      "action_ok": true,
+      "tp": 2,
+      "fp": 0,
+      "fn": 0,
+      "unsafe_write": false,
+      "confirm_ok": true,
+      "latency_ms": 0.48289999995176913,
+      "errors": [],
+      "goal_ok": true,
+      "tools_ok": true,
+      "correct": true,
+      "prediction": {
+        "action": "plan",
+        "goal": "set_thermostat",
+        "tools": [
+          "set_thermostat"
+        ],
+        "args": {
+          "set_thermostat": {
+            "temperature": 19,
+            "room": "bedroom"
+          }
+        },
+        "missing": [],
+        "needs_confirmation": false,
+        "arbiter": "NOISE",
+        "mode": "modify"
+      }
+    },
+    {
+      "id": "h11",
+      "split": "heldout",
+      "domain": "home",
+      "utterance": "What meetings do I have on Wednesday?",
+      "expected_action": "plan",
+      "predicted_action": "plan",
+      "action_ok": true,
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "unsafe_write": false,
+      "confirm_ok": true,
+      "latency_ms": 0.3552999996827566,
+      "errors": [],
+      "goal_ok": true,
+      "tools_ok": true,
+      "correct": true,
+      "prediction": {
+        "action": "plan",
+        "goal": "list_events",
+        "tools": [
+          "list_events"
+        ],
+        "args": {
+          "list_events": {
+            "date": "2026-09-30"
+          }
+        },
+        "missing": [],
+        "needs_confirmation": false,
+        "arbiter": "MODIFY",
+        "mode": "new"
+      }
+    },
+    {
+      "id": "h12",
+      "split": "heldout",
+      "domain": "home",
+      "utterance": "Schedule a meeting with Priya tomorrow at 3pm",
+      "expected_action": "plan",
+      "predicted_action": "plan",
+      "action_ok": true,
+      "tp": 3,
+      "fp": 0,
+      "fn": 0,
+      "unsafe_write": false,
+      "confirm_ok": true,
+      "latency_ms": 0.7937000000310945,
+      "errors": [],
+      "goal_ok": true,
+      "tools_ok": true,
+      "correct": true,
+      "prediction": {
+        "action": "plan",
+        "goal": "create_event",
+        "tools": [
+          "create_event"
+        ],
+        "args": {
+          "create_event": {
+            "title": "meeting with Priya at 3pm",
+            "date": "2026-09-26",
+            "time": "15:00"
+          }
+        },
+        "missing": [],
+        "needs_confirmation": false,
+        "arbiter": "MODIFY",
+        "mode": "new"
+      }
+    },
+    {
+      "id": "h13",
+      "split": "heldout",
+      "domain": "home",
+      "utterance": "delete that meeting",
+      "expected_action": "plan",
+      "predicted_action": "plan",
+      "action_ok": true,
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "unsafe_write": false,
+      "confirm_ok": true,
+      "latency_ms": 0.3359000002092216,
+      "errors": [],
+      "goal_ok": true,
+      "tools_ok": true,
+      "correct": true,
+      "prediction": {
+        "action": "plan",
+        "goal": "delete_event",
+        "tools": [
+          "delete_event"
+        ],
+        "args": {
+          "delete_event": {
+            "event_id": "EV-4410"
+          }
+        },
+        "missing": [],
+        "needs_confirmation": false,
+        "arbiter": "MODIFY",
+        "mode": "new"
+      }
+    },
+    {
+      "id": "h14",
+      "split": "heldout",
+      "domain": "home",
+      "utterance": "Remind me about the dentist",
+      "expected_action": "clarify",
+      "predicted_action": "clarify",
+      "action_ok": true,
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "unsafe_write": false,
+      "confirm_ok": null,
+      "latency_ms": 0.3622999993240228,
+      "errors": [],
+      "goal_ok": true,
+      "missing_ok": true,
+      "correct": true,
+      "prediction": {
+        "action": "clarify",
+        "goal": "create_event",
+        "tools": [
+          "create_event"
+        ],
+        "args": {
+          "create_event": {
+            "title": "dentist"
+          }
+        },
+        "missing": [
+          "date"
+        ],
+        "needs_confirmation": false,
+        "arbiter": "MODIFY",
+        "mode": "new"
+      }
+    },
+    {
+      "id": "h15",
+      "split": "heldout",
+      "domain": "home",
+      "utterance": "hmm, okay",
+      "expected_action": "noop",
+      "predicted_action": "noop",
+      "action_ok": true,
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "unsafe_write": false,
+      "confirm_ok": null,
+      "latency_ms": 0.006100000064179767,
+      "errors": [],
+      "correct": true,
+      "prediction": {
+        "action": "noop",
+        "goal": "get_weather",
+        "tools": [],
+        "args": {},
+        "missing": [],
+        "needs_confirmation": false,
+        "arbiter": "NOISE",
+        "mode": "noop"
+      }
+    },
+    {
+      "id": "h16",
+      "split": "heldout",
+      "domain": "home",
+      "utterance": "Make it warmer in the kitchen",
+      "expected_action": "clarify",
+      "predicted_action": "clarify",
+      "action_ok": true,
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "unsafe_write": false,
+      "confirm_ok": null,
+      "latency_ms": 0.3507999999783351,
+      "errors": [],
+      "goal_ok": true,
+      "missing_ok": true,
+      "correct": true,
+      "prediction": {
+        "action": "clarify",
+        "goal": "set_thermostat",
+        "tools": [
+          "set_thermostat"
+        ],
+        "args": {
+          "set_thermostat": {
+            "room": "kitchen"
+          }
+        },
+        "missing": [
+          "temperature"
+        ],
+        "needs_confirmation": false,
+        "arbiter": "MODIFY",
+        "mode": "new"
+      }
+    },
+    {
+      "id": "h17",
+      "split": "heldout",
+      "domain": "builtin",
+      "utterance": "Show me evening flights to Kolkata on Sunday",
+      "expected_action": "plan",
+      "predicted_action": "plan",
+      "action_ok": true,
+      "tp": 3,
+      "fp": 0,
+      "fn": 0,
+      "unsafe_write": false,
+      "confirm_ok": true,
+      "latency_ms": 0.6274000006669667,
+      "errors": [],
+      "goal_ok": true,
+      "tools_ok": true,
+      "correct": true,
+      "prediction": {
+        "action": "plan",
+        "goal": "search_flights",
+        "tools": [
+          "search_flights"
+        ],
+        "args": {
+          "search_flights": {
+            "to": "Kolkata",
+            "date": "2026-09-27",
+            "slot": "evening"
+          }
+        },
+        "missing": [],
+        "needs_confirmation": false,
+        "arbiter": "MODIFY",
+        "mode": "new"
+      }
+    },
+    {
+      "id": "h18",
+      "split": "heldout",
+      "domain": "builtin",
+      "utterance": "wait, Hyderabad",
+      "expected_action": "plan",
+      "predicted_action": "plan",
+      "action_ok": true,
+      "tp": 2,
+      "fp": 0,
+      "fn": 0,
+      "unsafe_write": false,
+      "confirm_ok": true,
+      "latency_ms": 0.4361000001154025,
+      "errors": [],
+      "goal_ok": true,
+      "tools_ok": true,
+      "correct": true,
+      "prediction": {
+        "action": "plan",
+        "goal": "search_flights",
+        "tools": [
+          "search_flights"
+        ],
+        "args": {
+          "search_flights": {
+            "to": "Hyderabad",
+            "slot": "evening"
+          }
+        },
+        "missing": [],
+        "needs_confirmation": false,
+        "arbiter": "NOISE",
+        "mode": "modify"
+      }
+    },
+    {
+      "id": "h19",
+      "split": "heldout",
+      "domain": "builtin",
+      "utterance": "Hold a seat on a flight to Goa but don't confirm it yet",
+      "expected_action": "plan",
+      "predicted_action": "plan",
+      "action_ok": true,
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "unsafe_write": false,
+      "confirm_ok": true,
+      "latency_ms": 0.39199999991978984,
+      "errors": [],
+      "goal_ok": true,
+      "tools_ok": true,
+      "correct": true,
+      "prediction": {
+        "action": "plan",
+        "goal": "hold_seat",
+        "tools": [
+          "search_flights",
+          "hold_seat"
+        ],
+        "args": {
+          "search_flights": {
+            "to": "Goa"
+          },
+          "hold_seat": {
+            "flight_id": "ref(search_flights.flight_id)"
+          }
+        },
+        "missing": [],
+        "needs_confirmation": false,
+        "arbiter": "RETRACT",
+        "mode": "new"
+      }
+    },
+    {
+      "id": "h20",
+      "split": "heldout",
+      "domain": "support",
+      "utterance": "My internet is down since morning, raise a complaint",
+      "expected_action": "plan",
+      "predicted_action": "plan",
+      "action_ok": true,
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "unsafe_write": false,
+      "confirm_ok": true,
+      "latency_ms": 0.8492999995723949,
+      "errors": [],
+      "goal_ok": true,
+      "tools_ok": true,
+      "correct": true,
+      "prediction": {
+        "action": "plan",
+        "goal": "create_ticket",
+        "tools": [
+          "create_ticket"
+        ],
+        "args": {
+          "create_ticket": {
+            "issue": "My internet is down since morning"
+          }
+        },
+        "missing": [],
+        "needs_confirmation": false,
+        "arbiter": "MODIFY",
+        "mode": "new"
+      }
+    },
+    {
+      "id": "h21",
+      "split": "heldout",
+      "domain": "support",
+      "utterance": "any update on my complaint?",
+      "expected_action": "plan",
+      "predicted_action": "plan",
+      "action_ok": true,
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "unsafe_write": false,
+      "confirm_ok": true,
+      "latency_ms": 0.3155999993396108,
+      "errors": [],
+      "goal_ok": true,
+      "tools_ok": true,
+      "correct": true,
+      "prediction": {
+        "action": "plan",
+        "goal": "get_ticket_status",
+        "tools": [
+          "get_ticket_status"
+        ],
+        "args": {
+          "get_ticket_status": {
+            "ticket_id": "TCK-3301"
+          }
+        },
+        "missing": [],
+        "needs_confirmation": false,
+        "arbiter": "MODIFY",
+        "mode": "new"
+      }
+    },
+    {
+      "id": "h22",
+      "split": "heldout",
+      "domain": "support",
+      "utterance": "Add a note to TCK-5120 saying the customer called back",
+      "expected_action": "plan",
+      "predicted_action": "plan",
+      "action_ok": true,
+      "tp": 0,
+      "fp": 0,
+      "fn": 2,
+      "unsafe_write": false,
+      "confirm_ok": true,
+      "latency_ms": 0.4151999992245692,
+      "errors": [
+        "goal create_ticket != update_ticket",
+        "tools ['create_ticket'] != ['update_ticket']",
+        "update_ticket.note=None lacks 'customer called back'",
+        "update_ticket.ticket_id=None expected 'tck-5120'"
+      ],
+      "goal_ok": false,
+      "tools_ok": false,
+      "correct": false,
+      "prediction": {
+        "action": "plan",
+        "goal": "create_ticket",
+        "tools": [
+          "create_ticket"
+        ],
+        "args": {
+          "create_ticket": {
+            "issue": "the customer called back"
+          }
+        },
+        "missing": [],
+        "needs_confirmation": false,
+        "arbiter": "MODIFY",
+        "mode": "new"
+      }
+    },
+    {
+      "id": "h23",
+      "split": "heldout",
+      "domain": "troubleshooting",
+      "utterance": "The DW-220 is showing F3, what should I do?",
+      "expected_action": "plan",
+      "predicted_action": "plan",
+      "action_ok": true,
+      "tp": 2,
+      "fp": 0,
+      "fn": 0,
+      "unsafe_write": false,
+      "confirm_ok": true,
+      "latency_ms": 1.533499999823107,
+      "errors": [],
+      "goal_ok": true,
+      "tools_ok": true,
+      "correct": true,
+      "prediction": {
+        "action": "plan",
+        "goal": "lookup_manual",
+        "tools": [
+          "lookup_manual"
+        ],
+        "args": {
+          "lookup_manual": {
+            "model": "DW-220",
+            "error_code": "F3"
+          }
+        },
+        "missing": [],
+        "needs_confirmation": false,
+        "arbiter": "MODIFY",
+        "mode": "new"
+      }
+    },
+    {
+      "id": "h24",
+      "split": "heldout",
+      "domain": "troubleshooting",
+      "utterance": "I need a repair visit on Wednesday afternoon",
+      "expected_action": "plan",
+      "predicted_action": "plan",
+      "action_ok": true,
+      "tp": 3,
+      "fp": 0,
+      "fn": 0,
+      "unsafe_write": false,
+      "confirm_ok": true,
+      "latency_ms": 0.28649999967456097,
+      "errors": [],
+      "goal_ok": true,
+      "tools_ok": true,
+      "correct": true,
+      "prediction": {
+        "action": "plan",
+        "goal": "schedule_technician",
+        "tools": [
+          "schedule_technician"
+        ],
+        "args": {
+          "schedule_technician": {
+            "model": "DW-220",
+            "date": "2026-09-30",
+            "slot": "afternoon"
+          }
+        },
+        "missing": [],
+        "needs_confirmation": true,
+        "arbiter": "MODIFY",
+        "mode": "new"
+      }
+    },
+    {
+      "id": "h25",
+      "split": "heldout",
+      "domain": "incar",
+      "utterance": "Take me to Cubbon Park",
+      "expected_action": "plan",
+      "predicted_action": "plan",
+      "action_ok": true,
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "unsafe_write": false,
+      "confirm_ok": true,
+      "latency_ms": 0.6150999997771578,
+      "errors": [],
+      "goal_ok": true,
+      "tools_ok": true,
+      "correct": true,
+      "prediction": {
+        "action": "plan",
+        "goal": "start_navigation",
+        "tools": [
+          "compute_route",
+          "start_navigation"
+        ],
+        "args": {
+          "compute_route": {
+            "destination": "Cubbon Park"
+          },
+          "start_navigation": {
+            "route_id": "ref(compute_route.route_id)"
+          }
+        },
+        "missing": [],
+        "needs_confirmation": false,
+        "arbiter": "MODIFY",
+        "mode": "new"
+      }
+    },
+    {
+      "id": "h26",
+      "split": "heldout",
+      "domain": "incar",
+      "utterance": "Where can I park near the stadium?",
+      "expected_action": "plan",
+      "predicted_action": "plan",
+      "action_ok": true,
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "unsafe_write": false,
+      "confirm_ok": true,
+      "latency_ms": 0.3087999994022539,
+      "errors": [],
+      "goal_ok": true,
+      "tools_ok": true,
+      "correct": true,
+      "prediction": {
+        "action": "plan",
+        "goal": "find_parking",
+        "tools": [
+          "find_parking"
+        ],
+        "args": {
+          "find_parking": {
+            "near": "stadium"
+          }
+        },
+        "missing": [],
+        "needs_confirmation": false,
+        "arbiter": "MODIFY",
+        "mode": "new"
+      }
+    },
+    {
+      "id": "h27",
+      "split": "heldout",
+      "domain": "incar",
+      "utterance": "Turn the temperature down to 18",
+      "expected_action": "plan",
+      "predicted_action": "plan",
+      "action_ok": true,
+      "tp": 1,
+      "fp": 0,
+      "fn": 0,
+      "unsafe_write": false,
+      "confirm_ok": true,
+      "latency_ms": 0.5430999999589403,
+      "errors": [],
+      "goal_ok": true,
+      "tools_ok": true,
+      "correct": true,
+      "prediction": {
+        "action": "plan",
+        "goal": "set_climate",
+        "tools": [
+          "set_climate"
+        ],
+        "args": {
+          "set_climate": {
+            "temperature": 18
+          }
+        },
+        "missing": [],
+        "needs_confirmation": false,
+        "arbiter": "MODIFY",
+        "mode": "new"
+      }
+    },
+    {
+      "id": "h28",
+      "split": "heldout",
+      "domain": "incar",
+      "utterance": "avoid highways",
+      "expected_action": "plan",
+      "predicted_action": "plan",
+      "action_ok": true,
+      "tp": 2,
+      "fp": 0,
+      "fn": 0,
+      "unsafe_write": false,
+      "confirm_ok": true,
+      "latency_ms": 0.4503999998632935,
+      "errors": [],
+      "goal_ok": true,
+      "tools_ok": true,
+      "correct": true,
+      "prediction": {
+        "action": "plan",
+        "goal": "start_navigation",
+        "tools": [
+          "compute_route",
+          "start_navigation"
+        ],
+        "args": {
+          "compute_route": {
+            "destination": "Cubbon Park",
+            "avoid": "highways"
+          },
+          "start_navigation": {
+            "route_id": "ref(compute_route.route_id)"
+          }
+        },
+        "missing": [],
+        "needs_confirmation": false,
+        "arbiter": "NOISE",
+        "mode": "modify"
+      }
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+[
+  {
+    "name": "search_restaurants",
+    "description": "Search restaurants in a city by cuisine",
+    "domain": "dining",
+    "keywords": ["restaurant", "food", "eat", "dinner", "lunch", "place"],
+    "mutation_class": "READ_ONLY",
+    "delay_s": 0.9,
+    "arguments": {
+      "type": "object",
+      "properties": {
+        "city": {"type": "string"},
+        "cuisine": {"type": "string", "enum": ["italian", "chinese", "indian", "thai", "mexican", "japanese"]},
+        "party_size": {"type": "integer", "x-units": ["people", "persons", "guests"]}
+      },
+      "required": ["city"]
+    },
+    "returns": {"properties": {"restaurant_id": {"type": "string"}, "name": {"type": "string"}}}
+  },
+  {
+    "name": "reserve_table",
+    "description": "Reserve a table at a restaurant",
+    "domain": "dining",
+    "keywords": ["table", "reserve", "reservation"],
+    "mutation_class": "IRREVERSIBLE",
+    "delay_s": 1.1,
+    "arguments": {
+      "type": "object",
+      "properties": {
+        "restaurant_id": {"type": "string"},
+        "party_size": {"type": "integer", "x-units": ["people", "persons", "guests"]},
+        "date": {"type": "string", "format": "date"},
+        "time": {"type": "string", "format": "time"}
+      },
+      "required": ["restaurant_id", "party_size", "date"]
+    },
+    "returns": {"properties": {"reservation_id": {"type": "string"}, "status": {"type": "string"}}}
+  }
+]

@@ -440,6 +440,65 @@ def ablate(
         console.print(f"[bold]{r['mechanism']}[/]  {r['verdict']}", highlight=False)
 
 
+@app.command(name="eval-planner")
+def eval_planner(
+    gold: Path = typer.Option(  # noqa: B008
+        Path("data/gold/planner_gold.jsonl"), "--gold", help="Planner gold JSONL"
+    ),
+    output: Path = typer.Option(  # noqa: B008
+        Path("reports/planner_eval.json"), "--output", "-o"
+    ),
+) -> None:
+    """AI/ML B: manifest-driven planner vs the pre-planner baseline (dev + held-out)."""
+    from .evaluation.planner_eval import evaluate, render_markdown
+
+    planner = evaluate(gold, system="planner")
+    baseline = evaluate(gold, system="baseline")
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(
+        json.dumps({"planner": planner, "baseline": baseline}, indent=2, default=str), encoding="utf-8"
+    )
+    output.with_suffix(".md").write_text(render_markdown(planner, baseline), encoding="utf-8")
+    for split, agg in planner["by_split"].items():
+        console.print(
+            f"[bold]{split:8s}[/] fully correct {agg['fully_correct']:.3f}  goal {agg['goal_accuracy']:.3f}  "
+            f"arg F1 {agg['arg_f1']:.3f}  unsafe writes {agg['unsafe_write_plans']}  p95 {agg['latency_p95_ms']}ms",
+            highlight=False,
+        )
+    console.print(
+        f"baseline fully correct {baseline['overall']['fully_correct']:.3f}  (gold {planner['gold_hash']})"
+    )
+    console.print(f"Wrote {output} and {output.with_suffix('.md')}")
+
+
+@app.command(name="eval-runtime")
+def eval_runtime(
+    suite: Path = typer.Option(  # noqa: B008
+        Path("data/runtime_scenarios/text_suite.json"), "--suite", help="Scenario suite JSON"
+    ),
+    output: Path = typer.Option(  # noqa: B008
+        Path("reports/runtime_eval.json"), "--output", "-o"
+    ),
+    time_scale: float = typer.Option(0.1, "--time-scale", help="Scale for event times and tool delays"),
+    ablations: bool = typer.Option(True, "--ablations/--no-ablations"),  # noqa: B008
+) -> None:
+    """AI/ML B: timed scenarios through AgentRuntime, scored on the Theme 05 categories."""
+    from .evaluation.runtime_eval import evaluate, render_markdown
+
+    report = evaluate(suite, ablations=ablations, time_scale=time_scale)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(json.dumps(report, indent=2, default=str), encoding="utf-8")
+    output.with_suffix(".md").write_text(render_markdown(report), encoding="utf-8")
+    for name, res in report["systems"].items():
+        s = res["summary"]
+        console.print(
+            f"[bold]{name:26s}[/] score {s['mean_score']:6.2f}  dup {s['duplicate_mutations']}  "
+            f"stale {s['stale_action_rate']}  regretted {s['regretted_irreversible']}",
+            highlight=False,
+        )
+    console.print(f"Wrote {output} and {output.with_suffix('.md')}")
+
+
 @app.command()
 def serve(host: str = "0.0.0.0", port: int = 8000) -> None:  # noqa: S104
     """FastAPI preview (binds 0.0.0.0 for the e2b sandbox preview)."""

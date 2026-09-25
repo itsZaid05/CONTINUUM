@@ -48,10 +48,11 @@ class PlanStep:
     params: dict[str, Any]
     depends_on: list[str] = field(default_factory=list)
     idempotency_key: str | None = None  # filled by the backend right before dispatch
+    risk_level: RiskLevel | None = None  # manifest-declared tier; overrides the kind table
 
     @property
     def risk(self) -> RiskLevel:
-        return risk_for(self.kind)
+        return self.risk_level if self.risk_level is not None else risk_for(self.kind)
 
     def to_dict(self) -> dict[str, Any]:
         return {

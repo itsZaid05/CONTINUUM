@@ -136,6 +136,37 @@ class VersionedStore:
         self._wal_append(v)
         return v
 
+    def apply_slots(
+        self,
+        slots: dict[str, Any],
+        category: ArbiterCategory | None = None,
+        evidence: list[EvidenceSpan] | None = None,
+    ) -> StateVersion:
+        """New version whose state is ``slots`` (the planner's session memory).
+
+        No-op when nothing changed — a NOISE turn or an identical correction
+        must not advance the version, or every in-flight call would look stale.
+        """
+        base = self.current()
+        if base is None:
+            return self.create_initial(slots, evidence)
+        if base.state == slots:
+            return base
+        v = StateVersion(
+            version=self._next,
+            parent=base.version,
+            committed_evidence=list(base.committed_evidence) + list(evidence or []),
+            state=dict(slots),
+            derived_from=base.version,
+            created_at=utcnow(),
+            status=StateStatus.ACTIVE,
+            arbiter_category=category,
+        )
+        self._versions[self._next] = v
+        self._next += 1
+        self._wal_append(v)
+        return v
+
     def merge_rapid(
         self,
         base_version: int,

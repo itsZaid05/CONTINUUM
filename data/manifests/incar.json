@@ -1,0 +1,81 @@
+[
+  {
+    "name": "compute_route",
+    "description": "Compute a driving route to a destination",
+    "domain": "navigation",
+    "keywords": ["route", "navigate", "directions", "drive", "take", "way"],
+    "mutation_class": "READ_ONLY",
+    "delay_s": 1.2,
+    "arguments": {
+      "type": "object",
+      "properties": {
+        "destination": {"type": "string", "description": "place to drive to"},
+        "avoid": {"type": "string", "enum": ["tolls", "highways", "ferries"]}
+      },
+      "required": ["destination"]
+    },
+    "returns": {"properties": {"route_id": {"type": "string"}, "eta_min": {"type": "integer"}}}
+  },
+  {
+    "name": "start_navigation",
+    "description": "Start turn-by-turn navigation along a computed route",
+    "domain": "navigation",
+    "keywords": ["navigation", "start", "guidance"],
+    "mutation_class": "MUTATING",
+    "delay_s": 0.3,
+    "arguments": {
+      "type": "object",
+      "properties": {"route_id": {"type": "string"}},
+      "required": ["route_id"]
+    },
+    "returns": {"properties": {"nav_session": {"type": "string"}}}
+  },
+  {
+    "name": "find_parking",
+    "description": "Find parking near a place",
+    "domain": "navigation",
+    "keywords": ["parking", "park"],
+    "mutation_class": "READ_ONLY",
+    "delay_s": 0.7,
+    "arguments": {
+      "type": "object",
+      "properties": {"near": {"type": "string", "description": "place to park near"}},
+      "required": ["near"]
+    },
+    "returns": {"properties": {"parking_id": {"type": "string"}, "spaces": {"type": "integer"}}}
+  },
+  {
+    "name": "find_charging_station",
+    "description": "Find an EV charging station near a place",
+    "domain": "navigation",
+    "keywords": ["charging", "charger", "charge", "ev", "battery"],
+    "mutation_class": "READ_ONLY",
+    "delay_s": 0.8,
+    "arguments": {
+      "type": "object",
+      "properties": {
+        "near": {"type": "string", "description": "place to search near"},
+        "connector": {"type": "string", "enum": ["ccs2", "type2", "chademo"]}
+      },
+      "required": ["near"]
+    },
+    "returns": {"properties": {"station_id": {"type": "string"}, "distance_km": {"type": "integer"}}}
+  },
+  {
+    "name": "set_climate",
+    "description": "Set the cabin air-conditioning temperature",
+    "domain": "vehicle",
+    "keywords": ["temperature", "ac", "climate", "cabin", "heat", "cool", "degrees"],
+    "mutation_class": "MUTATING",
+    "delay_s": 0.2,
+    "arguments": {
+      "type": "object",
+      "properties": {
+        "temperature": {"type": "integer", "minimum": 16, "maximum": 30, "x-units": ["degrees", "degree"]},
+        "zone": {"type": "string", "enum": ["driver", "passenger", "all"]}
+      },
+      "required": ["temperature"]
+    },
+    "returns": {"properties": {"temperature": {"type": "integer"}}}
+  }
+]
