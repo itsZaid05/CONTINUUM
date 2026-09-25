@@ -38,12 +38,33 @@ import uuid
 from dataclasses import dataclass, field
 from typing import Any, Protocol
 
+from pydantic import BaseModel, Field
+
 from .contracts import RiskLevel
 from .policy import risk_for
 
 # ---------------------------------------------------------------------------
 # Tool registry — name -> (kind, realistic delay, domain)
 # ---------------------------------------------------------------------------
+
+
+class ToolManifest(BaseModel):
+    """Runtime supplied tool contract; schemas are JSON Schema objects."""
+
+    name: str = Field(min_length=1)
+    arguments: dict[str, Any] = Field(default_factory=lambda: {"type": "object"})
+    mutation_class: str = "READ_ONLY"  # READ_ONLY | MUTATING | IRREVERSIBLE
+    cancellable: bool = True
+    idempotent: bool = True
+    authorization: str | None = None
+    postcondition: str | None = None
+    kind: str = "search"
+    delay_s: float = 0.01
+    domain: str = "generic"
+
+    @property
+    def state_changing(self) -> bool:
+        return self.mutation_class != "READ_ONLY"
 
 
 @dataclass(frozen=True)
@@ -57,6 +78,17 @@ class ToolSpec:
     def risk(self) -> RiskLevel:
         return risk_for(self.kind)
 
+    def manifest(self) -> ToolManifest:
+        return ToolManifest(
+            name=self.name,
+            kind=self.kind,
+            delay_s=self.delay_s,
+            domain=self.domain,
+            mutation_class="READ_ONLY" if self.risk == RiskLevel.FREE else self.risk.value,
+            cancellable=True,
+            idempotent=True,
+        )
+
 
 TOOL_REGISTRY: dict[str, ToolSpec] = {
     "search_flights": ToolSpec("search_flights", "search", 1.5, "flights"),
@@ -67,6 +99,42 @@ TOOL_REGISTRY: dict[str, ToolSpec] = {
     "modify_booking": ToolSpec("modify_booking", "cancel", 1.0, "booking"),
     "confirm_booking": ToolSpec("confirm_booking", "book", 2.0, "booking"),
 }
+
+
+class ToolRegistry:
+    """Manifest registry supporting tools unknown at build time."""
+
+    def __init__(self, manifests: list[ToolManifest] | None = None) -> None:
+        self._manifests: dict[str, ToolManifest] = {}
+        for manifest in manifests or []:
+            self.register(manifest)
+
+    def register(self, manifest: ToolManifest) -> None:
+        self._manifests[manifest.name] = manifest
+
+    def get(self, name: str) -> ToolManifest:
+        return self._manifests[name]
+
+    def all(self) -> list[ToolManifest]:
+        return list(self._manifests.values())
+
+    def choose_read_tool(self, state: dict[str, Any]) -> ToolManifest | None:
+        """Generic planner primitive: select a declared read-only tool, not a domain table."""
+        return next((m for m in self._manifests.values() if not m.state_changing), None)
+
+    def bind_args(self, name: str, state: dict[str, Any]) -> dict[str, Any]:
+        manifest = self.get(name)
+        required = manifest.arguments.get("required", [])
+        properties = manifest.arguments.get("properties", {})
+        args = {key: state[key] for key in properties if key in state}
+        missing = [key for key in required if key not in args]
+        if missing:
+            raise ValueError(f"missing required arguments for {name}: {missing}")
+        return args
+
+
+def default_registry() -> ToolRegistry:
+    return ToolRegistry([spec.manifest() for spec in TOOL_REGISTRY.values()])
 
 
 def spec_for(tool: str) -> ToolSpec:
@@ -128,8 +196,9 @@ def _synthesize_payload(spec: ToolSpec, params: dict[str, Any]) -> dict[str, Any
 class MockToolSandbox:
     """Owns idempotency dedup so a retried call never re-dispatches externally."""
 
-    def __init__(self) -> None:
+    def __init__(self, registry: ToolRegistry | None = None) -> None:
         self._dedup: dict[str, ToolResult] = {}
+        self.registry = registry or default_registry()
 
     def already_dispatched(self, idempotency_key: str) -> ToolResult | None:
         return self._dedup.get(idempotency_key)
@@ -146,7 +215,11 @@ class MockToolSandbox:
         caller's task is cancelled mid-flight — propagated, never swallowed,
         so the backend's task registry sees a real abort.
         """
-        spec = spec_for(tool)
+        try:
+            spec = spec_for(tool)
+        except KeyError:
+            manifest = self.registry.get(tool)
+            spec = ToolSpec(manifest.name, manifest.kind, manifest.delay_s, manifest.domain)
         params = params or {}
 
         if idempotency_key is not None:
@@ -239,9 +312,7 @@ async def execute_plan(
 
     async def _run(step: _Step) -> tuple[str, ToolResult]:
         params = _resolve_refs(step.params, results)
-        r = await sandbox.call(
-            step.tool, params, idempotency_key=step.idempotency_key, speed=speed
-        )
+        r = await sandbox.call(step.tool, params, idempotency_key=step.idempotency_key, speed=speed)
         return step.step_id, r
 
     while remaining:
