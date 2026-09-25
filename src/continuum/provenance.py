@@ -94,15 +94,17 @@ class ProvenanceGraph:
     ) -> list[str]:
         """Mark affected nodes with based_on < current_version as INVALIDATED. Return ids."""
         needle = dependents_for(category, field)
-        if not needle:
-            return []
         invalidated: list[str] = []
         for nid, node in list(self._nodes.items()):
             if node.status in {NodeStatus.INVALIDATED, NodeStatus.CANCELLED}:
                 continue
             if node.provenance.based_on >= current_version:
                 continue
-            if node.kind in needle:
+            # Actual execution lineage is authoritative.  The old kind table
+            # remains only as a conservative fallback for historical nodes.
+            directly_affected = bool(field and (field in node.input_fields or any(field.startswith(x + ".") or x.startswith(field + ".") for x in node.input_fields)))
+            upstream_invalid = bool(node.dependencies & set(invalidated))
+            if directly_affected or upstream_invalid or (not node.input_fields and node.kind in needle):
                 # create invalidated copy (frozen model)
                 new_node = node.model_copy(update={"status": NodeStatus.INVALIDATED})
                 self._nodes[nid] = new_node

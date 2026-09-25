@@ -9,7 +9,7 @@ Corresponds to: PERCEPTION → DELTA+ARBITER → VERSIONED STATE → PROVENANCE 
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from enum import StrEnum
+from ._compat import StrEnum
 from typing import Any, Literal
 
 from pydantic import BaseModel, Field, field_validator, model_validator
@@ -284,6 +284,8 @@ class ExecutionNode(BaseModel):
     risk: RiskLevel = Field(default=RiskLevel.FREE)
     result: Any | None = None
     error: str | None = None
+    dependencies: set[str] = Field(default_factory=set, description="Upstream node ids")
+    input_fields: set[str] = Field(default_factory=set, description="Intent fields actually read")
 
 
 # ---------------------------------------------------------------------------
