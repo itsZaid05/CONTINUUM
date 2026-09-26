@@ -1,0 +1,81 @@
+[
+  {
+    "name": "create_ticket",
+    "description": "Open a new customer support ticket describing a problem",
+    "domain": "support",
+    "keywords": ["ticket", "complaint", "issue", "support", "report", "problem"],
+    "mutation_class": "MUTATING",
+    "idempotent": false,
+    "delay_s": 0.8,
+    "arguments": {
+      "type": "object",
+      "properties": {
+        "issue": {"type": "string", "description": "free-text description of the problem"},
+        "priority": {"type": "string", "enum": ["low", "medium", "high"]},
+        "category": {"type": "string", "enum": ["network", "billing", "hardware", "account"]}
+      },
+      "required": ["issue"]
+    },
+    "returns": {"properties": {"ticket_id": {"type": "string"}, "status": {"type": "string"}}}
+  },
+  {
+    "name": "get_ticket_status",
+    "description": "Check the current status of an existing support ticket",
+    "domain": "support",
+    "keywords": ["ticket", "status", "progress"],
+    "mutation_class": "READ_ONLY",
+    "delay_s": 0.4,
+    "arguments": {
+      "type": "object",
+      "properties": {"ticket_id": {"type": "string", "pattern": "^TCK-\\d{3,6}$"}},
+      "required": ["ticket_id"]
+    },
+    "returns": {"properties": {"status": {"type": "string"}, "assignee": {"type": "string"}}}
+  },
+  {
+    "name": "update_ticket",
+    "description": "Change the priority of an existing support ticket or add a note to it",
+    "domain": "support",
+    "keywords": ["ticket", "priority", "note", "escalate"],
+    "mutation_class": "MUTATING",
+    "delay_s": 0.5,
+    "arguments": {
+      "type": "object",
+      "properties": {
+        "ticket_id": {"type": "string", "pattern": "^TCK-\\d{3,6}$"},
+        "priority": {"type": "string", "enum": ["low", "medium", "high"]},
+        "note": {"type": "string", "description": "free-text note to append"}
+      },
+      "required": ["ticket_id"]
+    },
+    "returns": {"properties": {"ticket_id": {"type": "string"}, "updated": {"type": "boolean"}}}
+  },
+  {
+    "name": "close_ticket",
+    "description": "Close or cancel an existing support ticket",
+    "domain": "support",
+    "keywords": ["ticket", "close", "resolved"],
+    "mutation_class": "MUTATING",
+    "delay_s": 0.4,
+    "arguments": {
+      "type": "object",
+      "properties": {"ticket_id": {"type": "string", "pattern": "^TCK-\\d{3,6}$"}},
+      "required": ["ticket_id"]
+    },
+    "returns": {"properties": {"ticket_id": {"type": "string"}, "status": {"type": "string"}}}
+  },
+  {
+    "name": "search_kb",
+    "description": "Search the help-center knowledge base for articles",
+    "domain": "support",
+    "keywords": ["help", "article", "knowledge", "faq", "how"],
+    "mutation_class": "READ_ONLY",
+    "delay_s": 0.3,
+    "arguments": {
+      "type": "object",
+      "properties": {"query": {"type": "string", "description": "free-text search query"}},
+      "required": ["query"]
+    },
+    "returns": {"properties": {"article_id": {"type": "string"}, "title": {"type": "string"}}}
+  }
+]

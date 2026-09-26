@@ -1,0 +1,323 @@
+[
+  {
+    "name": "flight_pivot",
+    "theme": "interruption",
+    "description": "In-car analogue: destination changes while the search runs; the stale search is cancelled, the morning constraint survives.",
+    "manifests": ["builtin"],
+    "events": [
+      {"at_ms": 0, "type": "text", "text": "Find flights to Delhi tomorrow morning"},
+      {"at_ms": 10, "type": "eot"},
+      {"at_ms": 300, "type": "interrupt"},
+      {"at_ms": 310, "type": "text", "text": "Actually, Bangalore"},
+      {"at_ms": 320, "type": "eot"}
+    ],
+    "run_ms": 3000,
+    "expect": {
+      "completed": [{"tool": "search_flights", "args": {"to": "Bangalore", "date": "2026-09-26", "slot": "morning"}}],
+      "cancelled": [{"tool": "search_flights", "args": {"to": "Delhi"}}],
+      "final_slots": {"to": "Bangalore", "slot": "morning", "date": "2026-09-26"}
+    }
+  },
+  {
+    "name": "rapid_corrections",
+    "theme": "interruption",
+    "description": "Three destinations inside half a second; only the last one may complete.",
+    "manifests": ["builtin"],
+    "events": [
+      {"at_ms": 0, "type": "text", "text": "Find flights to Delhi"},
+      {"at_ms": 10, "type": "eot"},
+      {"at_ms": 150, "type": "text", "text": "Actually, Mumbai"},
+      {"at_ms": 160, "type": "eot"},
+      {"at_ms": 300, "type": "text", "text": "no wait, Chennai"},
+      {"at_ms": 310, "type": "eot"}
+    ],
+    "run_ms": 3000,
+    "expect": {
+      "completed": [{"tool": "search_flights", "args": {"to": "Chennai"}}],
+      "cancelled": [{"tool": "search_flights", "args": {"to": "Delhi"}}, {"tool": "search_flights", "args": {"to": "Mumbai"}}],
+      "final_slots": {"to": "Chennai"}
+    }
+  },
+  {
+    "name": "backchannel_mid_task",
+    "theme": "interruption",
+    "description": "A backchannel while the search runs must not cancel or restart anything.",
+    "manifests": ["builtin"],
+    "events": [
+      {"at_ms": 0, "type": "text", "text": "Find flights to Kolkata on Sunday"},
+      {"at_ms": 10, "type": "eot"},
+      {"at_ms": 300, "type": "text", "text": "hmm okay"},
+      {"at_ms": 310, "type": "eot"}
+    ],
+    "run_ms": 2500,
+    "expect": {
+      "completed": [{"tool": "search_flights", "args": {"to": "Kolkata", "date": "2026-09-27"}}],
+      "kept": [{"tool": "search_flights", "args": {"to": "Kolkata"}}],
+      "final_slots": {"to": "Kolkata"}
+    }
+  },
+  {
+    "name": "additive_goal",
+    "theme": "interruption",
+    "description": "'Also find a hotel' adds work; the running flight search is kept, not restarted.",
+    "manifests": ["builtin"],
+    "events": [
+      {"at_ms": 0, "type": "text", "text": "Find flights to Goa"},
+      {"at_ms": 10, "type": "eot"},
+      {"at_ms": 300, "type": "text", "text": "also find a hotel there"},
+      {"at_ms": 310, "type": "eot"}
+    ],
+    "run_ms": 3000,
+    "expect": {
+      "completed": [{"tool": "search_flights", "args": {"to": "Goa"}}, {"tool": "search_hotels", "args": {"city": "Goa"}}],
+      "kept": [{"tool": "search_flights", "args": {"to": "Goa"}}],
+      "final_slots": {"to": "Goa", "city": "Goa"}
+    }
+  },
+  {
+    "name": "retract_before_commit",
+    "theme": "retraction",
+    "description": "'Don't book it' mid-search: the search is kept, hold/confirm never happen.",
+    "manifests": ["builtin"],
+    "events": [
+      {"at_ms": 0, "type": "text", "text": "Book a flight to Pune tomorrow"},
+      {"at_ms": 10, "type": "eot"},
+      {"at_ms": 700, "type": "text", "text": "Don't book it, just show me the options"},
+      {"at_ms": 710, "type": "eot"}
+    ],
+    "run_ms": 5000,
+    "expect": {
+      "completed": [{"tool": "search_flights", "args": {"to": "Pune", "date": "2026-09-26"}}],
+      "not_completed": [{"tool": "hold_seat"}, {"tool": "confirm_booking"}],
+      "kept": [{"tool": "search_flights", "args": {"to": "Pune"}}],
+      "final_slots": {"to": "Pune"}
+    }
+  },
+  {
+    "name": "retract_after_commit",
+    "theme": "retraction",
+    "description": "Retraction after the booking landed: no fake undo, an honest 'already booked' answer.",
+    "manifests": ["builtin"],
+    "events": [
+      {"at_ms": 0, "type": "text", "text": "Book a flight to Pune tomorrow"},
+      {"at_ms": 10, "type": "eot"},
+      {"at_ms": 4600, "type": "text", "text": "Don't book it"},
+      {"at_ms": 4610, "type": "eot"}
+    ],
+    "run_ms": 5500,
+    "expect": {
+      "completed": [{"tool": "confirm_booking"}],
+      "max_effects": {"confirm_booking": 1},
+      "speak_contains": ["already booked"]
+    }
+  },
+  {
+    "name": "booking_timeout_committed",
+    "theme": "fault",
+    "description": "confirm_booking times out but the booking landed: verify, never re-send (no double booking).",
+    "manifests": ["builtin"],
+    "faults": {"confirm_booking": {"timeout_times": 1, "commit_on_timeout": true}},
+    "events": [
+      {"at_ms": 0, "type": "text", "text": "Book a flight to Goa tomorrow"},
+      {"at_ms": 10, "type": "eot"}
+    ],
+    "run_ms": 8000,
+    "expect": {
+      "completed": [{"tool": "confirm_booking"}],
+      "max_effects": {"confirm_booking": 1},
+      "final_slots": {"to": "Goa"}
+    }
+  },
+  {
+    "name": "booking_timeout_not_committed",
+    "theme": "fault",
+    "description": "confirm_booking times out and nothing landed: verification allows exactly one safe retry.",
+    "manifests": ["builtin"],
+    "faults": {"confirm_booking": {"timeout_times": 1, "commit_on_timeout": false}},
+    "events": [
+      {"at_ms": 0, "type": "text", "text": "Book a flight to Goa tomorrow"},
+      {"at_ms": 10, "type": "eot"}
+    ],
+    "run_ms": 8000,
+    "expect": {
+      "completed": [{"tool": "confirm_booking"}],
+      "max_effects": {"confirm_booking": 1}
+    }
+  },
+  {
+    "name": "read_retry",
+    "theme": "fault",
+    "description": "The flight search fails twice (injected); read-only retries with backoff recover it.",
+    "manifests": ["builtin"],
+    "faults": {"search_flights": {"fail_times": 2}},
+    "events": [
+      {"at_ms": 0, "type": "text", "text": "Find flights to Chennai on Wednesday"},
+      {"at_ms": 10, "type": "eot"}
+    ],
+    "run_ms": 8000,
+    "expect": {
+      "completed": [{"tool": "search_flights", "args": {"to": "Chennai", "date": "2026-09-30"}}],
+      "final_slots": {"to": "Chennai"}
+    }
+  },
+  {
+    "name": "ticket_unseen_tools",
+    "theme": "unseen_tools",
+    "description": "Support manifests delivered at runtime; one ticket with the right priority.",
+    "manifests": ["support"],
+    "events": [
+      {"at_ms": 0, "type": "text", "text": "My router keeps dropping wifi, please open a ticket with high priority"},
+      {"at_ms": 10, "type": "eot"}
+    ],
+    "run_ms": 2000,
+    "expect": {
+      "completed": [{"tool": "create_ticket", "args": {"priority": "high"}, "args_contain": {"issue": "router"}}],
+      "max_effects": {"create_ticket": 1},
+      "final_slots": {"priority": "high"}
+    }
+  },
+  {
+    "name": "ticket_correction_inflight",
+    "theme": "interruption",
+    "description": "Priority corrected while the ticket is being created: cancel and re-create, never two tickets.",
+    "manifests": ["support"],
+    "events": [
+      {"at_ms": 0, "type": "text", "text": "Open a ticket: the printer is jammed"},
+      {"at_ms": 10, "type": "eot"},
+      {"at_ms": 300, "type": "text", "text": "actually make it high priority"},
+      {"at_ms": 310, "type": "eot"}
+    ],
+    "run_ms": 2500,
+    "expect": {
+      "completed": [{"tool": "create_ticket", "args": {"priority": "high"}, "args_contain": {"issue": "printer"}}],
+      "cancelled": [{"tool": "create_ticket", "args": {"issue": "the printer is jammed"}, "args_absent": ["priority"]}],
+      "max_effects": {"create_ticket": 1},
+      "final_slots": {"priority": "high"}
+    }
+  },
+  {
+    "name": "clarify_missing_slot",
+    "theme": "clarification",
+    "description": "'Open a ticket' has no issue: ask, then use the answer.",
+    "manifests": ["support"],
+    "events": [
+      {"at_ms": 0, "type": "text", "text": "Open a ticket"},
+      {"at_ms": 10, "type": "eot"},
+      {"at_ms": 800, "type": "text", "text": "the printer on floor two is jammed"},
+      {"at_ms": 810, "type": "eot"}
+    ],
+    "run_ms": 2500,
+    "expect": {
+      "clarify": true,
+      "completed": [{"tool": "create_ticket", "args_contain": {"issue": "printer"}}],
+      "max_effects": {"create_ticket": 1}
+    }
+  },
+  {
+    "name": "manual_lookup",
+    "theme": "unseen_tools",
+    "description": "Troubleshooting manifests: model and error code extracted from the schema patterns.",
+    "manifests": ["troubleshooting"],
+    "events": [
+      {"at_ms": 0, "type": "text", "text": "my washer WM-4500 shows error E4"},
+      {"at_ms": 10, "type": "eot"}
+    ],
+    "run_ms": 1500,
+    "expect": {
+      "completed": [{"tool": "lookup_manual", "args": {"model": "WM-4500", "error_code": "E4"}}],
+      "final_slots": {"model": "WM-4500", "error_code": "E4"}
+    }
+  },
+  {
+    "name": "irreversible_confirmed",
+    "theme": "clarification",
+    "description": "No explicit commit verb for an IRREVERSIBLE visit: ask first, act on 'yes'.",
+    "manifests": ["troubleshooting"],
+    "events": [
+      {"at_ms": 0, "type": "text", "text": "can someone come and repair my WM-4500 on Monday?"},
+      {"at_ms": 10, "type": "eot"},
+      {"at_ms": 600, "type": "text", "text": "yes please"},
+      {"at_ms": 610, "type": "eot"}
+    ],
+    "run_ms": 2500,
+    "expect": {
+      "clarify": true,
+      "completed": [{"tool": "schedule_technician", "args": {"model": "WM-4500", "date": "2026-09-28"}}],
+      "max_effects": {"schedule_technician": 1}
+    }
+  },
+  {
+    "name": "irreversible_declined",
+    "theme": "clarification",
+    "description": "The user declines the confirmation: the irreversible step never runs.",
+    "manifests": ["troubleshooting"],
+    "events": [
+      {"at_ms": 0, "type": "text", "text": "can someone come and repair my WM-4500 on Monday?"},
+      {"at_ms": 10, "type": "eot"},
+      {"at_ms": 600, "type": "text", "text": "no, not yet"},
+      {"at_ms": 610, "type": "eot"}
+    ],
+    "run_ms": 2500,
+    "expect": {
+      "clarify": true,
+      "not_completed": [{"tool": "schedule_technician"}]
+    }
+  },
+  {
+    "name": "nav_pivot",
+    "theme": "interruption",
+    "description": "Navigation target changes while the route is computed; navigation starts only on the new route.",
+    "manifests": ["incar"],
+    "events": [
+      {"at_ms": 0, "type": "text", "text": "Navigate to MG Road"},
+      {"at_ms": 10, "type": "eot"},
+      {"at_ms": 400, "type": "text", "text": "no, take me to Indiranagar"},
+      {"at_ms": 410, "type": "eot"}
+    ],
+    "run_ms": 3000,
+    "expect": {
+      "completed": [{"tool": "compute_route", "args": {"destination": "Indiranagar"}}, {"tool": "start_navigation"}],
+      "cancelled": [{"tool": "compute_route", "args": {"destination": "MG Road"}}],
+      "max_effects": {"start_navigation": 1},
+      "final_slots": {"destination": "Indiranagar"}
+    }
+  },
+  {
+    "name": "climate_correction",
+    "theme": "interruption",
+    "description": "A state-changing call is corrected in flight: cancel, apply the new value once.",
+    "manifests": ["incar"],
+    "events": [
+      {"at_ms": 0, "type": "text", "text": "Set the AC to 22 degrees"},
+      {"at_ms": 10, "type": "eot"},
+      {"at_ms": 60, "type": "text", "text": "make it 20"},
+      {"at_ms": 70, "type": "eot"}
+    ],
+    "run_ms": 1500,
+    "expect": {
+      "completed": [{"tool": "set_climate", "args": {"temperature": 20}}],
+      "cancelled": [{"tool": "set_climate", "args": {"temperature": 22}}],
+      "max_effects": {"set_climate": 1},
+      "final_slots": {"temperature": 20}
+    }
+  },
+  {
+    "name": "dining_chain_unseen",
+    "theme": "unseen_tools",
+    "description": "Held-out domain: search -> reserve chain bound through the manifest's returned restaurant_id.",
+    "manifests": ["dining"],
+    "events": [
+      {"at_ms": 0, "type": "text", "text": "Book a table for 2 at a Japanese place in Mumbai tomorrow at 8pm"},
+      {"at_ms": 10, "type": "eot"}
+    ],
+    "run_ms": 3500,
+    "expect": {
+      "completed": [
+        {"tool": "search_restaurants", "args": {"city": "Mumbai", "cuisine": "japanese"}},
+        {"tool": "reserve_table", "args": {"party_size": 2, "date": "2026-09-26", "time": "20:00"}}
+      ],
+      "max_effects": {"reserve_table": 1},
+      "final_slots": {"city": "Mumbai", "party_size": 2}
+    }
+  }
+]

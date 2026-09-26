@@ -1,0 +1,79 @@
+[
+  {
+    "name": "get_weather",
+    "description": "Get the weather forecast for a city",
+    "domain": "weather",
+    "keywords": ["weather", "forecast", "rain", "sunny"],
+    "mutation_class": "READ_ONLY",
+    "delay_s": 0.5,
+    "arguments": {
+      "type": "object",
+      "properties": {"city": {"type": "string"}, "date": {"type": "string", "format": "date"}},
+      "required": ["city"]
+    },
+    "returns": {"properties": {"forecast": {"type": "string"}, "high_c": {"type": "integer"}}}
+  },
+  {
+    "name": "set_thermostat",
+    "description": "Set the home thermostat temperature for a room",
+    "domain": "home",
+    "keywords": ["thermostat", "heating", "temperature", "degrees", "warm"],
+    "mutation_class": "MUTATING",
+    "delay_s": 0.3,
+    "arguments": {
+      "type": "object",
+      "properties": {
+        "temperature": {"type": "integer", "minimum": 10, "maximum": 30, "x-units": ["degrees", "degree"]},
+        "room": {"type": "string", "enum": ["bedroom", "kitchen", "living room", "office"]}
+      },
+      "required": ["temperature"]
+    },
+    "returns": {"properties": {"temperature": {"type": "integer"}}}
+  },
+  {
+    "name": "list_events",
+    "description": "List calendar events on a date",
+    "domain": "calendar",
+    "keywords": ["calendar", "events", "meetings", "agenda"],
+    "mutation_class": "READ_ONLY",
+    "delay_s": 0.4,
+    "arguments": {
+      "type": "object",
+      "properties": {"date": {"type": "string", "format": "date"}},
+      "required": ["date"]
+    },
+    "returns": {"properties": {"events": {"type": "string"}}}
+  },
+  {
+    "name": "create_event",
+    "description": "Create a calendar event or meeting",
+    "domain": "calendar",
+    "keywords": ["calendar", "event", "meeting", "appointment", "remind"],
+    "mutation_class": "MUTATING",
+    "delay_s": 0.5,
+    "arguments": {
+      "type": "object",
+      "properties": {
+        "title": {"type": "string", "description": "free-text event title"},
+        "date": {"type": "string", "format": "date"},
+        "time": {"type": "string", "format": "time"}
+      },
+      "required": ["title", "date"]
+    },
+    "returns": {"properties": {"event_id": {"type": "string"}}}
+  },
+  {
+    "name": "delete_event",
+    "description": "Delete a calendar event",
+    "domain": "calendar",
+    "keywords": ["calendar", "event", "meeting"],
+    "mutation_class": "IRREVERSIBLE",
+    "delay_s": 0.4,
+    "arguments": {
+      "type": "object",
+      "properties": {"event_id": {"type": "string", "pattern": "^EV-\\d{3,6}$"}},
+      "required": ["event_id"]
+    },
+    "returns": {"properties": {"deleted": {"type": "boolean"}}}
+  }
+]

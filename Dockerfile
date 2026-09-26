@@ -1,22 +1,18 @@
 # CONTINUUM Multi-Stage Container Dockerfile
 # Samsung PRISM Generative AI Hackathon (Theme 05: Interruptible Real-Time Agents)
-FROM python:3.12-slim AS builder
+FROM python:3.12-slim
 
 WORKDIR /app
 
-# Install dependencies
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Copy source code
-COPY backend/ ./backend/
+# Install project & dependencies
+COPY . .
+RUN pip install --no-cache-dir -e '.[dev]' || pip install --no-cache-dir -r requirements.txt
 
 # Expose FastAPI & WebSocket port
 EXPOSE 8000
 
-# Set environment variables
 ENV PYTHONUNBUFFERED=1
-ENV PORT=8000
+ENV PYTHONPATH=/app/src:/app
 
-# Run uvicorn server
-CMD ["uvicorn", "backend.app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Default command runs full test suite; can be overridden to start the live server
+CMD ["python", "-m", "pytest", "-q"]
