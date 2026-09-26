@@ -21,9 +21,10 @@ from __future__ import annotations
 
 import time
 import uuid
-from datetime import UTC, datetime
+from datetime import datetime
 from typing import TYPE_CHECKING, Any
 
+from ._compat import UTC
 from .contracts import ArbiterDecision, Branch, BranchState, SpeculationBudget
 from .policy import risk_for
 

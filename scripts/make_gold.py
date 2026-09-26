@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Generate frozen gold set 100 utterances, 20 per category, deterministic, pattern-coverable."""
 
+import hashlib
 import json
 import pathlib
-import hashlib
+import sys
 
 # 20 per category, hand-crafted to be pattern-matchable by offline-fake
 items = []
@@ -197,11 +198,9 @@ h = hashlib.sha256(out.read_bytes()).hexdigest()[:12]
 print(f"Wrote {out} ({len(items)} items) hash {h}")
 
 # also verify offline-fake coverage
-import sys
-
 sys.path.insert(0, "src")
-from continuum.delta_arbiter import arbitrate_offline_fake
-from continuum.versioned_state import VersionedStore
+from continuum.delta_arbiter import arbitrate_offline_fake  # noqa: E402
+from continuum.versioned_state import VersionedStore  # noqa: E402
 
 store = VersionedStore()
 store.create_initial({"destination": "Delhi", "goal_domain": "flights"})

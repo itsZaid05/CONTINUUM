@@ -81,8 +81,9 @@ class RuntimeEvent(BaseModel):
     event_id: str = Field(default_factory=lambda: uuid.uuid4().hex)
     type: EventType
     ts_ms: float | None = None  # producer timestamp (virtual clock), echoed into the trace
-    text: str | None = None
+    text: str | None = None  # text input, or an upstream ASR/OCR transcript
     data: bytes | None = None
+    confidence: float | None = Field(default=None, ge=0.0, le=1.0)
     call_id: str | None = None
     result: dict[str, Any] | None = None
     manifest: ToolManifest | None = None
@@ -114,6 +115,10 @@ class ToolCallAction(_Action):
 class CancelAction(_Action):
     type: Literal["cancel"] = "cancel"
     call_id: str
+    # The refreshed state is useful to harnesses that render cancellation
+    # before the replacement call/final arrives.  It is optional for backwards
+    # compatibility with the original organizer contract.
+    snapshot: Snapshot | None = None
 
 
 class ClarifyAction(_Action):
@@ -205,6 +210,7 @@ class AgentRuntime:
         faults: dict[str, FaultPlan] | None = None,
         speculation: bool = False,
         today: date | None = None,
+        asr_model_path: str | None = None,
         max_read_retries: int = 2,
         retry_backoff_s: float = 0.05,
         verify_timeouts: bool = True,
@@ -223,6 +229,7 @@ class AgentRuntime:
         self.faults = dict(faults or {})
         self.speculation = speculation and tool_mode == "local"
         self.today = today
+        self.asr_model_path = asr_model_path
         self.max_read_retries = max_read_retries
         self.retry_backoff_s = retry_backoff_s
         self.verify_timeouts = verify_timeouts
@@ -253,6 +260,59 @@ class AgentRuntime:
 
     def planner_for(self, s: _Session) -> GenericPlanner:
         return GenericPlanner(s.registry, today=self.today)
+
+    def snapshot(self, session_id: str, *, status: str | None = None) -> Snapshot:
+        """Return the latest organizer-visible state for a session.
+
+        This is intentionally computed at emission time, not cached with a
+        call.  A cancellation caused by a correction therefore carries the
+        replacement slots/version rather than the stale dispatch snapshot.
+        """
+        s = self.session(session_id)
+        intent: dict[str, Any] = {
+            "goals": list(s.goals),
+            "category": s.last_category,
+            "status": status or ("working" if any(r.status == "running" for r in s.runs.values()) else "idle"),
+        }
+        if len(s.goals) == 1:
+            intent["goal"] = s.goals[0]
+        return Snapshot(intent=intent, slots=dict(s.slots), version=self._version(s))
+
+    async def warmup(self) -> dict[str, Any]:
+        """Warm deterministic code paths without network access.
+
+        Optional dense/ASR models are not downloaded.  A local ASR model is
+        loaded lazily only when an audio event actually requests it.
+        """
+        probe = self.session("__warmup__")
+        perceive_text("find flights to Delhi", self._version(probe))
+        self.planner_for(probe)
+        self._sessions.pop("__warmup__", None)
+        return {"ready": True, "offline": True, "tools": len(self.registry.all())}
+
+    async def wait_idle(self, session_id: str, timeout_s: float | None = None) -> bool:
+        """Wait until the session has no live calls; return ``False`` on timeout."""
+        loop = asyncio.get_running_loop()
+        deadline = None if timeout_s is None else loop.time() + max(0.0, timeout_s)
+        while any(r.status == "running" for r in self.session(session_id).runs.values()):
+            if deadline is not None and loop.time() >= deadline:
+                return False
+            await asyncio.sleep(0.001)
+        return True
+
+    async def watchdog_final(self, session_id: str, reason: str = "time limit") -> FinalAction:
+        """Emit a truthful terminal action when an organizer watchdog expires."""
+        s = self.session(session_id)
+        await self._cancel_runs(
+            session_id, s, [run for run in s.runs.values() if run.status == "running"]
+        )
+        action = FinalAction(
+            text=f"I couldn't finish before the {reason}; no unconfirmed completion is being claimed.",
+            snapshot=self.snapshot(session_id, status="timed_out"),
+        )
+        await self._emit(action)
+        self._log(session_id, "watchdog_final", reason=reason)
+        return action
 
     async def submit(self, event: RuntimeEvent | dict[str, Any]) -> None:
         await self.input_queue.put(RuntimeEvent.model_validate(event))
@@ -320,8 +380,9 @@ class AgentRuntime:
         if event.type == EventType.TEXT:
             if not event.text:
                 return
+            # Text chunks only acquire the floor.  The single fast ACK is
+            # emitted at EOT, avoiding the old two-fillers-per-turn behaviour.
             s.text += event.text
-            await self._emit(SpeakAction(text="Got it — listening…"))
             return
         if event.type == EventType.EOT:
             if not s.text.strip():
@@ -331,10 +392,46 @@ class AgentRuntime:
             return
         if event.type == EventType.AUDIO:
             if event.data:
-                await self._process_evidence(event.session_id, perceive_audio(event.data, self._version(s)))
+                perception = perceive_audio(
+                    event.data,
+                    self._version(s),
+                    transcript=event.text,
+                    confidence=event.confidence,
+                    asr_model_path=self.asr_model_path,
+                )
+            elif event.text:
+                perception = perceive_text(
+                    event.text,
+                    self._version(s),
+                    "audio",
+                    confidence=event.confidence,
+                    source="upstream-asr",
+                )
+            else:
+                return
+            await self._process_evidence(event.session_id, perception)
             return
-        if event.type == EventType.FRAME and event.data:
-            await self._process_evidence(event.session_id, perceive_frame(event.data, self._version(s)))
+        if event.type == EventType.FRAME:
+            if event.data:
+                perception = perceive_frame(
+                    event.data,
+                    self._version(s),
+                    text=event.text,
+                    confidence=event.confidence,
+                )
+            elif event.text:
+                # OCR text supplied by the organizer is grounded evidence even
+                # when the transport omits the original (large) frame bytes.
+                perception = perceive_text(
+                    event.text,
+                    self._version(s),
+                    "vision",
+                    confidence=event.confidence,
+                    source="upstream-ocr",
+                )
+            else:
+                return
+            await self._process_evidence(event.session_id, perception)
 
     def _version(self, s: _Session) -> int:
         cur = s.store.current()
@@ -612,6 +709,15 @@ class AgentRuntime:
                 await asyncio.sleep(self.retry_backoff_s * (2 ** (run.attempts - 1)) * self.tool_speed)
                 await self._retry(session_id, s, run, m)
             shadow_task = None
+        if result.status != "COMPLETED":
+            await self._fail(
+                session_id,
+                s,
+                run,
+                ToolError(f"{run.tool}: external operation is {result.status}"),
+                uncertain=True,
+            )
+            return
         async with s.lock:
             if run.cancelled or s.runs.get(run.step_id) is not run:
                 self._log(session_id, "stale_result_rejected", call_id=run.call_id, tool=run.tool)
@@ -714,6 +820,9 @@ class AgentRuntime:
                 "status": "completed",
                 "state_changing": m.state_changing,
                 "category": s.last_category,
+                # A final is emitted only after this accepted tool result.  The
+                # call id makes that grounding auditable to the organizer.
+                "grounded_by": {"tool": final_run.tool, "call_id": final_run.call_id},
             }
             await self._emit(
                 FinalAction(
@@ -735,7 +844,12 @@ class AgentRuntime:
                 fut.cancel()
             if run.effect_key is not None:
                 s.effects.pop(run.effect_key, None)
-            await self._emit(CancelAction(call_id=run.call_id))
+            await self._emit(
+                CancelAction(
+                    call_id=run.call_id,
+                    snapshot=self.snapshot(session_id, status="interrupted"),
+                )
+            )
             self._log(session_id, "cancel", call_id=run.call_id, tool=run.tool, args=run.args)
         tasks = [r.task for r in doomed if r.task is not None]
         if tasks:

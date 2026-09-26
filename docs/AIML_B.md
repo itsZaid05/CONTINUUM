@@ -1,7 +1,7 @@
 # AI/ML Engineer B — Planning, Tools, Speculation & Evaluation
 
 > **Scope (updated spec §11):** planner DAG, tools, shadow predictor/manager, speculation metrics. Next-value items from the spec: **manifest-driven generic planning** (B-R4/B-R5), retries (B-8), shadows on the harness path (B-12), plus a proper evaluation pipeline.
-> **Status (25 Sep 2026):** built, tested (218 tests pass), evaluated. Reproduce everything with `make eval-b` (about 1 minute, no API keys).
+> **Status (26 Sep 2026):** final harness-edge build, tested (246 tests pass), evaluated. Reproduce planner, text runtime, and multimodal reports with `make eval-b` (offline; no API keys).
 
 ---
 
@@ -99,11 +99,19 @@ Pivot latency (end of turn → corrected `tool_call`) is p50 about 1.1 ms and p9
 
 Every ablation breaks exactly the scenario built to exercise it, so each mechanism is doing real work. **Read the 100 carefully:** this suite was written alongside the runtime, so it is a regression bar and a mechanism check, not an independent estimate. The held-out planner number is the generalisation evidence.
 
-### 4.3 Speculation — an honest negative
+### 4.3 Multimodal runtime (`reports/multimodal_eval.md`)
+
+The 11 deterministic audio/frame scenarios exercise grounded upstream ASR/OCR,
+low-confidence clarification, interruption, unseen manifests, and irreversible
+confirmation. CONTINUUM scores **100.00** versus **81.15** for the naive
+runtime, with zero duplicate mutations and zero regretted irreversible calls.
+This is also a regression suite, not a benchmark of an ASR or OCR model.
+
+### 4.4 Speculation — an honest negative
 
 Across the suite: 18 shadows spawned, **1 promoted** (5.6% reuse), 17 discarded, about 32 ms of tool latency hidden versus about 1.55 s of shadow tool time wasted (scaled clock). Prefetch fires on nearly every read goal, but users rarely ask for the prefetched tool next. **Keep `speculation=False`** (the default) unless the backend is cheap and follow-up requests are predictable. Tightening prefetch (for example, requiring two shared arguments, or learning co-occurrence from logs) is the obvious next experiment. It was not tuned here, to avoid fitting the suite.
 
-### 4.4 How to read the scores
+### 4.5 How to read the scores
 
 - **Latency saturates at 1.0 for every system:** the spoken ACK is a template emitted about 0.1 ms after end of turn. The category will only discriminate once an LLM sits in the path.
 - **The rubric under-weights safety:** a double booking costs 0.28 points (safety is 10%, split across four checks). The duplicate-mutation and regretted-irreversible counts are the columns to watch, not the score.
@@ -114,9 +122,9 @@ Across the suite: 18 shadows spawned, **1 promoted** (5.6% reuse), 17 discarded,
 
 | Item | Owner | Note |
 |---|---|---|
-| Harness event/action field names | Backend (B-6) | `RuntimeEvent`/`RuntimeAction` are additive-compatible; map to the kit's schema when it is released |
-| Audio/vision scenarios | AI/ML A | The runtime path is modality-agnostic, but perception still clarifies on every real WAV/PNG |
-| Fillers ("Got it — listening…" per chunk) | AI/ML A (A-2) | Visible as `speaks_per_turn ≈ 2` in the runtime report |
+| Official unpublished field variants | Integration | `harness_edge.py` maps the documented/common aliases; add any organizer-only spellings if its kit differs |
+| Real ASR/OCR model quality | AI/ML A | Optional disk-only faster-whisper is supported; deterministic evaluation uses upstream transcript/OCR evidence |
+| Rich progress narration | AI/ML A | Floor control budgets one fast ACK per turn (`speaks_per_turn = 1.06` including failure updates); long-operation progress narration is not synthesized |
 | Domain-general arbiter | AI/ML A (A-5) | Would let the planner trust arbiter deltas and stop the NOISE-on-real-request cases |
 | "Add a note" → update vs create | AI/ML B | Needs an "existing record in memory + add" rule, validated on a *new* held-out set |
 | Burst coalescing (`merge_rapid`) on the live path | Backend (B-14) | Rapid corrections currently cancel and re-dispatch each time (correct, but 3 calls instead of 1) |
@@ -126,11 +134,11 @@ Across the suite: 18 shadows spawned, **1 promoted** (5.6% reuse), 17 discarded,
 ## 6. Reproduce
 
 ```bash
-make eval-b                                  # both reports, about 1 min, no keys
+make eval-b                                  # planner + text + multimodal reports, no keys
 python -m continuum.cli eval-planner         # reports/planner_eval.{json,md}
 python -m continuum.cli eval-runtime         # reports/runtime_eval.{json,md}  (--no-ablations for speed)
-python -m pytest tests/test_slots.py tests/test_generic_planner.py \
-       tests/test_runtime_plan_exec.py tests/test_speculation_and_eval_b.py -q
+python -m continuum.cli eval-multimodal      # reports/multimodal_eval.{json,md}
+python -m pytest -q                          # 246 tests
 ```
 
 On a Windows console, set `PYTHONIOENCODING=utf-8` for the older `replay`/`compare` commands (they print `→`; this is pre-existing and unrelated to this work).
