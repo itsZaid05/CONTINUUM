@@ -414,7 +414,7 @@ def ablate(
             "without": wo["shadow_metrics"],
             "verdict": (
                 f"{sw['shadow_metrics']['reused_pct']}% of shadow work reused; cost capped "
-                f"(≤{sw['shadow_metrics']['primary_slowdown_pct']}% primary slowdown, cleanup "
+                f"(<={sw['shadow_metrics']['primary_slowdown_pct']}% primary slowdown, cleanup "
                 f"{sw['shadow_metrics']['cleanup_p95_ms']}ms p95)"
             ),
         },

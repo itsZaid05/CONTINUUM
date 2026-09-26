@@ -46,7 +46,8 @@ build-backend = "hatchling.build"
 packages = ["src/continuum"]
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
+testpaths = ["tests", "backend/tests"]
+pythonpath = ["src", "."]
 asyncio_mode = "auto"
 addopts = "-q"
 
