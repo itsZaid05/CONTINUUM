@@ -48,9 +48,11 @@ from .delta_arbiter import arbitrate
 from .dialogue import respond
 from .generic_planner import GenericPlanner, PlanDecision
 from .ledger import effect_id_for
+from .lifecycle import CallLifecycle, CallStatus
 from .perception import perceive_audio, perceive_frame, perceive_text
 from .planner import PlanStep
 from .speculation import ShadowSpeculator, call_key
+from .streaming import StreamingSpeechState
 from .tools import (
     TOOL_REGISTRY,
     FaultPlan,
@@ -81,8 +83,12 @@ class RuntimeEvent(BaseModel):
     event_id: str = Field(default_factory=lambda: uuid.uuid4().hex)
     type: EventType
     ts_ms: float | None = None  # producer timestamp (virtual clock), echoed into the trace
-    text: str | None = None
+    text: str | None = None  # text input, or an upstream ASR/OCR transcript
+    # Streaming ASR sends replacement hypotheses; JSONL text chunks append.
+    text_mode: Literal["append", "replace"] = "append"
+    is_final: bool = False
     data: bytes | None = None
+    confidence: float | None = Field(default=None, ge=0.0, le=1.0)
     call_id: str | None = None
     result: dict[str, Any] | None = None
     manifest: ToolManifest | None = None
@@ -109,11 +115,19 @@ class ToolCallAction(_Action):
     call_id: str
     tool: str
     args: dict[str, Any]
+    operation_id: str | None = None
+    base_version: int | None = None
+    idempotency_key: str | None = None
+    cancellable: bool | None = None
 
 
 class CancelAction(_Action):
     type: Literal["cancel"] = "cancel"
     call_id: str
+    # The refreshed state is useful to harnesses that render cancellation
+    # before the replacement call/final arrives.  It is optional for backwards
+    # compatibility with the original organizer contract.
+    snapshot: Snapshot | None = None
 
 
 class ClarifyAction(_Action):
@@ -132,7 +146,9 @@ RuntimeAction = Annotated[
     Field(discriminator="type"),
 ]
 
-_YES = re.compile(r"^\s*(?:yes|yeah|yep|sure|ok(?:ay)?|go ahead|do it|confirm|please do|book it|correct)\b", re.I)
+_YES = re.compile(
+    r"^\s*(?:yes|yeah|yep|sure|ok(?:ay)?|go ahead|do it|confirm|please do|book it|correct)\b", re.I
+)
 _NO = re.compile(r"^\s*(?:no|nope|don't|do not|cancel|stop|not now|never mind)\b", re.I)
 
 
@@ -162,6 +178,7 @@ class StepRun:
     cancelled: bool = False
     dispatched_ms: float = 0.0
     reply: asyncio.Future[dict[str, Any]] | None = None  # external mode: the harness result
+    lifecycle: CallLifecycle | None = None
 
 
 @dataclass
@@ -169,7 +186,7 @@ class _Session:
     registry: ToolRegistry
     sandbox: MockToolSandbox
     store: VersionedStore = field(default_factory=VersionedStore)
-    text: str = ""
+    speech: StreamingSpeechState = field(default_factory=StreamingSpeechState)
     slots: dict[str, Any] = field(default_factory=dict)
     goals: list[str] = field(default_factory=list)
     committed: set[str] = field(default_factory=set)
@@ -191,6 +208,15 @@ class _Session:
     spec: ShadowSpeculator | None = None
     shadow_tasks: dict[str, asyncio.Task[ToolResult]] = field(default_factory=dict)
 
+    # Compatibility for callers that inspected the old chunk buffer directly.
+    @property
+    def text(self) -> str:
+        return self.speech.candidate
+
+    @text.setter
+    def text(self, value: str) -> None:
+        self.speech.candidate = value
+
 
 class AgentRuntime:
     """Two-queue async runtime with isolated sessions and cancellable calls."""
@@ -205,6 +231,7 @@ class AgentRuntime:
         faults: dict[str, FaultPlan] | None = None,
         speculation: bool = False,
         today: date | None = None,
+        asr_model_path: str | None = None,
         max_read_retries: int = 2,
         retry_backoff_s: float = 0.05,
         verify_timeouts: bool = True,
@@ -223,6 +250,7 @@ class AgentRuntime:
         self.faults = dict(faults or {})
         self.speculation = speculation and tool_mode == "local"
         self.today = today
+        self.asr_model_path = asr_model_path
         self.max_read_retries = max_read_retries
         self.retry_backoff_s = retry_backoff_s
         self.verify_timeouts = verify_timeouts
@@ -239,7 +267,9 @@ class AgentRuntime:
         return (time.perf_counter() - self._t0) * 1000.0
 
     def _log(self, session_id: str, event: str, **data: Any) -> None:
-        self.trace.append({"ts_ms": round(self.now_ms(), 3), "session": session_id, "event": event, **data})
+        self.trace.append(
+            {"ts_ms": round(self.now_ms(), 3), "session": session_id, "event": event, **data}
+        )
 
     def session(self, session_id: str) -> _Session:
         s = self._sessions.get(session_id)
@@ -254,6 +284,60 @@ class AgentRuntime:
     def planner_for(self, s: _Session) -> GenericPlanner:
         return GenericPlanner(s.registry, today=self.today)
 
+    def snapshot(self, session_id: str, *, status: str | None = None) -> Snapshot:
+        """Return the latest organizer-visible state for a session.
+
+        This is intentionally computed at emission time, not cached with a
+        call.  A cancellation caused by a correction therefore carries the
+        replacement slots/version rather than the stale dispatch snapshot.
+        """
+        s = self.session(session_id)
+        intent: dict[str, Any] = {
+            "goals": list(s.goals),
+            "category": s.last_category,
+            "status": status
+            or ("working" if any(r.status == "running" for r in s.runs.values()) else "idle"),
+        }
+        if len(s.goals) == 1:
+            intent["goal"] = s.goals[0]
+        return Snapshot(intent=intent, slots=dict(s.slots), version=self._version(s))
+
+    async def warmup(self) -> dict[str, Any]:
+        """Warm deterministic code paths without network access.
+
+        Optional dense/ASR models are not downloaded.  A local ASR model is
+        loaded lazily only when an audio event actually requests it.
+        """
+        probe = self.session("__warmup__")
+        perceive_text("find flights to Delhi", self._version(probe))
+        self.planner_for(probe)
+        self._sessions.pop("__warmup__", None)
+        return {"ready": True, "offline": True, "tools": len(self.registry.all())}
+
+    async def wait_idle(self, session_id: str, timeout_s: float | None = None) -> bool:
+        """Wait until the session has no live calls; return ``False`` on timeout."""
+        loop = asyncio.get_running_loop()
+        deadline = None if timeout_s is None else loop.time() + max(0.0, timeout_s)
+        while any(r.status == "running" for r in self.session(session_id).runs.values()):
+            if deadline is not None and loop.time() >= deadline:
+                return False
+            await asyncio.sleep(0.001)
+        return True
+
+    async def watchdog_final(self, session_id: str, reason: str = "time limit") -> FinalAction:
+        """Emit a truthful terminal action when an organizer watchdog expires."""
+        s = self.session(session_id)
+        await self._cancel_runs(
+            session_id, s, [run for run in s.runs.values() if run.status == "running"]
+        )
+        action = FinalAction(
+            text=f"I couldn't finish before the {reason}; no unconfirmed completion is being claimed.",
+            snapshot=self.snapshot(session_id, status="timed_out"),
+        )
+        await self._emit(action)
+        self._log(session_id, "watchdog_final", reason=reason)
+        return action
+
     async def submit(self, event: RuntimeEvent | dict[str, Any]) -> None:
         await self.input_queue.put(RuntimeEvent.model_validate(event))
 
@@ -263,7 +347,11 @@ class AgentRuntime:
             await self.handle(event)
         except Exception as exc:  # noqa: BLE001 — one bad event must never stop the loop
             self._log(event.session_id, "handler_error", error=repr(exc))
-            await self._emit(ClarifyAction(text="Sorry, something went wrong on my side — could you say that again?"))
+            await self._emit(
+                ClarifyAction(
+                    text="Sorry, something went wrong on my side — could you say that again?"
+                )
+            )
         finally:
             self.input_queue.task_done()
 
@@ -280,15 +368,23 @@ class AgentRuntime:
                     t.cancel()
                 s.spec.close(self.now_ms())
 
-    async def _emit(self, action: SpeakAction | ToolCallAction | CancelAction | ClarifyAction | FinalAction) -> None:
+    async def _emit(
+        self, action: SpeakAction | ToolCallAction | CancelAction | ClarifyAction | FinalAction
+    ) -> None:
         action.ts_ms = round(self.now_ms(), 3)
         await self.output_queue.put(action)
 
     # ------------------------------------------------------------- events
     async def handle(self, event: RuntimeEvent) -> None:
         s = self.session(event.session_id)
-        self._log(event.session_id, "input", type=event.type.value, event_ts_ms=event.ts_ms,
-                  text=event.text, call_id=event.call_id)
+        self._log(
+            event.session_id,
+            "input",
+            type=event.type.value,
+            event_ts_ms=event.ts_ms,
+            text=event.text,
+            call_id=event.call_id,
+        )
         if event.type == EventType.MANIFEST:
             manifests = list(event.manifests or []) + ([event.manifest] if event.manifest else [])
             if not manifests:
@@ -314,33 +410,96 @@ class AgentRuntime:
             if fut is not None and not fut.done():
                 fut.set_result(dict(event.result or {}))
             else:
-                self._log(event.session_id, "tool_result_ignored", call_id=event.call_id,
-                          reason="unknown, cancelled or superseded call")
+                self._log(
+                    event.session_id,
+                    "tool_result_ignored",
+                    call_id=event.call_id,
+                    reason="unknown, cancelled or superseded call",
+                )
             return
         if event.type == EventType.TEXT:
             if not event.text:
                 return
-            s.text += event.text
-            await self._emit(SpeakAction(text="Got it — listening…"))
+            # Candidate hypotheses never reach committed state or dispatch a
+            # tool. LiveKit partials replace the candidate; JSONL chunks append.
+            s.speech.update(event.text, mode=event.text_mode, at_ms=self.now_ms())
+            self._log(
+                event.session_id,
+                "speech_candidate",
+                revision=s.speech.candidate_revision,
+                mode=event.text_mode,
+                final=event.is_final,
+            )
+            if event.is_final:
+                await self._commit_speech(event.session_id, s)
             return
         if event.type == EventType.EOT:
-            if not s.text.strip():
-                return
-            text, s.text = s.text, ""
-            await self._process_evidence(event.session_id, perceive_text(text, self._version(s)))
+            await self._commit_speech(event.session_id, s)
             return
         if event.type == EventType.AUDIO:
             if event.data:
-                await self._process_evidence(event.session_id, perceive_audio(event.data, self._version(s)))
+                perception = perceive_audio(
+                    event.data,
+                    self._version(s),
+                    transcript=event.text,
+                    confidence=event.confidence,
+                    asr_model_path=self.asr_model_path,
+                )
+            elif event.text:
+                perception = perceive_text(
+                    event.text,
+                    self._version(s),
+                    "audio",
+                    confidence=event.confidence,
+                    source="upstream-asr",
+                )
+            else:
+                return
+            await self._process_evidence(event.session_id, perception)
             return
-        if event.type == EventType.FRAME and event.data:
-            await self._process_evidence(event.session_id, perceive_frame(event.data, self._version(s)))
+        if event.type == EventType.FRAME:
+            if event.data:
+                perception = perceive_frame(
+                    event.data,
+                    self._version(s),
+                    text=event.text,
+                    confidence=event.confidence,
+                )
+            elif event.text:
+                # OCR text supplied by the organizer is grounded evidence even
+                # when the transport omits the original (large) frame bytes.
+                perception = perceive_text(
+                    event.text,
+                    self._version(s),
+                    "vision",
+                    confidence=event.confidence,
+                    source="upstream-ocr",
+                )
+            else:
+                return
+            await self._process_evidence(event.session_id, perception)
 
     def _version(self, s: _Session) -> int:
         cur = s.store.current()
         return cur.version if cur else 1
 
     # -------------------------------------------------------- understanding
+    async def _commit_speech(self, session_id: str, s: _Session) -> None:
+        utterance = s.speech.commit(self.now_ms())
+        if utterance is None:
+            return
+        self._log(
+            session_id,
+            "speech_committed",
+            turn_id=utterance.turn_id,
+            revision=utterance.candidate_revision,
+            text=utterance.text,
+        )
+        await self._process_evidence(
+            session_id,
+            perceive_text(utterance.text, self._version(s)),
+        )
+
     async def _process_evidence(self, session_id: str, perception: Any) -> None:
         s = self.session(session_id)
         await self._emit(SpeakAction(text=perception.fast_ack))
@@ -357,7 +516,9 @@ class AgentRuntime:
             s.last_category = decision.category.value
             if decision.needs_clarification():
                 await self._emit(
-                    ClarifyAction(text=decision.suggested_clarification or "Could you clarify that request?")
+                    ClarifyAction(
+                        text=decision.suggested_clarification or "Could you clarify that request?"
+                    )
                 )
                 return
             if self.planner_mode == "naive":
@@ -376,7 +537,9 @@ class AgentRuntime:
             if d.action == "noop":
                 return  # backchannel: in-flight work continues untouched
             if not d.steps and d.mode != "retract":
-                await self._emit(ClarifyAction(text=d.question or "Could you clarify that request?"))
+                await self._emit(
+                    ClarifyAction(text=d.question or "Could you clarify that request?")
+                )
                 return
             await self._apply_plan(session_id, s, d, decision, perception.evidences)
 
@@ -428,7 +591,9 @@ class AgentRuntime:
         goals = [g for g in s.goals if g != goal] + ([prefix] if prefix else [])
         d = planner.replan(goals, s.slots, authorized=s.authorized)
         self._log(session_id, "declined", tool=tool)
-        await self._emit(SpeakAction(text=f"Okay — I won't {s.registry.get(tool).description.lower() or tool}."))
+        await self._emit(
+            SpeakAction(text=f"Okay — I won't {s.registry.get(tool).description.lower() or tool}.")
+        )
         s.goals = list(d.goals)
         await self._reconcile(session_id, s, d)
         await self._advance(session_id, s)
@@ -456,7 +621,9 @@ class AgentRuntime:
                 if same and self.selective_cancel:
                     run.version = version
                     run.goal = d.goal_of.get(step_id, run.goal)
-                    self._log(session_id, "adopted", call_id=run.call_id, tool=run.tool, args=run.args)
+                    self._log(
+                        session_id, "adopted", call_id=run.call_id, tool=run.tool, args=run.args
+                    )
                 else:
                     to_cancel.append(run)
                     del s.runs[step_id]
@@ -483,19 +650,36 @@ class AgentRuntime:
                 m = s.registry.get(st.tool)
                 if args is None or any(p not in args or args[p] is None for p in m.required):
                     continue
+                try:
+                    args = m.validate_args(args)
+                except ValueError as exc:
+                    marker = f"schema:{st.step_id}"
+                    if marker not in s.asked:
+                        s.asked.add(marker)
+                        await self._emit(ClarifyAction(text=str(exc)))
+                    self._log(session_id, "tool_args_rejected", tool=st.tool, error=str(exc))
+                    continue
                 goal = d.goal_of.get(st.step_id, st.tool)
-                if m.risk == RiskLevel.IRREVERSIBLE and self.confirm_irreversible and goal not in s.authorized:
+                if (
+                    m.risk == RiskLevel.IRREVERSIBLE
+                    and self.confirm_irreversible
+                    and goal not in s.authorized
+                ):
                     if st.tool not in s.asked:
                         s.asked.add(st.tool)
                         s.pending_confirm = st.tool
                         shown = ", ".join(f"{k}={v}" for k, v in args.items())
                         await self._emit(
-                            ClarifyAction(text=f"Should I go ahead: {m.description or st.tool} ({shown})?")
+                            ClarifyAction(
+                                text=f"Should I go ahead: {m.description or st.tool} ({shown})?"
+                            )
                         )
                     continue
                 key = call_key(st.tool, args)
                 if not m.state_changing and key in s.completed:
-                    self._finish_run(session_id, s, st, args, key, goal, s.completed[key], reused=True)
+                    self._finish_run(
+                        session_id, s, st, args, key, goal, s.completed[key], reused=True
+                    )
                     progressed = True
                     continue
                 effect_key = None
@@ -503,7 +687,16 @@ class AgentRuntime:
                     effect_key = effect_id_for(0, f"{session_id}:{st.tool}", args)
                     state = s.effects.get(effect_key)
                     if state == "COMMITTED":
-                        self._finish_run(session_id, s, st, args, key, goal, s.effect_results[effect_key], reused=True)
+                        self._finish_run(
+                            session_id,
+                            s,
+                            st,
+                            args,
+                            key,
+                            goal,
+                            s.effect_results[effect_key],
+                            reused=True,
+                        )
                         progressed = True
                         continue
                     if state == "INFLIGHT":
@@ -514,7 +707,13 @@ class AgentRuntime:
                     if sh is not None:
                         s.spec.promote(sh, self.now_ms())
                         shadow_task = s.shadow_tasks.pop(sh.key, None)
-                        self._log(session_id, "shadow_promoted", tool=st.tool, args=args, branch=sh.branch_id)
+                        self._log(
+                            session_id,
+                            "shadow_promoted",
+                            tool=st.tool,
+                            args=args,
+                            branch=sh.branch_id,
+                        )
                 await self._dispatch(session_id, s, st, m, args, key, goal, effect_key, shadow_task)
                 progressed = progressed or shadow_task is not None
         await self._emit_finals(session_id, s)
@@ -531,20 +730,60 @@ class AgentRuntime:
         effect_key: str | None,
         shadow_task: asyncio.Task[ToolResult] | None = None,
     ) -> None:
+        call_id = uuid.uuid4().hex
+        dispatched_ms = self.now_ms()
+        lifecycle = CallLifecycle(
+            operation_id=uuid.uuid4().hex,
+            tool=st.tool,
+            args=dict(args),
+            base_version=self._version(s),
+            cancellable=m.cancellable,
+            effect_id=effect_key,
+        )
+        lifecycle.begin_attempt(call_id, dispatched_ms)
         run = StepRun(
-            step_id=st.step_id, tool=st.tool, args=args, key=key, call_id=uuid.uuid4().hex,
-            version=self._version(s), goal=goal, effect_key=effect_key, dispatched_ms=self.now_ms(),
+            step_id=st.step_id,
+            tool=st.tool,
+            args=args,
+            key=key,
+            call_id=call_id,
+            version=self._version(s),
+            goal=goal,
+            effect_key=effect_key,
+            dispatched_ms=dispatched_ms,
+            lifecycle=lifecycle,
         )
         if effect_key is not None:
             s.effects[effect_key] = "INFLIGHT"
         s.runs[st.step_id] = run
         s.calls[run.call_id] = run
         if shadow_task is None and self.tool_mode == "external":
-            run.reply = self._expect_result(s, run.call_id)  # before the call is visible: a fast reply must land
+            run.reply = self._expect_result(
+                s, run.call_id
+            )  # before the call is visible: a fast reply must land
         if shadow_task is None:
-            await self._emit(ToolCallAction(call_id=run.call_id, tool=st.tool, args=args))
-            self._log(session_id, "dispatch", call_id=run.call_id, tool=st.tool, args=args,
-                      state_changing=m.state_changing)
+            await self._emit(
+                ToolCallAction(
+                    call_id=run.call_id,
+                    tool=st.tool,
+                    args=args,
+                    operation_id=lifecycle.operation_id,
+                    base_version=lifecycle.base_version,
+                    idempotency_key=effect_key,
+                    cancellable=m.cancellable,
+                )
+            )
+            self._log(
+                session_id,
+                "dispatch",
+                operation_id=lifecycle.operation_id,
+                call_id=run.call_id,
+                base_version=lifecycle.base_version,
+                tool=st.tool,
+                args=args,
+                state_changing=m.state_changing,
+                lifecycle=lifecycle.status.value,
+            )
         run.task = asyncio.create_task(self._execute(session_id, run, m, shadow_task))
 
     async def _invoke(self, s: _Session, run: StepRun, m: ToolManifest) -> ToolResult:
@@ -557,12 +796,23 @@ class AgentRuntime:
                 raise ToolTimeout(str(raw.get("error", "timeout")))
             if raw.get("error") or status in {"error", "failed", "failure"}:
                 raise ToolError(str(raw.get("error", status)))
-            payload = raw.get("payload", raw.get("result", {k: v for k, v in raw.items() if k != "status"}))
-            return ToolResult(m.name, raw.get("external_operation_id"), run.dispatched_ms, self.now_ms(),
-                              "COMPLETED", dict(payload) if isinstance(payload, dict) else {"result": payload})
-        return await s.sandbox.call(
+            payload = raw.get(
+                "payload", raw.get("result", {k: v for k, v in raw.items() if k != "status"})
+            )
+            normalized = dict(payload) if isinstance(payload, dict) else {"result": payload}
+            return ToolResult(
+                m.name,
+                raw.get("external_operation_id"),
+                run.dispatched_ms,
+                self.now_ms(),
+                "COMPLETED",
+                m.validate_result(normalized),
+            )
+        result = await s.sandbox.call(
             m.name, run.args, idempotency_key=run.effect_key or run.call_id, speed=self.tool_speed
         )
+        result.payload = m.validate_result(result.payload)
+        return result
 
     async def _execute(
         self,
@@ -575,7 +825,11 @@ class AgentRuntime:
         result: ToolResult | None = None
         while result is None:
             try:
-                result = await (asyncio.shield(shadow_task) if shadow_task is not None else self._invoke(s, run, m))
+                result = await (
+                    asyncio.shield(shadow_task)
+                    if shadow_task is not None
+                    else self._invoke(s, run, m)
+                )
             except asyncio.CancelledError:
                 raise
             except ToolTimeout as exc:
@@ -587,9 +841,18 @@ class AgentRuntime:
                     await self._fail(session_id, s, run, exc, uncertain=True)
                     return
                 if m.state_changing and self.verify_timeouts:
-                    landed = s.sandbox.status(run.effect_key) if run.effect_key and self.tool_mode == "local" else None
-                    self._log(session_id, "verify_after_timeout", call_id=run.call_id, tool=run.tool,
-                              committed=landed is not None)
+                    landed = (
+                        s.sandbox.status(run.effect_key)
+                        if run.effect_key and self.tool_mode == "local"
+                        else None
+                    )
+                    self._log(
+                        session_id,
+                        "verify_after_timeout",
+                        call_id=run.call_id,
+                        tool=run.tool,
+                        committed=landed is not None,
+                    )
                     if landed is not None:
                         result = landed
                         break
@@ -609,9 +872,20 @@ class AgentRuntime:
                 if m.state_changing or run.attempts > self.max_read_retries:
                     await self._fail(session_id, s, run, exc)
                     return
-                await asyncio.sleep(self.retry_backoff_s * (2 ** (run.attempts - 1)) * self.tool_speed)
+                await asyncio.sleep(
+                    self.retry_backoff_s * (2 ** (run.attempts - 1)) * self.tool_speed
+                )
                 await self._retry(session_id, s, run, m)
             shadow_task = None
+        if result.status != "COMPLETED":
+            await self._fail(
+                session_id,
+                s,
+                run,
+                ToolError(f"{run.tool}: external operation is {result.status}"),
+                uncertain=True,
+            )
+            return
         async with s.lock:
             if run.cancelled or s.runs.get(run.step_id) is not run:
                 self._log(session_id, "stale_result_rejected", call_id=run.call_id, tool=run.tool)
@@ -628,29 +902,80 @@ class AgentRuntime:
         run.attempts += 1
         old = run.call_id
         run.call_id = uuid.uuid4().hex
+        if run.lifecycle is not None:
+            run.lifecycle.finish_attempt(self.now_ms(), error="retrying")
+            run.lifecycle.begin_attempt(run.call_id, self.now_ms())
         s.calls[run.call_id] = run
         if self.tool_mode == "external":
             run.reply = self._expect_result(s, run.call_id)
-        self._log(session_id, "retry", tool=run.tool, previous_call_id=old, call_id=run.call_id,
-                  attempt=run.attempts)
-        await self._emit(ToolCallAction(call_id=run.call_id, tool=run.tool, args=run.args))
-        self._log(session_id, "dispatch", call_id=run.call_id, tool=run.tool, args=run.args,
-                  state_changing=m.state_changing, retry=True)
+        self._log(
+            session_id,
+            "retry",
+            tool=run.tool,
+            previous_call_id=old,
+            call_id=run.call_id,
+            attempt=run.attempts,
+        )
+        await self._emit(
+            ToolCallAction(
+                call_id=run.call_id,
+                tool=run.tool,
+                args=run.args,
+                operation_id=run.lifecycle.operation_id if run.lifecycle else None,
+                base_version=run.lifecycle.base_version if run.lifecycle else run.version,
+                idempotency_key=run.effect_key,
+                cancellable=m.cancellable,
+            )
+        )
+        self._log(
+            session_id,
+            "dispatch",
+            call_id=run.call_id,
+            tool=run.tool,
+            args=run.args,
+            state_changing=m.state_changing,
+            retry=True,
+        )
 
     async def _fail(
         self, session_id: str, s: _Session, run: StepRun, exc: Exception, *, uncertain: bool = False
     ) -> None:
         run.status = "failed"
-        if run.effect_key is not None and not uncertain and s.effects.get(run.effect_key) == "INFLIGHT":
+        if run.lifecycle is not None:
+            now = self.now_ms()
+            if run.lifecycle.attempts and run.lifecycle.attempts[-1].finished_ms is None:
+                run.lifecycle.finish_attempt(now, error=str(exc))
+            if run.lifecycle.status in {CallStatus.RUNNING, CallStatus.CANCEL_REQUESTED}:
+                if uncertain:
+                    run.lifecycle.mark_unknown(now, str(exc))
+                else:
+                    run.lifecycle.mark_cancelled(now, f"verified failure: {exc}")
+        if (
+            run.effect_key is not None
+            and not uncertain
+            and s.effects.get(run.effect_key) == "INFLIGHT"
+        ):
             s.effects.pop(run.effect_key, None)  # verified not landed: a later retry is safe
-        self._log(session_id, "tool_failed", call_id=run.call_id, tool=run.tool, error=str(exc),
-                  uncertain=uncertain)
+        self._log(
+            session_id,
+            "tool_failed",
+            call_id=run.call_id,
+            tool=run.tool,
+            error=str(exc),
+            uncertain=uncertain,
+        )
         desc = (s.registry.get(run.tool).description or run.tool).lower()
         if uncertain:
-            await self._emit(SpeakAction(text=f"I didn't get a confirmation back ({desc}) — it may have "
-                                              "gone through, so I won't resend it blindly."))
+            await self._emit(
+                SpeakAction(
+                    text=f"I didn't get a confirmation back ({desc}) — it may have "
+                    "gone through, so I won't resend it blindly."
+                )
+            )
         else:
-            await self._emit(SpeakAction(text=f"I couldn't complete that ({desc}). Want me to try again?"))
+            await self._emit(
+                SpeakAction(text=f"I couldn't complete that ({desc}). Want me to try again?")
+            )
 
     def _finish_run(
         self,
@@ -667,11 +992,29 @@ class AgentRuntime:
     ) -> None:
         if run is None:
             assert st is not None
-            run = StepRun(st.step_id, st.tool, args, key, f"reuse-{uuid.uuid4().hex[:8]}",
-                          self._version(s), goal, status="done")
+            run = StepRun(
+                st.step_id,
+                st.tool,
+                args,
+                key,
+                f"reuse-{uuid.uuid4().hex[:8]}",
+                self._version(s),
+                goal,
+                status="done",
+            )
             s.runs[st.step_id] = run
         run.status = "done"
         run.result = result
+        if run.lifecycle is not None and run.lifecycle.status not in {
+            CallStatus.COMPLETED,
+            CallStatus.CANCELLED,
+            CallStatus.ABANDONED,
+        }:
+            run.lifecycle.mark_completed(
+                self.now_ms(),
+                result.payload,
+                external_operation_id=result.external_operation_id,
+            )
         m = s.registry.get(run.tool)
         if m.state_changing:
             ek = run.effect_key or effect_id_for(0, f"{session_id}:{run.tool}", args)
@@ -686,8 +1029,16 @@ class AgentRuntime:
         for k, v in result.payload.items():
             if k in arg_names and k.endswith("_id") and v is not None:
                 s.slots[k] = v
-        self._log(session_id, "tool_completed", call_id=run.call_id, tool=run.tool, args=args,
-                  reused=reused, state_changing=m.state_changing, payload=result.payload)
+        self._log(
+            session_id,
+            "tool_completed",
+            call_id=run.call_id,
+            tool=run.tool,
+            args=args,
+            reused=reused,
+            state_changing=m.state_changing,
+            payload=result.payload,
+        )
 
     async def _emit_finals(self, session_id: str, s: _Session) -> None:
         d = s.plan
@@ -714,6 +1065,9 @@ class AgentRuntime:
                 "status": "completed",
                 "state_changing": m.state_changing,
                 "category": s.last_category,
+                # A final is emitted only after this accepted tool result.  The
+                # call id makes that grounding auditable to the organizer.
+                "grounded_by": {"tool": final_run.tool, "call_id": final_run.call_id},
             }
             await self._emit(
                 FinalAction(
@@ -727,16 +1081,45 @@ class AgentRuntime:
         doomed = [r for r in runs if r.status == "running"]
         for run in doomed:
             run.cancelled = True
-            run.status = "cancelled"
-            if run.task is not None and not run.task.done():
-                run.task.cancel()
+            cancellable = s.registry.get(run.tool).cancellable
+            lifecycle_status = CallStatus.CANCELLED
+            if run.lifecycle is not None and run.lifecycle.status == CallStatus.RUNNING:
+                lifecycle_status = run.lifecycle.request_cancel(
+                    self.now_ms(), "invalidated by a newer committed plan"
+                )
+            if cancellable:
+                run.status = "cancelled"
+                if run.task is not None and not run.task.done():
+                    run.task.cancel()
+                if (
+                    run.lifecycle is not None
+                    and run.lifecycle.status == CallStatus.CANCEL_REQUESTED
+                ):
+                    run.lifecycle.mark_cancelled(self.now_ms(), "local cancellation accepted")
+            else:
+                # The local await/result is detached, but the external effect may
+                # still land. Keep its effect key in-flight so it cannot be sent
+                # again blindly; every late result is rejected by run identity.
+                run.status = "abandoned"
             fut = s.external.pop(run.call_id, None)
             if fut is not None and not fut.done():
                 fut.cancel()
-            if run.effect_key is not None:
-                s.effects.pop(run.effect_key, None)
-            await self._emit(CancelAction(call_id=run.call_id))
-            self._log(session_id, "cancel", call_id=run.call_id, tool=run.tool, args=run.args)
+            await self._emit(
+                CancelAction(
+                    call_id=run.call_id,
+                    snapshot=self.snapshot(session_id, status="interrupted"),
+                )
+            )
+            self._log(
+                session_id,
+                "cancel",
+                operation_id=run.lifecycle.operation_id if run.lifecycle else None,
+                call_id=run.call_id,
+                tool=run.tool,
+                args=run.args,
+                cancellable=cancellable,
+                lifecycle=lifecycle_status.value,
+            )
         tasks = [r.task for r in doomed if r.task is not None]
         if tasks:
             _done, pending = await asyncio.wait(tasks, timeout=self.cancel_grace_s)
@@ -763,17 +1146,29 @@ class AgentRuntime:
             task.add_done_callback(_done)
             sh.task = task
             s.shadow_tasks[sh.key] = task
-            self._log(session_id, "shadow_spawn", tool=cand.tool, args=cand.args, source=cand.source,
-                      branch=sh.branch_id)
+            self._log(
+                session_id,
+                "shadow_spawn",
+                tool=cand.tool,
+                args=cand.args,
+                source=cand.source,
+                branch=sh.branch_id,
+            )
 
     # ------------------------------------------------------ naive baseline
-    async def _naive_turn(self, session_id: str, s: _Session, decision: ArbiterDecision, perception: Any) -> None:
+    async def _naive_turn(
+        self, session_id: str, s: _Session, decision: ArbiterDecision, perception: Any
+    ) -> None:
         """The runtime's behaviour before the generic planner: first read-only
         tool, args copied from arbiter state, cancel everything on any change."""
         base = s.store.current() or s.store.create_initial({})
-        current = s.store.patch(base.version, decision.delta, decision.category, perception.evidences)
+        current = s.store.patch(
+            base.version, decision.delta, decision.category, perception.evidences
+        )
         if current.version != base.version:
-            await self._cancel_runs(session_id, s, [r for r in s.runs.values() if r.status == "running"])
+            await self._cancel_runs(
+                session_id, s, [r for r in s.runs.values() if r.status == "running"]
+            )
             s.runs.clear()
         tool = s.registry.choose_read_tool(current.state)
         if tool is None:
@@ -790,11 +1185,25 @@ class AgentRuntime:
         step = PlanStep(tool.name, tool.name, tool.kind, args, risk_level=tool.risk)
         s.slots = dict(current.state)
         s.goals = [tool.name]
-        s.plan = PlanDecision("plan", "new", [tool.name], [step], dict(current.state),
-                              goal_of={tool.name: tool.name})
-        await self._dispatch(session_id, s, step, tool, args, call_key(tool.name, args), tool.name, None)
+        s.plan = PlanDecision(
+            "plan", "new", [tool.name], [step], dict(current.state), goal_of={tool.name: tool.name}
+        )
+        await self._dispatch(
+            session_id, s, step, tool, args, call_key(tool.name, args), tool.name, None
+        )
 
     # --------------------------------------------------------- introspection
+    def call_lifecycles(self, session_id: str) -> list[dict[str, Any]]:
+        """Return one auditable record per logical operation in dispatch order."""
+        seen: set[str] = set()
+        rows: list[dict[str, Any]] = []
+        for run in self.session(session_id).calls.values():
+            if run.lifecycle is None or run.lifecycle.operation_id in seen:
+                continue
+            seen.add(run.lifecycle.operation_id)
+            rows.append(run.lifecycle.as_trace())
+        return rows
+
     def speculation_metrics(self) -> dict[str, Any]:
         out: dict[str, Any] = {}
         for sid, s in self._sessions.items():

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import hashlib
 import json
 from pathlib import Path
@@ -13,7 +14,7 @@ from rich.table import Table
 
 app = typer.Typer(
     add_completion=False,
-    help="CONTINUUM — Interruptible Real-Time Agents (Engineer A)",
+    help="CONTINUUM — Manifest-driven interruptible real-time agents",
 )
 console = Console()
 
@@ -471,6 +472,36 @@ def eval_planner(
     console.print(f"Wrote {output} and {output.with_suffix('.md')}")
 
 
+@app.command(name="eval-multimodal")
+def eval_multimodal(
+    suite: Path = typer.Option(  # noqa: B008
+        Path("data/runtime_scenarios/multimodal_suite.json"),
+        "--suite",
+        help="Deterministic audio/frame scenario suite",
+    ),
+    output: Path = typer.Option(  # noqa: B008
+        Path("reports/multimodal_eval.json"), "--output", "-o"
+    ),
+    time_scale: float = typer.Option(0.1, "--time-scale"),
+) -> None:
+    """Evaluate grounded and ambiguous audio/frame events through AgentRuntime."""
+    from .evaluation.multimodal_eval import evaluate, render_markdown
+
+    report = evaluate(suite, time_scale=time_scale)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(json.dumps(report, indent=2, default=str), encoding="utf-8")
+    output.with_suffix(".md").write_text(render_markdown(report), encoding="utf-8")
+    for name, result in report["systems"].items():
+        summary = result["summary"]
+        console.print(
+            f"[bold]{name:26s}[/] score {summary['mean_score']:6.2f}  "
+            f"unsafe duplicates {summary['duplicate_mutations']}  "
+            f"unneeded clarify {summary['unnecessary_clarification_rate']}",
+            highlight=False,
+        )
+    console.print(f"Wrote {output} and {output.with_suffix('.md')}")
+
+
 @app.command(name="eval-runtime")
 def eval_runtime(
     suite: Path = typer.Option(  # noqa: B008
@@ -497,6 +528,28 @@ def eval_runtime(
             highlight=False,
         )
     console.print(f"Wrote {output} and {output.with_suffix('.md')}")
+
+
+@app.command()
+def kit(
+    local_tools: bool = typer.Option(  # noqa: B008
+        False, "--local-tools", help="Execute the deterministic local sandbox instead of waiting for tool_result"
+    ),
+    watchdog_s: float = typer.Option(120.0, "--watchdog", min=0.001),  # noqa: B008
+    asr_model: Path | None = typer.Option(  # noqa: B008
+        None, "--asr-model", help="Optional existing faster-whisper model directory (never downloaded)"
+    ),
+) -> None:
+    """Run the organizer JSONL stdio bridge (one event/action per line)."""
+    from .harness_edge import JsonlBridge, serve_stdio
+    from .runtime import AgentRuntime
+
+    runtime = AgentRuntime(
+        tool_mode="local" if local_tools else "external",
+        asr_model_path=str(asr_model) if asr_model else None,
+    )
+    bridge = JsonlBridge(runtime, watchdog_s=watchdog_s)
+    asyncio.run(serve_stdio(bridge=bridge))
 
 
 @app.command()

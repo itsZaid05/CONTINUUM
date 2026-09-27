@@ -9,8 +9,8 @@ messages for before/after-commit states live here (shared by dialogue.py).
 from __future__ import annotations
 
 from dataclasses import dataclass
-from ._compat import StrEnum
 
+from ._compat import StrEnum
 from .contracts import ArbiterCategory, ArbiterDecision, ExecutionNode, RiskLevel
 
 # Node kind → RiskLevel mapping (hardcoded MVP, later policy file)

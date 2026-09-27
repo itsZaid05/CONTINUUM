@@ -40,6 +40,9 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Protocol
 
+from jsonschema import Draft202012Validator
+from jsonschema.exceptions import SchemaError
+from jsonschema.exceptions import ValidationError as JsonSchemaValidationError
 from pydantic import BaseModel, Field, field_validator, model_validator
 
 from .contracts import RiskLevel
@@ -101,13 +104,32 @@ class ToolManifest(BaseModel):
     @model_validator(mode="before")
     @classmethod
     def _accept_boolean_flags(cls, data: Any) -> Any:
-        # {"read_only": true} / {"state_modifying": true} are the Theme 05
-        # guide's own vocabulary; map them onto mutation_class.
-        if isinstance(data, dict) and "mutation_class" not in data:
-            if data.get("read_only") is True or data.get("state_modifying") is False:
-                data = {**data, "mutation_class": "READ_ONLY"}
-            elif data.get("state_modifying") is True or data.get("read_only") is False:
-                data = {**data, "mutation_class": "MUTATING"}
+        # Accept the field names used by common function/tool kits while
+        # preserving one canonical internal schema.
+        if isinstance(data, dict):
+            data = dict(data)
+            if "arguments" not in data:
+                for alias in ("input_schema", "parameters", "args_schema"):
+                    if alias in data:
+                        data["arguments"] = data[alias]
+                        break
+            if "returns" not in data:
+                for alias in ("output_schema", "result_schema", "return_schema"):
+                    if alias in data:
+                        data["returns"] = data[alias]
+                        break
+            # {"read_only": true} / {"state_modifying": true} are the Theme
+            # 05 guide's own vocabulary; map them onto mutation_class.
+            if "mutation_class" not in data:
+                if data.get("read_only") is True or data.get("state_modifying") is False:
+                    data["mutation_class"] = "READ_ONLY"
+                elif data.get("state_modifying") is True or data.get("read_only") is False:
+                    data["mutation_class"] = "MUTATING"
+                else:
+                    for alias in ("risk", "risk_level", "effect", "mutation"):
+                        if alias in data:
+                            data["mutation_class"] = data[alias]
+                            break
         return data
 
     @field_validator("mutation_class", mode="before")
@@ -123,7 +145,39 @@ class ToolManifest(BaseModel):
     def _derive_kind(self) -> ToolManifest:
         if not self.kind:
             self.kind = _KIND_FOR_CLASS[self.mutation_class]
+        try:
+            Draft202012Validator.check_schema(self.arguments)
+            Draft202012Validator.check_schema(self.returns)
+        except SchemaError as exc:
+            raise ValueError(f"invalid JSON Schema for tool {self.name}: {exc.message}") from exc
+        if self.arguments.get("type", "object") != "object":
+            raise ValueError(f"tool {self.name} arguments schema must describe an object")
         return self
+
+    def validate_args(self, args: dict[str, Any]) -> dict[str, Any]:
+        """Validate a concrete call against the complete manifest schema."""
+        return self._validate_payload(self.arguments, args, label="arguments")
+
+    def validate_result(self, result: dict[str, Any]) -> dict[str, Any]:
+        """Validate the observed backend output before it can be trusted.
+
+        Result contracts used to be planner hints only.  Treating them as real
+        Draft 2020-12 schemas closes the gap where a malformed response could
+        be announced as a successful side effect.
+        """
+        return self._validate_payload(self.returns, result, label="result")
+
+    def _validate_payload(
+        self, schema: dict[str, Any], payload: dict[str, Any], *, label: str
+    ) -> dict[str, Any]:
+        try:
+            Draft202012Validator(schema).validate(payload)
+        except JsonSchemaValidationError as exc:
+            location = ".".join(str(x) for x in exc.absolute_path) or label
+            raise ValueError(
+                f"invalid {label} for {self.name} at {location}: {exc.message}"
+            ) from exc
+        return dict(payload)
 
     @property
     def state_changing(self) -> bool:
@@ -302,7 +356,7 @@ class ToolRegistry:
         missing = [key for key in required if key not in args]
         if missing:
             raise ValueError(f"missing required arguments for {name}: {missing}")
-        return args
+        return manifest.validate_args(args)
 
 
 def default_registry() -> ToolRegistry:
@@ -430,6 +484,10 @@ class MockToolSandbox:
         faults: dict[str, FaultPlan] | None = None,
     ) -> None:
         self._dedup: dict[str, ToolResult] = {}
+        # One lock per idempotency key closes the race where two concurrent
+        # retries both check the cache before either records its result. Calls
+        # under different keys remain fully concurrent.
+        self._key_locks: dict[str, asyncio.Lock] = {}
         self.registry = registry or default_registry()
         self.faults = dict(faults or {})
         self._attempts: dict[str, int] = {}
@@ -450,6 +508,23 @@ class MockToolSandbox:
         return self.registry.get(tool) if self.registry.has(tool) else None
 
     async def call(
+        self,
+        tool: str,
+        params: dict[str, Any] | None = None,
+        *,
+        idempotency_key: str | None = None,
+        speed: float = 1.0,
+    ) -> ToolResult:
+        """Dispatch a call with atomic per-key idempotency."""
+        if idempotency_key is None:
+            return await self._call_unlocked(tool, params, idempotency_key=None, speed=speed)
+        lock = self._key_locks.setdefault(idempotency_key, asyncio.Lock())
+        async with lock:
+            return await self._call_unlocked(
+                tool, params, idempotency_key=idempotency_key, speed=speed
+            )
+
+    async def _call_unlocked(
         self,
         tool: str,
         params: dict[str, Any] | None = None,

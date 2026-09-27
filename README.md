@@ -1,17 +1,17 @@
 # CONTINUUM — Interruptible Real-Time Agents
-### Samsung PRISM Theme 05 • AI/ML Engineer A (Understanding, Dialogue & Evaluation)
+### Samsung PRISM Theme 05 • Harness-edge reference implementation
 
 > **One-line pitch:** *CONTINUUM keeps AI agents consistent when humans change their minds: it sorts what kind of change happened, keeps the work that's still valid, discards the rest, and prepares for likely next changes within strict safety and resource limits.*
 
 [![Phase](https://img.shields.io/badge/phase-4%20speculation-%2300C853)](docs/STATUS.md)
-[![Tests](https://img.shields.io/badge/tests-137%20passed-%2300C853)](#quickstart)
+[![Tests](https://img.shields.io/badge/tests-279%20passed-%2300C853)](#quickstart)
 [![Ruff](https://img.shields.io/badge/ruff-clean-%2300C853)](#quickstart)
 [![Mypy](https://img.shields.io/badge/mypy-clean-%2300C853)](#quickstart)
-[![Python](https://img.shields.io/badge/python-3.11-blue)](#quickstart)
+[![Python](https://img.shields.io/badge/python-3.10--3.12-blue)](#quickstart)
 [![License](https://img.shields.io/badge/license-MIT-lightgrey)](#acknowledgments)
 [![Demo](https://img.shields.io/badge/demo-Delhi→Bangalore-2962FF)](#scenarios)
 
-**Status:** Phases 1–5 (A-scope) complete — **runnable, 130 tests, deterministic offline-fake + env-gated LLM/dense**. Judges `make eval` in 60 s with no keys; with keys `GEMINI_API_KEY` / `OPENAI_API_KEY` / `OLLAMA_HOST` + `CONTINUUM_DENSE_DOWNLOAD=1` shows real gaps. Phase 4 adds bounded shadow speculation with reused/wasted/cleanup metrics; Phase 3 edges (honest retraction after commit, verify-after-timeout, CommitGate) are wired into replay + API preview. See `docs/STATUS.md`.
+**Status (27 Sep 2026):** foundation plus the FDB-managed LiveKit edge — **279 tests**, Python 3.10–3.12 core CI, Gemini native audio behind a provider interface, twelve manifest-generated FDB tools, lifecycle-safe effect reconciliation, and official-shape telemetry. Credential-free checks are complete; no official FDB score is claimed until the released audio and live services are run. See [`docs/FDB_LIVEKIT.md`](docs/FDB_LIVEKIT.md) and [`docs/BLUEPRINT_IMPLEMENTATION.md`](docs/BLUEPRINT_IMPLEMENTATION.md).
 
 ---
 
@@ -77,17 +77,20 @@ What each new piece does is normatively defined in `docs/ARCHITECTURE_A.md` (per
 ## Quickstart — 2 commands for judges (60 s, no keys)
 
 ```bash
-git clone https://github.com/itsZaid05/new.git && cd new
-# judges: main after PR #2 merges; live branch meanwhile:
-git checkout arena/01a0c708-new
+git clone https://github.com/itsZaid05/CONTINUUM.git && cd CONTINUUM
 
 # install (uv preferred, pip fallback)
 pip install --break-system-packages -e ".[dev]"   # or: uv sync --extra dev
 
 # 1) tests + lint + mypy (offline-fake deterministic, LLM adapters env-gated)
-python -m pytest -q          # 137 passed, 0 fail  (<10s, dense fallback no download)
-ruff check src tests         # All checks passed!
-python -m mypy src           # Success: no issues in 17 files
+python -m pytest -q                  # 279 passed, 0 failed
+ruff check src tests scripts         # All checks passed!
+python -m mypy src                   # Success: no issues found
+
+# organizer stdio protocol (JSONL in/out)
+continuum kit
+# full planner + text-runtime + multimodal reports
+make eval-b
 
 # 2) metrics (recreates reports/, <10s) — offline-fake
 python -m continuum.cli eval-arbiter --gold data/gold/arbiter_100.jsonl --output reports/arbiter_accuracy.json
@@ -108,7 +111,41 @@ python -m continuum.cli replay data/scenarios/delhi_bangalore.json --backend gem
 python examples/quickstart.py   # 7 steps + backend table + prompt preview
 ```
 
-**Expected Phases 1–4 (offline-fake + dense/LLM fallback, frozen gold `b8920267657a`):**
+### FDB-v3 LiveKit + Gemini native audio
+
+```bash
+uv sync --frozen --extra dev --extra fdb
+scripts/fetch_fdb.sh
+python scripts/audit_fdb_contract.py --source-dir .artifacts/Full-Duplex-Bench
+continuum-fdb-contract .artifacts/Full-Duplex-Bench/v3/benchmark_data_v2.json
+
+# With LIVEKIT_URL, LIVEKIT_API_KEY, LIVEKIT_API_SECRET, and GOOGLE_API_KEY
+# supplied through the environment:
+continuum-fdb-agent --check start
+continuum-fdb-agent start
+```
+
+The credential-free bridge check executes all **100 scenarios / 154 annotated
+calls** but is not an official model score. Live audio instructions, telemetry
+paths, provider replacement boundary, and honest evaluation limits are in
+[`docs/FDB_LIVEKIT.md`](docs/FDB_LIVEKIT.md).
+
+**Final harness-path results (deterministic offline run):**
+
+| Evaluation | CONTINUUM | Baseline |
+|---|---:|---:|
+| Planner fully correct, held-out | **0.964** | 0.062 overall |
+| Text runtime, 18 timed scenarios | **100.00** | 54.65 |
+| Multimodal runtime, 11 audio/frame scenarios | **100.00** | 81.15 |
+| No-verify ablation | duplicate mutations **1** | — |
+| No-CommitGate ablation | regretted irreversible **1** | — |
+
+The runtime suites are regression/mechanism checks written with the runtime,
+not independent generalization estimates; the frozen held-out planner split is
+the generalization evidence. See the checked-in JSON and Markdown under
+`reports/` for per-scenario details and scorer limitations.
+
+**Earlier Phase 1–4 replay results (offline-fake + dense/LLM fallback, frozen gold `b8920267657a`):**
 
 ```text
 Arbiter accuracy 100.00% macro-F1 1.000  (20/20 per category) — same for dense fallback
@@ -190,7 +227,7 @@ python -m continuum.cli eval-runtime   # AI/ML B: 18 timed scenarios through Age
 # Makefile aliases
 make test      # pytest -q
 make lint      # ruff check + mypy
-make eval-b    # AI/ML B planner + runtime evaluation → reports/planner_eval.md, reports/runtime_eval.md
+make eval-b    # planner + text/multimodal runtime → reports/{planner,runtime,multimodal}_eval.md
 make eval      # test + eval-arbiter + compare + ls reports/
 make replay    # delhi_bangalore --trace
 make demo      # uvicorn continuum.api:app --host 0.0.0.0 --port 8000  (preview: https://8000-*.e2b.app)
@@ -262,7 +299,7 @@ src/continuum/
 data/
   gold/arbiter_100.jsonl           # frozen 100, 20/category, hash b8920267657a
   scenarios/*.json                 # 7 deterministic traces (incl. R-02 duplicate)
-tests/  # 137 tests — contract(22)+arbiter(8)+llm_adapter(24)+branch(6)+shadow(10)+branch_budget(6)+policy(6)+dialogue(5)+perception(5)+provenance(7)+replay(9)+versioned(7)+ledger(16)+baseline(6)
+tests/  # 246 tests — contracts, planning, interruption runtime, harness edge, multimodal, safety, replay and evaluation
 docs/   # 6 markdown docs (research, architecture, plan, evaluation, demo, status)
 reports/  # arbiter_accuracy.{json,md}, comparison.{json,md}, shadow_metrics.{json,md}, shadow_scores.jsonl, ablation.{json,md}
 examples/quickstart.py    # Phase 2: shows backend table + prompt + calibration + replay gemini

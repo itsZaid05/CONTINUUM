@@ -1,0 +1,369 @@
+[
+  {
+    "name": "audio_flight_pivot",
+    "theme": "multimodal_interruption",
+    "description": "In-car analogue: destination changes while the search runs; the stale search is cancelled, the morning constraint survives.",
+    "manifests": [
+      "builtin"
+    ],
+    "events": [
+      {
+        "at_ms": 10,
+        "type": "audio",
+        "text": "Find flights to Delhi tomorrow morning",
+        "confidence": 0.92
+      },
+      {
+        "at_ms": 300,
+        "type": "interrupt"
+      },
+      {
+        "at_ms": 320,
+        "type": "audio",
+        "text": "Actually, Bangalore",
+        "confidence": 0.92
+      }
+    ],
+    "run_ms": 3000,
+    "expect": {
+      "completed": [
+        {
+          "tool": "search_flights",
+          "args": {
+            "to": "Bangalore",
+            "date": "2026-09-26",
+            "slot": "morning"
+          }
+        }
+      ],
+      "cancelled": [
+        {
+          "tool": "search_flights",
+          "args": {
+            "to": "Delhi"
+          }
+        }
+      ],
+      "final_slots": {
+        "to": "Bangalore",
+        "slot": "morning",
+        "date": "2026-09-26"
+      }
+    }
+  },
+  {
+    "name": "frame_ticket_unseen_tools",
+    "theme": "multimodal_unseen_tools",
+    "description": "Support manifests delivered at runtime; one ticket with the right priority.",
+    "manifests": [
+      "support"
+    ],
+    "events": [
+      {
+        "at_ms": 10,
+        "type": "frame",
+        "text": "My router keeps dropping wifi, please open a ticket with high priority",
+        "confidence": 0.92
+      }
+    ],
+    "run_ms": 2000,
+    "expect": {
+      "completed": [
+        {
+          "tool": "create_ticket",
+          "args": {
+            "priority": "high"
+          },
+          "args_contain": {
+            "issue": "router"
+          }
+        }
+      ],
+      "max_effects": {
+        "create_ticket": 1
+      },
+      "final_slots": {
+        "priority": "high"
+      }
+    }
+  },
+  {
+    "name": "audio_clarify_missing_slot",
+    "theme": "multimodal_clarification",
+    "description": "'Open a ticket' has no issue: ask, then use the answer.",
+    "manifests": [
+      "support"
+    ],
+    "events": [
+      {
+        "at_ms": 10,
+        "type": "audio",
+        "text": "Open a ticket",
+        "confidence": 0.92
+      },
+      {
+        "at_ms": 810,
+        "type": "audio",
+        "text": "the printer on floor two is jammed",
+        "confidence": 0.92
+      }
+    ],
+    "run_ms": 2500,
+    "expect": {
+      "clarify": true,
+      "completed": [
+        {
+          "tool": "create_ticket",
+          "args_contain": {
+            "issue": "printer"
+          }
+        }
+      ],
+      "max_effects": {
+        "create_ticket": 1
+      }
+    }
+  },
+  {
+    "name": "frame_manual_lookup",
+    "theme": "multimodal_unseen_tools",
+    "description": "Troubleshooting manifests: model and error code extracted from the schema patterns.",
+    "manifests": [
+      "troubleshooting"
+    ],
+    "events": [
+      {
+        "at_ms": 10,
+        "type": "frame",
+        "text": "my washer WM-4500 shows error E4",
+        "confidence": 0.92
+      }
+    ],
+    "run_ms": 1500,
+    "expect": {
+      "completed": [
+        {
+          "tool": "lookup_manual",
+          "args": {
+            "model": "WM-4500",
+            "error_code": "E4"
+          }
+        }
+      ],
+      "final_slots": {
+        "model": "WM-4500",
+        "error_code": "E4"
+      }
+    }
+  },
+  {
+    "name": "audio_irreversible_confirmed",
+    "theme": "multimodal_clarification",
+    "description": "No explicit commit verb for an IRREVERSIBLE visit: ask first, act on 'yes'.",
+    "manifests": [
+      "troubleshooting"
+    ],
+    "events": [
+      {
+        "at_ms": 10,
+        "type": "audio",
+        "text": "can someone come and repair my WM-4500 on Monday?",
+        "confidence": 0.92
+      },
+      {
+        "at_ms": 610,
+        "type": "audio",
+        "text": "yes please",
+        "confidence": 0.92
+      }
+    ],
+    "run_ms": 2500,
+    "expect": {
+      "clarify": true,
+      "completed": [
+        {
+          "tool": "schedule_technician",
+          "args": {
+            "model": "WM-4500",
+            "date": "2026-09-28"
+          }
+        }
+      ],
+      "max_effects": {
+        "schedule_technician": 1
+      }
+    }
+  },
+  {
+    "name": "low_confidence_audio_1",
+    "theme": "multimodal_confidence",
+    "description": "Low-confidence evidence must clarify and never execute.",
+    "manifests": [
+      "builtin"
+    ],
+    "events": [
+      {
+        "at_ms": 0,
+        "type": "audio",
+        "text": "Book a flight to Delhi tomorrow",
+        "confidence": 0.35
+      }
+    ],
+    "run_ms": 500,
+    "expect": {
+      "clarify": true,
+      "not_completed": [
+        {
+          "tool": "search_flights"
+        },
+        {
+          "tool": "confirm_booking"
+        }
+      ]
+    }
+  },
+  {
+    "name": "low_confidence_frame_2",
+    "theme": "multimodal_confidence",
+    "description": "Low-confidence evidence must clarify and never execute.",
+    "manifests": [
+      "support"
+    ],
+    "events": [
+      {
+        "at_ms": 0,
+        "type": "frame",
+        "text": "Open a high priority ticket for a broken display",
+        "confidence": 0.35
+      }
+    ],
+    "run_ms": 500,
+    "expect": {
+      "clarify": true,
+      "not_completed": [
+        {
+          "tool": "create_ticket"
+        }
+      ]
+    }
+  },
+  {
+    "name": "low_confidence_audio_3",
+    "theme": "multimodal_confidence",
+    "description": "Low-confidence evidence must clarify and never execute.",
+    "manifests": [
+      "builtin"
+    ],
+    "events": [
+      {
+        "at_ms": 0,
+        "type": "audio",
+        "text": "Actually, make it Bangalore",
+        "confidence": 0.35
+      }
+    ],
+    "run_ms": 500,
+    "expect": {
+      "clarify": true,
+      "not_completed": [
+        {
+          "tool": "search_flights"
+        }
+      ]
+    }
+  },
+  {
+    "name": "low_confidence_frame_4",
+    "theme": "multimodal_confidence",
+    "description": "Low-confidence evidence must clarify and never execute.",
+    "manifests": [
+      "troubleshooting"
+    ],
+    "events": [
+      {
+        "at_ms": 0,
+        "type": "frame",
+        "text": "Washer WM-4500 error E4",
+        "confidence": 0.35
+      }
+    ],
+    "run_ms": 500,
+    "expect": {
+      "clarify": true,
+      "not_completed": [
+        {
+          "tool": "lookup_manual"
+        }
+      ]
+    }
+  },
+  {
+    "name": "low_confidence_audio_5",
+    "theme": "multimodal_confidence",
+    "description": "Low-confidence evidence must clarify and never execute.",
+    "manifests": [
+      "incar"
+    ],
+    "events": [
+      {
+        "at_ms": 0,
+        "type": "audio",
+        "text": "Navigate to the airport",
+        "confidence": 0.35
+      }
+    ],
+    "run_ms": 500,
+    "expect": {
+      "clarify": true,
+      "not_completed": [
+        {
+          "tool": "start_navigation"
+        }
+      ]
+    }
+  },
+  {
+    "name": "frame_manual_grounding_facets",
+    "theme": "multimodal_grounding",
+    "description": "Frame OCR grounds the model and error-code facets before a manual lookup.",
+    "manifests": [
+      "troubleshooting"
+    ],
+    "events": [
+      {
+        "at_ms": 0,
+        "type": "frame",
+        "text": "my washer WM-4500 shows error E4",
+        "confidence": 0.94
+      }
+    ],
+    "run_ms": 1500,
+    "expect": {
+      "completed": [
+        {
+          "tool": "lookup_manual",
+          "args": {
+            "model": "WM-4500"
+          }
+        },
+        {
+          "tool": "lookup_manual",
+          "args": {
+            "error_code": "E4"
+          }
+        },
+        {
+          "tool": "lookup_manual",
+          "args": {
+            "model": "WM-4500",
+            "error_code": "E4"
+          }
+        }
+      ],
+      "speak_contains": [
+        "Got it",
+        "on it"
+      ]
+    }
+  }
+]

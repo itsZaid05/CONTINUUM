@@ -1,25 +1,50 @@
-# AI Assistance Disclosure — CONTINUUM (Engineer A)
+# AI Assistance Disclosure — CONTINUUM
 
-Required at submission by the hackathon convention (as enforced in sibling repos).
+This repository was developed with AI coding assistance. The team remains
+responsible for the architecture, scenario and gold-set curation, review,
+safety policy, and submitted results.
 
-## What AI was used for
-- **Research triage** — 40+ papers/repos/YC sources screened and summarized into
-  `docs/RESEARCH_REPORT.md` (every borrow is attributed there and in README Acknowledgments).
-- **Drafting** — code scaffolding for phases 1–5 following `docs/IMPLEMENTATION_PLAN.md`;
-  all designs are Engineer A's stated architecture (9-step pipeline, arbiter taxonomy,
-  speculation budget), not invented by the assistant.
-- **Verification** — every number in `reports/` is produced by deterministic commands a
-  human (or judge) can re-run in <10s: `pytest -q`, `continuum eval-arbiter`,
-  `continuum compare`, `continuum ablate`. No metric was written by hand.
+## Assistance used
 
-## What AI was NOT allowed to do
-- No unreviewed merge: all phases went through review + `git push` + PR #2.
-- No hidden stubs presented as results: `offline-fake` is labeled as a deterministic
-  table (CI lane) in README, STATUS, and every report; real-model lanes are env-gated.
-- Lost-work incident (sandbox commit unpushed) was disclosed and rebuilt from spec,
-  not papered over — see `docs/STATUS.md` integrity note.
+- Research triage and drafting of `docs/RESEARCH_REPORT.md`.
+- Implementation scaffolding and refactoring for the runtime, planner, tool
+  sandbox, JSONL harness edge, perception adapters, tests, and documentation.
+- Test, lint, type-check, evaluation, and compatibility debugging.
 
-## Human ownership
-- Intent taxonomy, gold-set utterances (100, hand-written post-cutoff), scenario design,
-  safety rules (READ/STAGE-only speculation, honest retraction), and the metrics story
-  are authored/curated by the team; the assistant implemented and tested to spec.
+## Controls and limitations
+
+- AI-generated changes were run through the repository's deterministic tests,
+  Ruff, and mypy before inclusion.
+- No hidden service or credential is needed by the default path.
+  `offline-fake` is explicitly a deterministic CI lane, not a claim of model
+  intelligence. Real LLM backends remain optional and environment-gated.
+- Optional ASR accepts only an existing local model directory and uses
+  `local_files_only=True`; the default multimodal evaluation uses provided
+  transcript/OCR evidence and never downloads a model.
+- The runtime evaluation suites were built alongside the implementation and
+  are described as regression/mechanism checks, not independent estimates.
+  The frozen planner held-out split is retained separately.
+- Safety decisions remain explicit in code: risk tiers, CommitGate,
+  verification after uncertain mutation timeouts, idempotency keys, stale
+  result rejection, and truthful timeout/retraction language.
+
+## Reproduction
+
+```bash
+python -m pytest -q
+ruff check src tests scripts
+mypy src
+make eval-b
+```
+
+The commands regenerate or verify:
+
+- 246 deterministic tests;
+- planner held-out fully-correct rate 0.964;
+- text runtime score 100.00 vs naive runtime 54.65;
+- multimodal runtime score 100.00 vs naive runtime 81.15;
+- one duplicate mutation in the no-verification ablation; and
+- one regretted irreversible action in the no-CommitGate ablation.
+
+Machine-readable reports and per-scenario traces are checked in under
+`reports/` so claims can be audited rather than accepted from prose.

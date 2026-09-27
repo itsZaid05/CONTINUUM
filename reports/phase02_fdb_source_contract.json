@@ -1,0 +1,28 @@
+{
+  "benchmark_version": "1.0",
+  "checks": {
+    "expected_call_count": true,
+    "revision": true,
+    "rollback_count": true,
+    "scenario_count": true,
+    "tool_contract": true
+  },
+  "expected_tool_calls": 154,
+  "revision": "3e799c45a045256f47d5f1c9cda90157e2d2ec9e",
+  "scenarios": 100,
+  "source": "/tmp/Full-Duplex-Bench",
+  "tools": [
+    "add_to_cart",
+    "book_flight",
+    "calculate_commute",
+    "get_card_benefits",
+    "get_exchange_rate",
+    "modify_autopay",
+    "search_apartments",
+    "search_flights",
+    "search_products",
+    "track_order",
+    "update_identity_doc",
+    "update_search_filter"
+  ]
+}

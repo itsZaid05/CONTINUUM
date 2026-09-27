@@ -1,5 +1,10 @@
 # CONTINUUM — Verified Status (Phase 4 + Phase 5 wiring complete)
 
+> **Historical snapshot (22 Sep 2026).** The final harness-edge status, 246-test
+> verification, and current commands are in
+> [`THEME05_BUILD_STATUS.md`](THEME05_BUILD_STATUS.md). This document is kept
+> as the Phase 4 audit trail.
+
 > **Current phase:** 4 — Speculation (shadow budget, metrics, cleanup) ✅ · Phase 5 comparison/preview ✅
 > **Date:** 2026-09-22
 > **Branch:** `arena/01a0c708-new` (supersedes merged `arena/01a0c653-new`, PR #1)
