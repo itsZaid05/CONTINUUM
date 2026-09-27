@@ -207,6 +207,8 @@ def normalize_event(raw: Mapping[str, Any], *, default_session: str = "default")
         "type": EventType(event_type),
         "ts_ms": _first(raw, "ts_ms", "timestamp_ms", "timestamp", "at_ms"),
         "text": str(text) if text is not None else None,
+        "text_mode": _first(raw, "text_mode", "transcript_mode", "update_mode") or "append",
+        "is_final": bool(_first(raw, "is_final", "final", "transcript_final") or False),
         "data": data,
         "confidence": _first(raw, "confidence", "asr_confidence", "ocr_confidence"),
         "call_id": _first(

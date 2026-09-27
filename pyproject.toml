@@ -13,6 +13,7 @@ dependencies = [
     "typer>=0.12",
     "rich>=13.7",
     "python-dateutil>=2.9",
+    "jsonschema>=4.23",
 ]
 
 [project.optional-dependencies]
@@ -31,6 +32,21 @@ dense = [
 ]
 asr = [
     "faster-whisper>=1.0",
+]
+# Matches the official FDB-v3 cascaded-agent stack. Imports stay lazy, so the
+# default deterministic test lane does not require LiveKit or cloud keys.
+fdb = [
+    "livekit-agents[openai]~=1.3",
+    "livekit-plugins-silero>=1.3,<2",
+    "livekit~=1.0",
+    "numpy>=1.26",
+    "python-dotenv>=1.0",
+    "pydub>=0.25",
+    "ffmpeg-python>=0.2",
+]
+fdb-eval = [
+    "nemo_toolkit[asr]>=2.0",
+    "openai>=1.0",
 ]
 
 [project.scripts]

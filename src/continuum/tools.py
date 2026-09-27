@@ -40,6 +40,9 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Protocol
 
+from jsonschema import Draft202012Validator
+from jsonschema.exceptions import SchemaError
+from jsonschema.exceptions import ValidationError as JsonSchemaValidationError
 from pydantic import BaseModel, Field, field_validator, model_validator
 
 from .contracts import RiskLevel
@@ -142,7 +145,25 @@ class ToolManifest(BaseModel):
     def _derive_kind(self) -> ToolManifest:
         if not self.kind:
             self.kind = _KIND_FOR_CLASS[self.mutation_class]
+        try:
+            Draft202012Validator.check_schema(self.arguments)
+            Draft202012Validator.check_schema(self.returns)
+        except SchemaError as exc:
+            raise ValueError(f"invalid JSON Schema for tool {self.name}: {exc.message}") from exc
+        if self.arguments.get("type", "object") != "object":
+            raise ValueError(f"tool {self.name} arguments schema must describe an object")
         return self
+
+    def validate_args(self, args: dict[str, Any]) -> dict[str, Any]:
+        """Validate a concrete call against the complete manifest schema."""
+        try:
+            Draft202012Validator(self.arguments).validate(args)
+        except JsonSchemaValidationError as exc:
+            location = ".".join(str(x) for x in exc.absolute_path) or "arguments"
+            raise ValueError(
+                f"invalid arguments for {self.name} at {location}: {exc.message}"
+            ) from exc
+        return dict(args)
 
     @property
     def state_changing(self) -> bool:
@@ -321,7 +342,7 @@ class ToolRegistry:
         missing = [key for key in required if key not in args]
         if missing:
             raise ValueError(f"missing required arguments for {name}: {missing}")
-        return args
+        return manifest.validate_args(args)
 
 
 def default_registry() -> ToolRegistry:
