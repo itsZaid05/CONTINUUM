@@ -25,7 +25,13 @@ def _object(
 
 
 def _returns(**properties: Any) -> dict[str, Any]:
-    return {"type": "object", "properties": properties}
+    """Strict result schema for bridge/backend reconciliation."""
+    return {
+        "type": "object",
+        "properties": properties,
+        "required": list(properties),
+        "additionalProperties": False,
+    }
 
 
 FDB_TOOL_NAMES = (
@@ -49,6 +55,18 @@ def fdb_tool_manifests() -> list[ToolManifest]:
     number = {"type": "number"}
     integer = {"type": "integer", "minimum": 1}
     flexible = {"type": ["string", "number", "integer", "boolean"]}
+    apartment = {
+        "type": "object",
+        "properties": {
+            "id": string,
+            "address": string,
+            "price": number,
+            "beds": integer,
+            "pets_allowed": {"type": "boolean"},
+        },
+        "required": ["id", "address", "price", "beds", "pets_allowed"],
+        "additionalProperties": False,
+    }
     preauthorized = "fdb-v3-simulated-environment"
     return [
         ToolManifest(
@@ -59,8 +77,21 @@ def fdb_tool_manifests() -> list[ToolManifest]:
             arguments=_object({"destination": string, "date": string}, ["destination", "date"]),
             returns=_returns(
                 status=string,
-                flights={"type": "array"},
-                flight_id=string,
+                flights={
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "flight_id": string,
+                            "destination": string,
+                            "date": string,
+                            "price": number,
+                        },
+                        "required": ["flight_id", "destination", "date", "price"],
+                        "additionalProperties": False,
+                    },
+                    "minItems": 1,
+                },
             ),
         ),
         ToolManifest(
@@ -141,7 +172,11 @@ def fdb_tool_manifests() -> list[ToolManifest]:
                 }
             ),
             returns=_returns(
-                status=string, apartments={"type": "array"}, cheapest_apartment_address=string
+                status=string,
+                city=string,
+                results={"type": "array", "items": apartment, "minItems": 1},
+                apartments={"type": "array", "items": apartment, "minItems": 1},
+                cheapest_apartment_address=string,
             ),
         ),
         ToolManifest(
@@ -184,7 +219,20 @@ def fdb_tool_manifests() -> list[ToolManifest]:
             arguments=_object(
                 {"query": string, "max_price": number, "category": string}, ["query"]
             ),
-            returns=_returns(status=string, products={"type": "array"}, cheapest_product_id=string),
+            returns=_returns(
+                status=string,
+                products={
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {"product_id": string, "name": string, "price": number},
+                        "required": ["product_id", "name", "price"],
+                        "additionalProperties": False,
+                    },
+                    "minItems": 1,
+                },
+                cheapest_product_id=string,
+            ),
         ),
         ToolManifest(
             name="add_to_cart",

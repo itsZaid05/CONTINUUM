@@ -28,3 +28,29 @@ jobs:
         run: ruff check src tests scripts
       - name: Mypy
         run: mypy src
+
+  fdb-edge:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install LiveKit and Gemini edge
+        run: python -m pip install --upgrade pip && python -m pip install -e '.[dev,fdb]'
+      - name: FDB bridge and provider contracts
+        run: python -m pytest -q tests/test_fdb_contracts.py tests/test_fdb_config.py tests/test_fdb_livekit_bridge.py
+      - name: Optional edge import
+        env:
+          GOOGLE_API_KEY: contract-test-placeholder
+        run: |
+          python - <<'PY'
+          from continuum.integrations.fdb.agent import server
+          from continuum.integrations.fdb.provider import GeminiNativeAudioProvider, NativeAudioConfig
+
+          model = GeminiNativeAudioProvider().build_model(NativeAudioConfig())
+          assert server is not None
+          assert model.capabilities.audio_output
+          print("FDB LiveKit/Gemini import contract passed")
+          PY

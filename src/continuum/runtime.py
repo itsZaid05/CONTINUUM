@@ -799,17 +799,20 @@ class AgentRuntime:
             payload = raw.get(
                 "payload", raw.get("result", {k: v for k, v in raw.items() if k != "status"})
             )
+            normalized = dict(payload) if isinstance(payload, dict) else {"result": payload}
             return ToolResult(
                 m.name,
                 raw.get("external_operation_id"),
                 run.dispatched_ms,
                 self.now_ms(),
                 "COMPLETED",
-                dict(payload) if isinstance(payload, dict) else {"result": payload},
+                m.validate_result(normalized),
             )
-        return await s.sandbox.call(
+        result = await s.sandbox.call(
             m.name, run.args, idempotency_key=run.effect_key or run.call_id, speed=self.tool_speed
         )
+        result.payload = m.validate_result(result.payload)
+        return result
 
     async def _execute(
         self,

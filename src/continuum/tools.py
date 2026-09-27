@@ -156,14 +156,28 @@ class ToolManifest(BaseModel):
 
     def validate_args(self, args: dict[str, Any]) -> dict[str, Any]:
         """Validate a concrete call against the complete manifest schema."""
+        return self._validate_payload(self.arguments, args, label="arguments")
+
+    def validate_result(self, result: dict[str, Any]) -> dict[str, Any]:
+        """Validate the observed backend output before it can be trusted.
+
+        Result contracts used to be planner hints only.  Treating them as real
+        Draft 2020-12 schemas closes the gap where a malformed response could
+        be announced as a successful side effect.
+        """
+        return self._validate_payload(self.returns, result, label="result")
+
+    def _validate_payload(
+        self, schema: dict[str, Any], payload: dict[str, Any], *, label: str
+    ) -> dict[str, Any]:
         try:
-            Draft202012Validator(self.arguments).validate(args)
+            Draft202012Validator(schema).validate(payload)
         except JsonSchemaValidationError as exc:
-            location = ".".join(str(x) for x in exc.absolute_path) or "arguments"
+            location = ".".join(str(x) for x in exc.absolute_path) or label
             raise ValueError(
-                f"invalid arguments for {self.name} at {location}: {exc.message}"
+                f"invalid {label} for {self.name} at {location}: {exc.message}"
             ) from exc
-        return dict(args)
+        return dict(payload)
 
     @property
     def state_changing(self) -> bool:
