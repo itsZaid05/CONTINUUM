@@ -1,0 +1,26 @@
+{
+  "checks": {
+    "agent_output_wav_written": false,
+    "audio_artifact_telemetry": false,
+    "input_transcript_telemetry": false,
+    "official_tool_call_written": false,
+    "output_audio_frame_telemetry": false,
+    "output_transcript_telemetry": false,
+    "remote_audio_received": false,
+    "sampled_video_telemetry": false,
+    "session_close_telemetry": false,
+    "tool_completed_telemetry": false,
+    "worker_stayed_running": false
+  },
+  "executed": false,
+  "missing_credential_names": [
+    "LIVEKIT_URL",
+    "LIVEKIT_API_KEY",
+    "LIVEKIT_API_SECRET",
+    "GOOGLE_API_KEY"
+  ],
+  "official_score": false,
+  "run_id": "phase03-83932d8bc1e041d6912b6c67c8db25a4",
+  "schema": "continuum.phase03.live-smoke.v1",
+  "status": "skipped_external_gate"
+}

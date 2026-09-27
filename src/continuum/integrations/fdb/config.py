@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 from dataclasses import dataclass
 
+from .media import MediaConfig
 from .provider import NativeAudioConfig
 
 
@@ -22,6 +23,7 @@ class FdbAgentConfig:
     telemetry_path: str = "/tmp/continuum_fdb_telemetry.jsonl"
     official_tool_log_path: str = "/tmp/agent_tool_calls.log"
     shutdown_timeout_s: float = 5.0
+    media: MediaConfig = MediaConfig()
 
     @classmethod
     def from_env(cls) -> FdbAgentConfig:
@@ -45,6 +47,7 @@ class FdbAgentConfig:
             ),
             official_tool_log_path=os.getenv("FDB_TOOL_LOG_PATH", "/tmp/agent_tool_calls.log"),
             shutdown_timeout_s=timeout,
+            media=MediaConfig.from_env(),
         )
 
     def validate_livekit_environment(self) -> None:
@@ -56,4 +59,6 @@ class FdbAgentConfig:
             )
 
     def native_audio(self) -> NativeAudioConfig:
-        return NativeAudioConfig(model=self.model, voice=self.voice, language=self.language)
+        return NativeAudioConfig(
+            model=self.model, voice=self.voice, language=self.language, media=self.media
+        )

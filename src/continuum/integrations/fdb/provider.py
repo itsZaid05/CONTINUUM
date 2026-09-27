@@ -6,6 +6,8 @@ import os
 from dataclasses import dataclass
 from typing import Any, Protocol, runtime_checkable
 
+from .media import MediaConfig
+
 
 class ProviderConfigurationError(RuntimeError):
     """Raised when a selected media provider lacks required configuration."""
@@ -17,6 +19,7 @@ class NativeAudioConfig:
     voice: str = "Puck"
     language: str | None = None
     temperature: float | None = None
+    media: MediaConfig = MediaConfig()
 
 
 @runtime_checkable
@@ -50,18 +53,45 @@ class GeminiNativeAudioProvider:
         self.validate_environment()
         try:
             from google.genai import types
+            from livekit.agents.utils import images
             from livekit.plugins import google
         except ImportError as exc:  # pragma: no cover - depends on optional extra
             raise ProviderConfigurationError(
                 "Gemini support is not installed; sync the project with the 'fdb' extra"
             ) from exc
 
+        transcription = types.AudioTranscriptionConfig(
+            language_codes=[config.language] if config.language else None,
+            word_timestamp=config.media.requested_word_timestamps,
+            mode=types.AudioTranscriptionConfigMode.VERBATIM,
+        )
+        activity = types.AutomaticActivityDetection(
+            disabled=False,
+            start_of_speech_sensitivity=types.StartSensitivity(
+                config.media.vad_start_sensitivity
+            ),
+            end_of_speech_sensitivity=types.EndSensitivity(config.media.vad_end_sensitivity),
+            prefix_padding_ms=config.media.vad_prefix_padding_ms,
+            silence_duration_ms=config.media.vad_silence_duration_ms,
+        )
         kwargs: dict[str, Any] = {
             "model": config.model,
             "voice": config.voice,
-            # Ask Gemini Live to expose both sides of the native audio stream.
-            "input_audio_transcription": types.AudioTranscriptionConfig(),
-            "output_audio_transcription": types.AudioTranscriptionConfig(),
+            "modalities": [types.Modality.AUDIO],
+            "input_audio_transcription": transcription,
+            "output_audio_transcription": transcription,
+            "realtime_input_config": types.RealtimeInputConfig(
+                automatic_activity_detection=activity,
+                activity_handling=types.ActivityHandling.START_OF_ACTIVITY_INTERRUPTS,
+                turn_coverage=(
+                    types.TurnCoverage.TURN_INCLUDES_AUDIO_ACTIVITY_AND_ALL_VIDEO
+                    if config.media.video_enabled
+                    else types.TurnCoverage.TURN_INCLUDES_ONLY_ACTIVITY
+                ),
+            ),
+            "image_encode_options": images.EncodeOptions(
+                format="JPEG", quality=config.media.jpeg_quality
+            ),
         }
         if config.language:
             kwargs["language"] = config.language

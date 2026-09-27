@@ -8,6 +8,7 @@ from collections.abc import Coroutine
 from typing import Any
 
 from ...streaming import StreamingSpeechState
+from .media import TranscriptEvent
 from .telemetry import JsonlTelemetry
 from .tool_bridge import FdbToolBridge
 
@@ -24,6 +25,8 @@ class LiveKitSessionAdapter:
         self._user_started_at: float | None = None
         self._user_ended_at: float | None = None
         self._agent_started_at: float | None = None
+        self._agent_speaking = False
+        self._dispatch_closed = False
 
     def attach(self, session: Any) -> None:
         session.on("user_input_transcribed", self.on_user_input_transcribed)
@@ -37,17 +40,30 @@ class LiveKitSessionAdapter:
         if not transcript:
             return
         now_ms = time.time() * 1000.0
-        self.bridge.begin_candidate_turn()
-        self.speech.update(transcript, mode="replace", at_ms=now_ms)
+        if not self._dispatch_closed:
+            self.bridge.begin_candidate_turn()
+            self.speech.update(transcript, mode="replace", at_ms=now_ms)
         is_final = bool(getattr(event, "is_final", False))
-        self.telemetry.emit(
-            "speech_candidate",
+        normalized = TranscriptEvent(
+            direction="input",
             text=transcript,
             final=is_final,
-            revision=self.speech.candidate_revision,
+            observed_at=now_ms / 1000.0,
+            source="gemini_native_audio",
             language=getattr(event, "language", None),
+            item_id=getattr(event, "item_id", None),
+            start_time=getattr(event, "start_time", None),
+            end_time=getattr(event, "end_time", None),
+            timebase="seconds" if getattr(event, "start_time", None) is not None else None,
+            timing_source=(
+                "provider_alignment"
+                if getattr(event, "start_time", None) is not None
+                else "event_observation"
+            ),
+            confidence=getattr(event, "confidence", None),
         )
-        if is_final:
+        self.telemetry.emit("provider_input_audio_transcription", **normalized.payload())
+        if is_final and not self._dispatch_closed:
             self._commit_speech(now_ms, boundary="final_transcript")
 
     def on_user_state_changed(self, event: Any) -> None:
@@ -55,19 +71,22 @@ class LiveKitSessionAdapter:
         now = time.time()
         if state == "speaking":
             self._user_started_at = now
+            self._dispatch_closed = False
             self.bridge.begin_candidate_turn()
-            self.telemetry.emit("user_speech_started")
-            self._schedule(self.bridge.cancel_cancellable("user barge-in"))
+            self.telemetry.emit("user_speech_started", barge_in=self._agent_speaking)
+            if self._agent_speaking:
+                self._schedule(self.bridge.cancel_cancellable("user barge-in"))
         elif state == "listening":
             self._user_ended_at = now
             self._commit_speech(now * 1000.0, boundary="end_of_turn")
-            # EOT is a valid dispatch boundary even when a provider does not
-            # expose input transcription text.
-            self.bridge.commit_turn("end_of_turn")
-            self.telemetry.emit("user_speech_ended")
+            if not self._dispatch_closed:
+                self.bridge.commit_turn("end_of_turn")
+            self._dispatch_closed = True
+            self.telemetry.emit("end_of_turn", timing_source="vad_boundary")
 
     def on_agent_state_changed(self, event: Any) -> None:
         state = str(getattr(event, "new_state", ""))
+        self._agent_speaking = state == "speaking"
         if state == "speaking":
             self._agent_started_at = time.time()
             latency = (
@@ -92,15 +111,19 @@ class LiveKitSessionAdapter:
         self.telemetry.emit("livekit_tools_executed", tools=[row for row in calls if row])
 
     def on_error(self, event: Any) -> None:
-        # repr(error) may contain transport internals but never configuration
-        # values supplied by this integration.
-        self.telemetry.emit("livekit_error", error=repr(getattr(event, "error", event)))
+        error = getattr(event, "error", event)
+        self.telemetry.emit(
+            "livekit_error",
+            error_type=type(error).__name__,
+            source=type(event).__name__,
+        )
 
     def _commit_speech(self, at_ms: float, *, boundary: str) -> None:
         utterance = self.speech.commit(at_ms)
         if utterance is None:
             return
         self.bridge.commit_turn(boundary)
+        self._dispatch_closed = True
         self.telemetry.emit(
             "speech_committed",
             text=utterance.text,
@@ -124,3 +147,4 @@ class LiveKitSessionAdapter:
         if self._tasks:
             await asyncio.gather(*tuple(self._tasks), return_exceptions=True)
         await self.bridge.close(timeout_s=timeout_s)
+        self.telemetry.emit("session_closed")
