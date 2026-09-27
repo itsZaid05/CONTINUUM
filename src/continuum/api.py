@@ -9,6 +9,8 @@ import json
 from pathlib import Path
 from typing import Any
 
+from . import __version__
+
 try:
     from fastapi import FastAPI
     from fastapi.middleware.cors import CORSMiddleware
@@ -30,7 +32,7 @@ _SCENARIOS = [
 ]
 
 if HAS_FASTAPI:
-    app = FastAPI(title="CONTINUUM — Engineer A Preview", version="0.4.0-phase4")
+    app = FastAPI(title="CONTINUUM — Interruptible Agent Preview", version=__version__)
 
     app.add_middleware(
         CORSMiddleware,
@@ -49,8 +51,8 @@ if HAS_FASTAPI:
         pre{{background:#0b1020;color:#7ee787;padding:16px;overflow:auto;border-radius:8px}}
         a{{color:#4aa3ff}} .m{{color:#8899aa}}</style>
         </head><body>
-        <h1>CONTINUUM — Interruptible Real-Time Agents <span class="m">v0.4.0-phase4</span></h1>
-        <p><b>Engineer A:</b> Understanding, Dialogue &amp; Evaluation · Samsung PRISM Theme 05</p>
+        <h1>CONTINUUM — Interruptible Real-Time Agents <span class="m">v{__version__}</span></h1>
+        <p>Manifest planning, safe async execution and multimodal harness edge · Samsung PRISM Theme 05</p>
         <p><i>Keeps agents consistent when humans change their minds: classify the change,
         keep valid work, discard the rest, speculate within hard budget.</i></p>
         <h3>Scenarios (deterministic offline-fake)</h3>
@@ -70,8 +72,8 @@ if HAS_FASTAPI:
     def health() -> dict[str, Any]:
         return {
             "status": "ok",
-            "phase": "4-speculation",
-            "version": "0.4.0-phase4",
+            "phase": "harness-edge",
+            "version": __version__,
             "scenarios": [n for n, _ in _SCENARIOS],
         }
 

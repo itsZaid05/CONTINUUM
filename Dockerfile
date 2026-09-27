@@ -4,15 +4,22 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
-# Install project & dependencies
-COPY . .
-RUN pip install --no-cache-dir -e '.[dev]' || pip install --no-cache-dir -r requirements.txt
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONPATH=/app/src:/app
 
-# Expose FastAPI & WebSocket port
+# Install dependencies and project
+COPY pyproject.toml README.md LICENSE ./
+COPY requirements.txt ./
+COPY src ./src
+COPY backend ./backend
+COPY data ./data
+
+RUN pip install --no-cache-dir . || pip install --no-cache-dir -r requirements.txt
+
+# Expose FastAPI & WebSocket port for live prototype HUD
 EXPOSE 8000
 
-ENV PYTHONUNBUFFERED=1
-ENV PYTHONPATH=/app/src:/app
-
-# Default command runs full test suite; can be overridden to start the live server
-CMD ["python", "-m", "pytest", "-q"]
+# The organizer streams one JSON event per stdin line and receives one JSON
+# action per stdout line via the official runner contract.
+ENTRYPOINT ["continuum", "kit"]

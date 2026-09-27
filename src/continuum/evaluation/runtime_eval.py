@@ -28,6 +28,7 @@ milliseconds and are *not* rescaled.
 from __future__ import annotations
 
 import asyncio
+import base64
 import json
 import statistics
 from pathlib import Path
@@ -93,9 +94,20 @@ async def run_scenario(sc: dict[str, Any], *, time_scale: float = 0.1, **runtime
         delay = start + ev["at_ms"] * time_scale / 1000.0 - loop.time()
         if delay > 0:
             await asyncio.sleep(delay)
+        data = ev.get("data")
+        if isinstance(data, str):
+            data = base64.b64decode(data)
         await rt.handle(
-            RuntimeEvent(session_id=SESSION, type=EventType(ev["type"]), text=ev.get("text"),
-                         call_id=ev.get("call_id"), ts_ms=ev["at_ms"])
+            RuntimeEvent(
+                session_id=SESSION,
+                type=EventType(ev["type"]),
+                text=ev.get("text") or ev.get("transcript") or ev.get("ocr_text"),
+                data=data,
+                confidence=ev.get("confidence"),
+                call_id=ev.get("call_id"),
+                result=ev.get("result"),
+                ts_ms=ev["at_ms"],
+            )
         )
     rest = start + sc.get("run_ms", 3000) * time_scale / 1000.0 - loop.time()
     if rest > 0:

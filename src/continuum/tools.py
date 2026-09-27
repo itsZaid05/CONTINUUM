@@ -101,13 +101,32 @@ class ToolManifest(BaseModel):
     @model_validator(mode="before")
     @classmethod
     def _accept_boolean_flags(cls, data: Any) -> Any:
-        # {"read_only": true} / {"state_modifying": true} are the Theme 05
-        # guide's own vocabulary; map them onto mutation_class.
-        if isinstance(data, dict) and "mutation_class" not in data:
-            if data.get("read_only") is True or data.get("state_modifying") is False:
-                data = {**data, "mutation_class": "READ_ONLY"}
-            elif data.get("state_modifying") is True or data.get("read_only") is False:
-                data = {**data, "mutation_class": "MUTATING"}
+        # Accept the field names used by common function/tool kits while
+        # preserving one canonical internal schema.
+        if isinstance(data, dict):
+            data = dict(data)
+            if "arguments" not in data:
+                for alias in ("input_schema", "parameters", "args_schema"):
+                    if alias in data:
+                        data["arguments"] = data[alias]
+                        break
+            if "returns" not in data:
+                for alias in ("output_schema", "result_schema", "return_schema"):
+                    if alias in data:
+                        data["returns"] = data[alias]
+                        break
+            # {"read_only": true} / {"state_modifying": true} are the Theme
+            # 05 guide's own vocabulary; map them onto mutation_class.
+            if "mutation_class" not in data:
+                if data.get("read_only") is True or data.get("state_modifying") is False:
+                    data["mutation_class"] = "READ_ONLY"
+                elif data.get("state_modifying") is True or data.get("read_only") is False:
+                    data["mutation_class"] = "MUTATING"
+                else:
+                    for alias in ("risk", "risk_level", "effect", "mutation"):
+                        if alias in data:
+                            data["mutation_class"] = data[alias]
+                            break
         return data
 
     @field_validator("mutation_class", mode="before")
@@ -430,6 +449,10 @@ class MockToolSandbox:
         faults: dict[str, FaultPlan] | None = None,
     ) -> None:
         self._dedup: dict[str, ToolResult] = {}
+        # One lock per idempotency key closes the race where two concurrent
+        # retries both check the cache before either records its result. Calls
+        # under different keys remain fully concurrent.
+        self._key_locks: dict[str, asyncio.Lock] = {}
         self.registry = registry or default_registry()
         self.faults = dict(faults or {})
         self._attempts: dict[str, int] = {}
@@ -450,6 +473,23 @@ class MockToolSandbox:
         return self.registry.get(tool) if self.registry.has(tool) else None
 
     async def call(
+        self,
+        tool: str,
+        params: dict[str, Any] | None = None,
+        *,
+        idempotency_key: str | None = None,
+        speed: float = 1.0,
+    ) -> ToolResult:
+        """Dispatch a call with atomic per-key idempotency."""
+        if idempotency_key is None:
+            return await self._call_unlocked(tool, params, idempotency_key=None, speed=speed)
+        lock = self._key_locks.setdefault(idempotency_key, asyncio.Lock())
+        async with lock:
+            return await self._call_unlocked(
+                tool, params, idempotency_key=idempotency_key, speed=speed
+            )
+
+    async def _call_unlocked(
         self,
         tool: str,
         params: dict[str, Any] | None = None,

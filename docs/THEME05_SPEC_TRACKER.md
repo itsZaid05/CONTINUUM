@@ -1,5 +1,11 @@
 # CONTINUUM — Theme 05 Specification Tracker
 
+> **Historical audit (24 Sep 2026).** This file records the gap analysis that
+> drove the implementation; its status cells intentionally describe the older
+> `cf9037c` tree. For the final 26 Sep build, use
+> [`THEME05_BUILD_STATUS.md`](THEME05_BUILD_STATUS.md) and
+> [`HARNESS_EDGE.md`](HARNESS_EDGE.md).
+
 > **Purpose:** Map every requirement in the *Theme 05: Interruptible Real-Time Agents* guide (v1.0.0) to what CONTINUUM has built so far and what is still left. The work is split into two parts:
 >
 > - **Part A — AI/ML component** (understanding: perception, intent/delta arbitration, multimodal grounding, calibration, response quality)

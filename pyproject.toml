@@ -1,7 +1,7 @@
 [project]
 name = "continuum"
-version = "0.4.0"
-description = "CONTINUUM — Interruptible Real-Time Agents for Samsung PRISM Theme 05 (Engineer A: Understanding, Dialogue & Evaluation)"
+version = "0.6.0"
+description = "CONTINUUM — manifest-driven, interruptible real-time agents for Samsung PRISM Theme 05"
 readme = "README.md"
 requires-python = ">=3.10,<3.13"
 license = { text = "MIT" }
@@ -13,7 +13,6 @@ dependencies = [
     "typer>=0.12",
     "rich>=13.7",
     "python-dateutil>=2.9",
-    "sentence-transformers>=3.0 ; python_version >= '3.10'",
 ]
 
 [project.optional-dependencies]
@@ -30,13 +29,16 @@ dense = [
     "torch>=2.3",
     "rank-bm25>=0.2.2",
 ]
+asr = [
+    "faster-whisper>=1.0",
+]
 
 [project.scripts]
 continuum = "continuum.cli:main"
 
 [project.urls]
-Repository = "https://github.com/itsZaid05/new"
-Issues = "https://github.com/itsZaid05/new/issues"
+Repository = "https://github.com/itsZaid05/CONTINUUM"
+Issues = "https://github.com/itsZaid05/CONTINUUM/issues"
 
 [build-system]
 requires = ["hatchling"]
@@ -82,7 +84,7 @@ ignore = ["B008"]  # Typer idiom uses function calls in defaults by design
 "tests/*" = ["B017", "E501", "E702", "F841"]
 
 [tool.mypy]
-python_version = "3.11"
+python_version = "3.10"
 strict = false
 ignore_missing_imports = true
 warn_unused_ignores = false
