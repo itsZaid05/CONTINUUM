@@ -52,7 +52,7 @@ ignored `.artifacts/` directory.
 - [x] Existing and new tests pass locally (261 on Python 3.11); Python 3.10-3.12 CI is configured.
 - [x] Ruff and mypy pass.
 - [x] `uv.lock` generated; `uv lock --check` and `uv sync --frozen --extra dev` pass.
-- [ ] Phase audit committed, pushed, and Python 3.10-3.12 CI confirmed.
+- [x] Phase audit committed and pushed; Python 3.10-3.12 CI passed in run `36296693342`.
 
 ## Known external gates
 

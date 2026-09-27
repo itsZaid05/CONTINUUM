@@ -38,6 +38,7 @@ score is claimed by this report.
 | `uv lock --check` | **Passed** |
 | `uv sync --frozen --extra dev` | **Passed** |
 | `git diff --check` | **Passed** |
+| GitHub CI, Python 3.10/3.11/3.12 | **Passed** — run `36296693342` |
 | Pinned FDB source checkout | **Passed** |
 | Official benchmark contract parse | **100 scenarios, 154 expected calls** |
 | Official tool-set parity | **12/12 exact names** |
