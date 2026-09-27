@@ -31,7 +31,7 @@ ignored `.artifacts/` directory.
 |---|---|---|---|
 | 0 | Baseline alignment, official-source pin, implementation ledger, dependency lock | Branch aligned; upstream revision/license recorded; baseline checks reproducible | Complete — 27 Sep 2026 |
 | 1 | Runtime foundation: candidate/committed speech, exact call lifecycle, JSON Schema dispatch validation, FDB contracts/manifests | Unit/contract tests plus existing 246 regressions; illegal transitions and partial-speech side effects tested | Complete — 27 Sep 2026 |
-| 2 | FDB/LiveKit edge: Gemini provider interface/implementation, agent, transcript adapter, tool bridge, telemetry, official-shape mocks | Optional FDB install imports; 12 tools exposed; 100/154 call-chain check; schemas, postconditions, cancellation, teardown, and official logs pass | Implemented; local gate passed — audit/CI pending |
+| 2 | FDB/LiveKit edge: Gemini provider interface/implementation, agent, transcript adapter, tool bridge, telemetry, official-shape mocks | Optional FDB install imports; 12 tools exposed; 100/154 call-chain check; schemas, postconditions, cancellation, teardown, and official logs pass | Complete — 27 Sep 2026 |
 | 3 | Official media path: Gemini Live native audio, provider transcript/audio events, VAD/EOT/barge-in, timestamps/confidence/visual path where exposed | Live room smoke test with environment-only credentials; recorded WAV and call telemetry | Not started |
 | 4 | Full official evaluation: fetch 100 recordings, batch runner, official scorers, repeatability | 100/100 processed; official reports archived with provenance; no synthetic score substituted | Blocked by credentials/data download |
 | 5 | Additional state/effect stress testing beyond the Phase 2 bridge hardening | Fault, duplicate, stale, out-of-order, cleanup, and FDB hard-chain tests pass | Core bridge requirements merged into Phase 2 |
@@ -68,7 +68,8 @@ ignored `.artifacts/` directory.
 - [x] Nested result references and repeated same-tool calls supported.
 - [x] Internal contract run passes all 100 scenarios and 154 calls; labeled non-official.
 - [x] 279 tests, Ruff, mypy, lock check, optional FDB sync, and source import smoke pass locally.
-- [ ] GitHub CI and phase audit publication (required before milestone approval).
+- [x] GitHub CI passed core Python 3.10/3.11/3.12 and the dedicated FDB edge job (run `36300601414`).
+- [x] Phase audit and machine-readable source/mock reports published.
 
 ## Known external gates
 

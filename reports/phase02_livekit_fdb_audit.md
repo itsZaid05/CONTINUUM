@@ -86,7 +86,7 @@ a live-room result or an official FDB-v3 score.
 | Pinned upstream revision/source contract | **Passed** |
 | Released scenarios/calls/tools/rollback cases | **100 / 154 / 12 / 21** |
 | Internal bridge call-chain execution | **100 scenarios, 154/154 calls, 0 failures** |
-| GitHub CI | **Pending publication run** |
+| GitHub CI | **Passed — run `36300601414`** (Python 3.10/3.11/3.12 + FDB edge) |
 
 Machine-readable evidence:
 
@@ -137,6 +137,6 @@ The following were **not** executed and are not claimed:
 The credential-free Phase 2 code gate is satisfied: the selected Gemini native
 implementation remains replaceable, the FDB-managed LiveKit edge imports, all
 released call chains execute through lifecycle/effect controls, telemetry
-matches the upstream runner, and local quality gates pass. Milestone completion
-still requires a published CI pass; live media and official benchmark quality
-remain explicitly deferred to later milestones.
+matches the upstream runner, and local plus published CI quality gates pass.
+Live media and official benchmark quality remain explicitly deferred to later
+milestones.
