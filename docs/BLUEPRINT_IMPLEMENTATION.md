@@ -71,6 +71,18 @@ ignored `.artifacts/` directory.
 - [x] GitHub CI passed core Python 3.10/3.11/3.12 and the dedicated FDB edge job (run `36300601414`).
 - [x] Phase audit and machine-readable source/mock reports published.
 
+## Phase 3 media acceptance inventory
+
+- [x] Provider-neutral media configuration and normalized media event contracts.
+- [x] Explicit Gemini audio, transcription, server-VAD, video-turn and JPEG policy.
+- [x] Explicit LiveKit room audio/video/transcript options.
+- [x] Atomic deterministic PCM16 provider-output artifact recording.
+- [x] Defensive telemetry secret redaction and safe error records.
+- [x] Fail-closed smoke preflight and explicit credential-free skip report.
+- [ ] Genuine LiveKit/Google live smoke and remote evidence audit.
+
+No Phase 4 work or score is claimed while the Phase 3 live gate remains open.
+
 ## Known external gates
 
 The current execution environment has no configured `LIVEKIT_*` or

@@ -3,10 +3,13 @@
 from __future__ import annotations
 
 import json
+import os
 import threading
 import time
 from pathlib import Path
 from typing import Any
+
+from .media import redact_media
 
 
 class JsonlTelemetry:
@@ -30,6 +33,16 @@ class JsonlTelemetry:
         self.official_path = Path(official_path)
         self.heartbeat_path = Path(heartbeat_path)
         self._lock = threading.Lock()
+        self._configured_secrets = tuple(
+            value
+            for name in (
+                "LIVEKIT_URL",
+                "LIVEKIT_API_KEY",
+                "LIVEKIT_API_SECRET",
+                "GOOGLE_API_KEY",
+            )
+            if (value := os.getenv(name))
+        )
 
     def emit(self, event: str, **data: Any) -> None:
         payload = {
@@ -100,7 +113,12 @@ class JsonlTelemetry:
     def _append(self, path: Path, payload: dict[str, Any]) -> None:
         self._append_text(
             path,
-            json.dumps(payload, sort_keys=True, separators=(",", ":"), default=str),
+            json.dumps(
+                redact_media(payload, self._configured_secrets),
+                sort_keys=True,
+                separators=(",", ":"),
+                default=str,
+            ),
         )
 
     def _append_text(self, path: Path, line: str) -> None:

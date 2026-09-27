@@ -131,6 +131,21 @@ not speech understanding or model quality.
 - Worker shutdown cancels safe reads, waits for accepted mutations, and marks a
   drain timeout as abandoned without claiming completion.
 
+## Phase 3 media gate
+
+Phase 3 adds explicit Gemini server-VAD/transcription/image policy, explicit LiveKit
+room audio/video/transcript I/O, normalized `continuum.media.v1` telemetry, and
+atomic PCM16 provider-output recording. Run the credential-free preflight with:
+
+```bash
+continuum-fdb-media-smoke --allow-skip --output reports/phase03_live_smoke.json
+```
+
+That command records `skipped_external_gate`; it is not a live pass. A credentialed
+run must omit `--allow-skip`. Requested word timestamps and confidence remain null
+unless the provider exposes them. Provider-output and remotely received WAV files
+have distinct provenance. See `reports/phase03_media_audit.md`.
+
 ## Honest boundary
 
 The local contract suite does **not** establish an official FDB score. Official

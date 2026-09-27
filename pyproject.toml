@@ -54,6 +54,7 @@ fdb-eval = [
 continuum = "continuum.cli:main"
 continuum-fdb-agent = "continuum.integrations.fdb.runner:main"
 continuum-fdb-contract = "continuum.integrations.fdb.scenario_runner:main"
+continuum-fdb-media-smoke = "continuum.integrations.fdb.live_smoke:main"
 
 [project.urls]
 Repository = "https://github.com/itsZaid05/CONTINUUM"

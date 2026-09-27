@@ -1,0 +1,110 @@
+name: Phase 3 live media smoke
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  live-media-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+        with:
+          python-version: "3.11"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@94527f2e458b27549849d47d273a16bec83a01e9
+        with:
+          enable-cache: true
+
+      - name: Install frozen dev and FDB environment
+        run: uv sync --frozen --extra dev --extra fdb
+
+      - name: Install speech synthesizer
+        run: sudo apt-get update && sudo apt-get install --yes espeak-ng
+
+      - name: Validate required credentials are registered
+        shell: python
+        env:
+          LIVEKIT_URL: ${{ secrets.LIVEKIT_URL }}
+          LIVEKIT_API_KEY: ${{ secrets.LIVEKIT_API_KEY }}
+          LIVEKIT_API_SECRET: ${{ secrets.LIVEKIT_API_SECRET }}
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+        run: |
+          import os
+          import sys
+
+          required = (
+              "LIVEKIT_URL",
+              "LIVEKIT_API_KEY",
+              "LIVEKIT_API_SECRET",
+              "GOOGLE_API_KEY",
+          )
+          missing = [name for name in required if not os.environ.get(name)]
+          if missing:
+              print("Missing required GitHub Actions secrets: " + ", ".join(missing))
+              sys.exit(1)
+          print("All required GitHub Actions secrets are registered.")
+
+      - name: Create PCM16 speech fixture
+        run: |
+          mkdir -p reports/phase03-media
+          espeak-ng --stdout "Please use the order tracking tool to track order A one." \
+            > reports/phase03-media/order-tracking-input.wav
+          python - <<'PY'
+          import wave
+
+          path = "reports/phase03-media/order-tracking-input.wav"
+          with wave.open(path, "rb") as wav:
+              assert wav.getsampwidth() == 2, "speech fixture must be PCM16"
+          PY
+
+      - name: Run live media smoke
+        env:
+          LIVEKIT_URL: ${{ secrets.LIVEKIT_URL }}
+          LIVEKIT_API_KEY: ${{ secrets.LIVEKIT_API_KEY }}
+          LIVEKIT_API_SECRET: ${{ secrets.LIVEKIT_API_SECRET }}
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+          CONTINUUM_TELEMETRY_PATH: reports/agent-telemetry.jsonl
+          FDB_TOOL_LOG_PATH: reports/agent-tool-calls.jsonl
+        run: |
+          uv run continuum-fdb-media-smoke \
+            --input-wav reports/phase03-media/order-tracking-input.wav \
+            --output reports/phase03_live_smoke.json \
+            --artifact-dir reports/phase03-media \
+            --worker-startup-s 15 \
+            --timeout-s 90
+
+      - name: Enforce live smoke gate
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          report = json.loads(Path("reports/phase03_live_smoke.json").read_text())
+          assert report.get("status") == "passed", report.get("status")
+          checks = report.get("checks")
+          assert isinstance(checks, dict) and checks, "report has no checks"
+          failed = [name for name, passed in checks.items() if passed is not True]
+          assert not failed, "failed checks: " + ", ".join(failed)
+          PY
+
+      - name: Upload sanitized smoke evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: phase03-live-media-smoke-${{ github.run_id }}
+          if-no-files-found: error
+          retention-days: 14
+          path: |
+            reports/phase03_live_smoke.json
+            reports/phase03-media/**/agent-telemetry.jsonl
+            reports/phase03-media/**/agent-tool-calls.jsonl
+            reports/phase03-media/**/*.wav
