@@ -1,0 +1,11 @@
+{
+  "backend_dispatches": 154,
+  "benchmark_version": "1.0",
+  "executed_calls": 154,
+  "expected_calls": 154,
+  "failures": [],
+  "kind": "internal_contract_check",
+  "official_score": false,
+  "passed": true,
+  "scenarios": 100
+}

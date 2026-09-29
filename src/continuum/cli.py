@@ -3,14 +3,31 @@
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import hashlib
 import json
+import sys
 from pathlib import Path
 from typing import Any, cast
 
 import typer
 from rich.console import Console
 from rich.table import Table
+
+
+def _utf8_console() -> None:
+    """Windows consoles default to cp1252, which cannot print the arrows and
+    dashes in reports ("→", "≤", "—") and crashed every command that did.
+    Re-open stdout/stderr as UTF-8 (replacing, never raising) before Rich
+    binds to them."""
+    for stream in (sys.stdout, sys.stderr):
+        enc = (getattr(stream, "encoding", None) or "").lower().replace("-", "")
+        if enc != "utf8" and hasattr(stream, "reconfigure"):
+            with contextlib.suppress(Exception):
+                stream.reconfigure(encoding="utf-8", errors="replace")
+
+
+_utf8_console()
 
 app = typer.Typer(
     add_completion=False,
@@ -483,9 +500,15 @@ def eval_multimodal(
         Path("reports/multimodal_eval.json"), "--output", "-o"
     ),
     time_scale: float = typer.Option(0.1, "--time-scale"),
+    raw: bool = typer.Option(True, "--raw/--no-raw", help="Also run real ASR/OCR on raw media fixtures"),  # noqa: B008
 ) -> None:
     """Evaluate grounded and ambiguous audio/frame events through AgentRuntime."""
-    from .evaluation.multimodal_eval import evaluate, render_markdown
+    from .evaluation.multimodal_eval import (
+        evaluate,
+        evaluate_raw,
+        render_markdown,
+        render_raw_markdown,
+    )
 
     report = evaluate(suite, time_scale=time_scale)
     output.parent.mkdir(parents=True, exist_ok=True)
@@ -500,6 +523,21 @@ def eval_multimodal(
             highlight=False,
         )
     console.print(f"Wrote {output} and {output.with_suffix('.md')}")
+    if raw:
+        raw_report = evaluate_raw()
+        raw_out = output.with_name("raw_media_eval.json")
+        raw_out.write_text(json.dumps(raw_report, indent=2, default=str), encoding="utf-8")
+        raw_out.with_suffix(".md").write_text(render_raw_markdown(raw_report), encoding="utf-8")
+        if raw_report.get("skipped"):
+            console.print(f"[yellow]raw media skipped:[/] {raw_report['reason']}", highlight=False)
+        else:
+            s = raw_report["systems"]["continuum"]["summary"]
+            console.print(
+                f"[bold]{'raw media (real ASR/OCR)':26s}[/] score {s['mean_score']:6.2f}  "
+                f"pivot p50 {s['pivot_p50_ms']}ms  ack p95 {s['ack_p95_ms']}ms",
+                highlight=False,
+            )
+        console.print(f"Wrote {raw_out} and {raw_out.with_suffix('.md')}")
 
 
 @app.command(name="eval-runtime")
@@ -550,6 +588,30 @@ def kit(
     )
     bridge = JsonlBridge(runtime, watchdog_s=watchdog_s)
     asyncio.run(serve_stdio(bridge=bridge))
+
+
+@app.command(name="fetch-models")
+def fetch_models(
+    asr: str = typer.Option(
+        "base.en", "--asr", help="faster-whisper size: tiny.en | base.en | small.en ('' to skip)"
+    ),
+    model_dir: Path = typer.Option(Path("models"), "--dir", help="Where recognizers live"),  # noqa: B008
+) -> None:
+    """One-time setup (network): download the local ASR model into models/.
+
+    Runtime and warm-up never download anything; they discover what this put
+    on disk (or ``$CONTINUUM_ASR_MODEL``). OCR needs no download — RapidOCR's
+    models ship inside the ``vision`` extra's wheel.
+    """
+    from .perception import recognizers
+
+    if asr:
+        from huggingface_hub import snapshot_download
+
+        target = model_dir / f"faster-whisper-{asr}"
+        console.print(f"Fetching Systran/faster-whisper-{asr} → {target} …")
+        snapshot_download(f"Systran/faster-whisper-{asr}", local_dir=str(target))
+    console.print_json(json.dumps(recognizers()))
 
 
 @app.command()

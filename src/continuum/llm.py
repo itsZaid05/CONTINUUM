@@ -535,27 +535,44 @@ _DENSE_PROTOTYPES: dict[str, list[str]] = {
 }
 
 
+# Process-wide cache: the model is loaded at most once per (download-mode).
+# A failed load is cached too (None), so an offline miss stays a fast miss
+# instead of re-probing the disk/hub on every utterance.
+_DENSE_MODEL_CACHE: dict[bool, Any | None] = {}
+
+
 def _get_dense_model() -> Any | None:
-    """Lazy load MiniLM; returns None if not installed/cached offline."""
+    """Lazy load MiniLM once; returns None if not installed/cached offline."""
     if os.getenv("CONTINUUM_DENSE_DISABLE", "0") == "1":
         return None
     allow_download = os.getenv("CONTINUUM_DENSE_DOWNLOAD", "0") == "1"
+    if allow_download in _DENSE_MODEL_CACHE:
+        return _DENSE_MODEL_CACHE[allow_download]
+    model: Any | None = None
     try:
         from sentence_transformers import SentenceTransformer  # type: ignore
 
         try:
             if allow_download:
-                m = SentenceTransformer(_DENSE_MODEL_NAME, trust_remote_code=False)
+                model = SentenceTransformer(_DENSE_MODEL_NAME, trust_remote_code=False)
             else:
-                # offline: fail fast if not cached, no download
-                m = SentenceTransformer(
+                # offline: fail fast if not cached, never download. (No global
+                # HF_HUB_OFFLINE: that would also block a legitimate warm-up fetch.)
+                model = SentenceTransformer(
                     _DENSE_MODEL_NAME, trust_remote_code=False, local_files_only=True
                 )
-            return m
         except Exception:
-            return None
+            model = None
     except ImportError:
-        return None
+        model = None
+    _DENSE_MODEL_CACHE[allow_download] = model
+    return model
+
+
+def warm_dense_model() -> bool:
+    """Warm-up hook (Theme 05 §6 allows 300 s): load MiniLM + centroids up front
+    so the first turn never pays the import/load cost. True if dense is usable."""
+    return get_dense_centroids() is not None
 
 
 def _cosine(a: Any, b: Any) -> float:

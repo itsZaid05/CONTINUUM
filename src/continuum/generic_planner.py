@@ -311,6 +311,9 @@ class GenericPlanner:
         committed: set[str],
     ) -> dict[str, float]:
         scores: dict[str, float] = {}
+        evidence_elsewhere = any(
+            e.kind != "free_text" for name, found in ex.items() if name not in active_chain for e in found.values()
+        )
         for m in self.registry.all():
             prof = tool_profile(m)
             topic = sum(prof[c] for c in cues.concepts if c in prof)
@@ -332,7 +335,12 @@ class GenericPlanner:
             if _tool_words(m) & cues.negated:
                 neg = -5.0 if m.state_changing else -3.0
             cont = 0.0
-            if m.name in active_chain and not cues.replace:
+            # Continuity only when the turn fits the goal in progress: it supplies
+            # values for this tool, is an explicit correction, or fits nothing else.
+            # (A finished lookup must not swallow a new request that brings a
+            # date only the scheduling tool can take.)
+            fits = bool(ex[m.name]) or cues.correction or not evidence_elsewhere
+            if m.name in active_chain and not cues.replace and fits:
                 cont = 1.5
             if m.name in committed and m.state_changing:
                 cont = -3.0  # re-running a committed effect would duplicate it

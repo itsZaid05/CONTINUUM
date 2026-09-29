@@ -1,0 +1,235 @@
+{
+  "suite": "data/runtime_scenarios/raw_media_suite.json",
+  "time_scale": 1.0,
+  "weights": {
+    "task_completion": 0.4,
+    "interruption_recovery": 0.35,
+    "latency": 0.15,
+    "safety_protocol": 0.1
+  },
+  "note": "Scores approximate the Theme 05 rubric from the guide; the official scorer is not released.",
+  "systems": {
+    "continuum": {
+      "config": {},
+      "summary": {
+        "scenarios": 7,
+        "mean_score": 100.0,
+        "task_completion": 1.0,
+        "interruption_recovery": 1.0,
+        "latency": 1.0,
+        "safety_protocol": 1.0,
+        "stale_action_rate": 0.0,
+        "stale_reruns": 0,
+        "duplicate_mutations": 0,
+        "regretted_irreversible": 0,
+        "unnecessary_clarification_rate": 0.0,
+        "tool_calls": 7,
+        "cancels": 1,
+        "ack_p50_ms": 0.02,
+        "ack_p95_ms": 0.027,
+        "pivot_p50_ms": 894.388,
+        "pivot_p95_ms": 894.388,
+        "cancel_p95_ms": 894.102,
+        "speaks_per_turn": 1.0
+      },
+      "scenarios": [
+        {
+          "name": "raw_audio_flight_pivot",
+          "theme": "raw_audio_interruption",
+          "score": 100.0,
+          "task_completion": 1.0,
+          "interruption_recovery": 1.0,
+          "latency": 1.0,
+          "safety_protocol": 1.0,
+          "interruption_applicable": true,
+          "tool_calls": 2,
+          "cancels": 1,
+          "clarifications": 0,
+          "unnecessary_clarification": false,
+          "speaks_per_turn": 1.0,
+          "stale_completions": 0,
+          "stale_reruns": 0,
+          "duplicate_effects": 0,
+          "regretted_irreversible": 0,
+          "ack_ms": [
+            0.02,
+            0.027
+          ],
+          "pivot_ms": [
+            894.388
+          ],
+          "cancel_ms": [
+            894.102
+          ],
+          "speculation": null,
+          "notes": []
+        },
+        {
+          "name": "raw_audio_misheard_city",
+          "theme": "raw_audio_safety",
+          "score": 100.0,
+          "task_completion": 1.0,
+          "interruption_recovery": 1.0,
+          "latency": 1.0,
+          "safety_protocol": 1.0,
+          "interruption_applicable": true,
+          "tool_calls": 1,
+          "cancels": 0,
+          "clarifications": 1,
+          "unnecessary_clarification": false,
+          "speaks_per_turn": 1.0,
+          "stale_completions": 0,
+          "stale_reruns": 0,
+          "duplicate_effects": 0,
+          "regretted_irreversible": 0,
+          "ack_ms": [
+            0.017,
+            0.019
+          ],
+          "pivot_ms": [],
+          "cancel_ms": [],
+          "speculation": null,
+          "notes": []
+        },
+        {
+          "name": "raw_audio_ticket_clarify",
+          "theme": "raw_audio_clarification",
+          "score": 100.0,
+          "task_completion": 1.0,
+          "interruption_recovery": 1.0,
+          "latency": 1.0,
+          "safety_protocol": 1.0,
+          "interruption_applicable": false,
+          "tool_calls": 1,
+          "cancels": 0,
+          "clarifications": 1,
+          "unnecessary_clarification": false,
+          "speaks_per_turn": 1.0,
+          "stale_completions": 0,
+          "stale_reruns": 0,
+          "duplicate_effects": 0,
+          "regretted_irreversible": 0,
+          "ack_ms": [
+            0.031,
+            0.02
+          ],
+          "pivot_ms": [],
+          "cancel_ms": [],
+          "speculation": null,
+          "notes": []
+        },
+        {
+          "name": "raw_frame_manual_lookup",
+          "theme": "raw_vision",
+          "score": 100.0,
+          "task_completion": 1.0,
+          "interruption_recovery": 1.0,
+          "latency": 1.0,
+          "safety_protocol": 1.0,
+          "interruption_applicable": false,
+          "tool_calls": 1,
+          "cancels": 0,
+          "clarifications": 0,
+          "unnecessary_clarification": false,
+          "speaks_per_turn": 1.0,
+          "stale_completions": 0,
+          "stale_reruns": 0,
+          "duplicate_effects": 0,
+          "regretted_irreversible": 0,
+          "ack_ms": [
+            0.023
+          ],
+          "pivot_ms": [],
+          "cancel_ms": [],
+          "speculation": null,
+          "notes": []
+        },
+        {
+          "name": "raw_crossmodal_repair_confirm",
+          "theme": "raw_crossmodal",
+          "score": 100.0,
+          "task_completion": 1.0,
+          "interruption_recovery": 1.0,
+          "latency": 1.0,
+          "safety_protocol": 1.0,
+          "interruption_applicable": false,
+          "tool_calls": 2,
+          "cancels": 0,
+          "clarifications": 1,
+          "unnecessary_clarification": false,
+          "speaks_per_turn": 1.0,
+          "stale_completions": 0,
+          "stale_reruns": 0,
+          "duplicate_effects": 0,
+          "regretted_irreversible": 0,
+          "ack_ms": [
+            0.015,
+            0.023,
+            0.024
+          ],
+          "pivot_ms": [],
+          "cancel_ms": [],
+          "speculation": null,
+          "notes": []
+        },
+        {
+          "name": "raw_frame_no_text",
+          "theme": "raw_vision_safety",
+          "score": 100.0,
+          "task_completion": 1.0,
+          "interruption_recovery": 1.0,
+          "latency": 1.0,
+          "safety_protocol": 1.0,
+          "interruption_applicable": false,
+          "tool_calls": 0,
+          "cancels": 0,
+          "clarifications": 1,
+          "unnecessary_clarification": false,
+          "speaks_per_turn": 1.0,
+          "stale_completions": 0,
+          "stale_reruns": 0,
+          "duplicate_effects": 0,
+          "regretted_irreversible": 0,
+          "ack_ms": [
+            0.018
+          ],
+          "pivot_ms": [],
+          "cancel_ms": [],
+          "speculation": null,
+          "notes": []
+        },
+        {
+          "name": "raw_frame_blurred",
+          "theme": "raw_vision_safety",
+          "score": 100.0,
+          "task_completion": 1.0,
+          "interruption_recovery": 1.0,
+          "latency": 1.0,
+          "safety_protocol": 1.0,
+          "interruption_applicable": false,
+          "tool_calls": 0,
+          "cancels": 0,
+          "clarifications": 1,
+          "unnecessary_clarification": false,
+          "speaks_per_turn": 1.0,
+          "stale_completions": 0,
+          "stale_reruns": 0,
+          "duplicate_effects": 0,
+          "regretted_irreversible": 0,
+          "ack_ms": [
+            0.02
+          ],
+          "pivot_ms": [],
+          "cancel_ms": [],
+          "speculation": null,
+          "notes": []
+        }
+      ]
+    }
+  },
+  "recognizers": {
+    "asr": "models\\faster-whisper-base.en",
+    "ocr": "rapidocr"
+  },
+  "skipped": false
+}

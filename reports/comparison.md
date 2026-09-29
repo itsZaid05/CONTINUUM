@@ -14,4 +14,4 @@ Backend: `offline-fake` — baseline column is the naive **redo-all agent** (`sr
 
 C✓ = CONTINUUM correctness check (zero stale leaks, honest retract); DB = baseline double-book. Baseline analytic redo-all wall kept in JSON (`baseline_analytic_ms`) for transparency.
 
-Generated at 2026-09-23T10:45:28.673337
+Generated at 2026-09-29T11:38:25.896469

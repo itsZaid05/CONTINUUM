@@ -1,0 +1,115 @@
+[
+  {
+    "name": "raw_audio_flight_pivot",
+    "theme": "raw_audio_interruption",
+    "description": "Real speech, real ASR: the spoken correction cancels the running Delhi search; morning and date survive.",
+    "manifests": ["builtin"],
+    "events": [
+      {"at_ms": 0, "type": "audio", "data_file": "data/media/find_flights_delhi.wav"},
+      {"at_ms": 300, "type": "interrupt"},
+      {"at_ms": 400, "type": "audio", "data_file": "data/media/actually_bangalore.wav"}
+    ],
+    "run_ms": 5000,
+    "expect": {
+      "completed": [{"tool": "search_flights", "args": {"to": "Bangalore", "date": "2026-09-26", "slot": "morning"}}],
+      "cancelled": [{"tool": "search_flights", "args": {"to": "Delhi"}}],
+      "final_slots": {"to": "Bangalore", "slot": "morning", "date": "2026-09-26"}
+    }
+  },
+  {
+    "name": "raw_audio_misheard_city",
+    "theme": "raw_audio_safety",
+    "description": "The correction arrives through heavy noise and is recognised as 'Actually, Mangalore.' at low confidence: read it back, keep the Delhi search, never reroute to a wrong city.",
+    "manifests": ["builtin"],
+    "events": [
+      {"at_ms": 0, "type": "audio", "data_file": "data/media/find_flights_delhi.wav"},
+      {"at_ms": 400, "type": "audio", "data_file": "data/media/actually_bangalore.wav", "noise_snr_db": 0, "noise_seed": 2}
+    ],
+    "run_ms": 5000,
+    "expect": {
+      "clarify": true,
+      "completed": [{"tool": "search_flights", "args": {"to": "Delhi", "date": "2026-09-26", "slot": "morning"}}],
+      "kept": [{"tool": "search_flights", "args": {"to": "Delhi"}}],
+      "not_completed": [{"tool": "search_flights", "args": {"to": "Mangalore"}}, {"tool": "search_flights", "args": {"to": "Bangalore"}}],
+      "final_slots": {"to": "Delhi"}
+    }
+  },
+  {
+    "name": "raw_audio_ticket_clarify",
+    "theme": "raw_audio_clarification",
+    "description": "Spoken 'Open a ticket' has no issue: ask; the spoken answer fills it.",
+    "manifests": ["support"],
+    "events": [
+      {"at_ms": 0, "type": "audio", "data_file": "data/media/open_a_ticket.wav"},
+      {"at_ms": 2500, "type": "audio", "data_file": "data/media/printer_jammed.wav"}
+    ],
+    "run_ms": 5000,
+    "expect": {
+      "clarify": true,
+      "completed": [{"tool": "create_ticket", "args_contain": {"issue": "printer"}}],
+      "max_effects": {"create_ticket": 1}
+    }
+  },
+  {
+    "name": "raw_frame_manual_lookup",
+    "theme": "raw_vision",
+    "description": "Real OCR on an appliance panel photo: model and error code grounded from pixels.",
+    "manifests": ["troubleshooting"],
+    "events": [
+      {"at_ms": 0, "type": "frame", "data_file": "data/media/washer_panel_e4.png"}
+    ],
+    "run_ms": 2500,
+    "expect": {
+      "completed": [{"tool": "lookup_manual", "args": {"model": "WM-4500", "error_code": "E4"}}],
+      "final_slots": {"model": "WM-4500", "error_code": "E4"}
+    }
+  },
+  {
+    "name": "raw_crossmodal_repair_confirm",
+    "theme": "raw_crossmodal",
+    "description": "The frame grounds the model; a spoken request books the visit only after a spoken 'yes' (IRREVERSIBLE).",
+    "manifests": ["troubleshooting"],
+    "events": [
+      {"at_ms": 0, "type": "frame", "data_file": "data/media/washer_panel_e4.png"},
+      {"at_ms": 2000, "type": "audio", "data_file": "data/media/repair_on_monday.wav"},
+      {"at_ms": 4500, "type": "audio", "data_file": "data/media/yes_please.wav"}
+    ],
+    "run_ms": 8000,
+    "expect": {
+      "clarify": true,
+      "completed": [
+        {"tool": "lookup_manual", "args": {"model": "WM-4500", "error_code": "E4"}},
+        {"tool": "schedule_technician", "args": {"model": "WM-4500", "date": "2026-09-28"}}
+      ],
+      "max_effects": {"schedule_technician": 1}
+    }
+  },
+  {
+    "name": "raw_frame_no_text",
+    "theme": "raw_vision_safety",
+    "description": "A photo with no legible text: ask, never guess a model.",
+    "manifests": ["troubleshooting"],
+    "events": [
+      {"at_ms": 0, "type": "frame", "data_file": "data/media/washer_door_no_text.png"}
+    ],
+    "run_ms": 2000,
+    "expect": {
+      "clarify": true,
+      "not_completed": [{"tool": "lookup_manual"}]
+    }
+  },
+  {
+    "name": "raw_frame_blurred",
+    "theme": "raw_vision_safety",
+    "description": "The same panel, badly blurred: ask, never act on a guessed reading.",
+    "manifests": ["troubleshooting"],
+    "events": [
+      {"at_ms": 0, "type": "frame", "data_file": "data/media/washer_panel_blurred.png"}
+    ],
+    "run_ms": 2000,
+    "expect": {
+      "clarify": true,
+      "not_completed": [{"tool": "lookup_manual"}]
+    }
+  }
+]

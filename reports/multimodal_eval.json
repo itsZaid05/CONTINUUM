@@ -25,11 +25,11 @@
         "unnecessary_clarification_rate": 0.0,
         "tool_calls": 7,
         "cancels": 1,
-        "ack_p50_ms": 0.1,
-        "ack_p95_ms": 0.161,
-        "pivot_p50_ms": 4.296,
-        "pivot_p95_ms": 4.296,
-        "cancel_p95_ms": 2.425,
+        "ack_p50_ms": 0.085,
+        "ack_p95_ms": 0.114,
+        "pivot_p50_ms": 4.762,
+        "pivot_p95_ms": 4.762,
+        "cancel_p95_ms": 2.652,
         "speaks_per_turn": 1.0
       },
       "scenarios": [
@@ -52,15 +52,15 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.161,
-            0.108
+            0.101,
+            0.11
           ],
           "pivot_ms": [
-            4.296,
-            2.559
+            4.762,
+            3.038
           ],
           "cancel_ms": [
-            2.425
+            2.652
           ],
           "speculation": null,
           "notes": []
@@ -84,7 +84,7 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.114
+            0.068
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -110,8 +110,8 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.044,
-            0.097
+            0.072,
+            0.168
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -137,7 +137,7 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.052
+            0.093
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -163,8 +163,8 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.103,
-            0.217
+            0.085,
+            0.071
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -190,7 +190,7 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.059
+            0.062
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -216,7 +216,7 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.1
+            0.114
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -242,7 +242,7 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.082
+            0.084
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -268,7 +268,7 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.063
+            0.089
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -294,7 +294,7 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.07
+            0.069
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -320,7 +320,7 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.107
+            0.085
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -347,10 +347,10 @@
         "unnecessary_clarification_rate": 0.2727,
         "tool_calls": 2,
         "cancels": 1,
-        "ack_p50_ms": 0.066,
-        "ack_p95_ms": 0.101,
-        "pivot_p50_ms": 0.456,
-        "pivot_p95_ms": 0.456,
+        "ack_p50_ms": 0.086,
+        "ack_p95_ms": 0.095,
+        "pivot_p50_ms": 0.497,
+        "pivot_p95_ms": 0.497,
         "cancel_p95_ms": null,
         "speaks_per_turn": 1.0
       },
@@ -374,12 +374,12 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.052,
-            0.097
+            0.077,
+            0.117
           ],
           "pivot_ms": [
-            0.177,
-            0.456
+            0.231,
+            0.497
           ],
           "cancel_ms": [],
           "speculation": null,
@@ -408,7 +408,7 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.097
+            0.093
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -437,8 +437,8 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.056,
-            0.254
+            0.057,
+            0.095
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -466,7 +466,7 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.046
+            0.075
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -495,8 +495,8 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.052,
-            0.073
+            0.091,
+            0.069
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -524,7 +524,7 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.066
+            0.092
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -550,7 +550,7 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.078
+            0.067
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -576,7 +576,7 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.101
+            0.089
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -602,7 +602,7 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.056
+            0.083
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -628,7 +628,7 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.055
+            0.056
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -654,7 +654,7 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.051
+            0.086
           ],
           "pivot_ms": [],
           "cancel_ms": [],

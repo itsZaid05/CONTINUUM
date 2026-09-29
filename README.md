@@ -4,14 +4,14 @@
 > **One-line pitch:** *CONTINUUM keeps AI agents consistent when humans change their minds: it sorts what kind of change happened, keeps the work that's still valid, discards the rest, and prepares for likely next changes within strict safety and resource limits.*
 
 [![Phase](https://img.shields.io/badge/phase-4%20speculation-%2300C853)](docs/STATUS.md)
-[![Tests](https://img.shields.io/badge/tests-246%20passed-%2300C853)](#quickstart)
+[![Tests](https://img.shields.io/badge/tests-308%20passed-%2300C853)](#quickstart)
 [![Ruff](https://img.shields.io/badge/ruff-clean-%2300C853)](#quickstart)
 [![Mypy](https://img.shields.io/badge/mypy-clean-%2300C853)](#quickstart)
 [![Python](https://img.shields.io/badge/python-3.10--3.12-blue)](#quickstart)
 [![License](https://img.shields.io/badge/license-MIT-lightgrey)](#acknowledgments)
 [![Demo](https://img.shields.io/badge/demo-Delhi→Bangalore-2962FF)](#scenarios)
 
-**Status (26 Sep 2026):** final harness-edge build — **246 tests**, Python 3.10–3.12 CI, manifest-driven planning, selective cancellation, retries/verification, CommitGate, idempotent effects, bounded opt-in speculation, JSONL kit bridge, and confidence-aware audio/frame ingestion. Everything needed for the deterministic evaluation runs offline. See [`docs/HARNESS_EDGE.md`](docs/HARNESS_EDGE.md), [`docs/AIML_B.md`](docs/AIML_B.md), and [`docs/THEME05_BUILD_STATUS.md`](docs/THEME05_BUILD_STATUS.md).
+**Status (28 Sep 2026):** foundation plus the FDB-managed LiveKit media edge — **308 tests**, Python 3.10–3.12 core CI, Gemini native audio behind a provider interface, twelve manifest-generated FDB tools, lifecycle-safe effect reconciliation, and official-shape telemetry. Credential-free checks are complete; no official FDB score is claimed until the released audio and live services are run. See [`docs/FDB_LIVEKIT.md`](docs/FDB_LIVEKIT.md) and [`docs/BLUEPRINT_IMPLEMENTATION.md`](docs/BLUEPRINT_IMPLEMENTATION.md).
 
 ---
 
@@ -83,7 +83,7 @@ git clone https://github.com/itsZaid05/CONTINUUM.git && cd CONTINUUM
 pip install --break-system-packages -e ".[dev]"   # or: uv sync --extra dev
 
 # 1) tests + lint + mypy (offline-fake deterministic, LLM adapters env-gated)
-python -m pytest -q                  # 246 passed, 0 failed
+python -m pytest -q                  # 279 passed, 0 failed
 ruff check src tests scripts         # All checks passed!
 python -m mypy src                   # Success: no issues found
 
@@ -110,6 +110,25 @@ python -m continuum.cli replay data/scenarios/delhi_bangalore.json --trace | tai
 python -m continuum.cli replay data/scenarios/delhi_bangalore.json --backend gemini --trace | tail -n 50  # same logic, latency tag differs
 python examples/quickstart.py   # 7 steps + backend table + prompt preview
 ```
+
+### FDB-v3 LiveKit + Gemini native audio
+
+```bash
+uv sync --frozen --extra dev --extra fdb
+scripts/fetch_fdb.sh
+python scripts/audit_fdb_contract.py --source-dir .artifacts/Full-Duplex-Bench
+continuum-fdb-contract .artifacts/Full-Duplex-Bench/v3/benchmark_data_v2.json
+
+# With LIVEKIT_URL, LIVEKIT_API_KEY, LIVEKIT_API_SECRET, and GOOGLE_API_KEY
+# supplied through the environment:
+continuum-fdb-agent --check start
+continuum-fdb-agent start
+```
+
+The credential-free bridge check executes all **100 scenarios / 154 annotated
+calls** but is not an official model score. Live audio instructions, telemetry
+paths, provider replacement boundary, and honest evaluation limits are in
+[`docs/FDB_LIVEKIT.md`](docs/FDB_LIVEKIT.md).
 
 **Final harness-path results (deterministic offline run):**
 

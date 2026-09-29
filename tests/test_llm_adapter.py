@@ -172,12 +172,22 @@ def test_dense_local_files_only_no_download():
     os.environ.pop("CONTINUUM_DENSE_DISABLE", None)
     # call dense classify — should return None if model not cached (fast)
     # we don't assert on download, just that it doesn't hang >10s and returns either valid or None
+    import importlib.util
     import time
+
+    # The one-off library import (torch + sentence-transformers, ~10s cold on a
+    # synced disk) is not what this test is about; exclude it from the clock so
+    # the bound measures load + classify, where a hub download would show up.
+    if importlib.util.find_spec("sentence_transformers") is not None:
+        import sentence_transformers  # noqa: F401
 
     t0 = time.perf_counter()
     res = dense_classify("Hmm, okay…")
-    elapsed = time.perf_counter() - t0
     assert elapsed < 45.0  # fail fast (model load ~4-20s cold on slower hardware, but not 60s download)
+    if res is not None:
+        t1 = time.perf_counter()
+        dense_classify("Actually, Bangalore")
+        assert time.perf_counter() - t1 < 2.0  # model is cached, not reloaded per call
     # res may be None (most CI) or valid category; both ok
     if res is not None:
         cat, conf = res
