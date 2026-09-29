@@ -1,4 +1,4 @@
-# Arbiter Accuracy — offline-fake (gold b8920267657a)
+# Arbiter Accuracy — offline-fake (gold e816c1c29955)
 
 - **Accuracy:** 100.00% (100/100)
 - **Macro-F1:** 1.000

@@ -2,10 +2,15 @@
 CONTINUUM Backend Core Server & Real-Time Orchestrator
 PRISM Generative AI Hackathon (Theme 05: Interruptible Real-Time Agents)
 """
+import os
 import time
 import asyncio
 import json
 from typing import Dict, Set, Optional, Any
+from dotenv import load_dotenv
+
+load_dotenv()
+
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse

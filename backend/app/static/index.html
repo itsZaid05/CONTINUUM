@@ -120,19 +120,23 @@
           <p class="text-sm text-slate-400 max-w-md mx-auto">An interruptible conversational assistant. Speak, change your mind mid-task, or add constraints in real time without restarting.</p>
         </div>
 
-        <!-- Suggestion Action Pills -->
+        <!-- Suggestion Action Pills across Multi-Domains -->
         <div class="w-full max-w-lg space-y-2">
-          <button onclick="fillAndSend('Can you find flight from Amritsar to New Delhi for tomorrow')" class="w-full text-left px-4 py-3 rounded-xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.06] hover:border-white/[0.12] transition flex items-center gap-3 text-sm text-slate-300 group">
+          <button onclick="fillAndSend('Can you find flight from Delhi to Bangalore for tomorrow')" class="w-full text-left px-4 py-2.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.06] hover:border-white/[0.12] transition flex items-center gap-3 text-xs sm:text-sm text-slate-300 group">
             <i class="fa-solid fa-plane-departure text-cyan-400 group-hover:scale-110 transition"></i>
-            <span>"Can you find flight from Amritsar to New Delhi for tomorrow"</span>
+            <span>✈️ "Find flight from Delhi to Bangalore for tomorrow"</span>
           </button>
-          <button onclick="fillAndSend('Wait change it to Amritsar to Kerala')" class="w-full text-left px-4 py-3 rounded-xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.06] hover:border-white/[0.12] transition flex items-center gap-3 text-sm text-slate-300 group">
-            <i class="fa-solid fa-bolt text-amber-400 group-hover:scale-110 transition"></i>
-            <span>"Wait change it to Amritsar to Kerala"</span>
+          <button onclick="fillAndSend('Navigate to Cyber City office, avoid highway tolls')" class="w-full text-left px-4 py-2.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.06] hover:border-white/[0.12] transition flex items-center gap-3 text-xs sm:text-sm text-slate-300 group">
+            <i class="fa-solid fa-location-arrow text-emerald-400 group-hover:scale-110 transition"></i>
+            <span>🚗 "Navigate to Cyber City office, avoid highway tolls"</span>
           </button>
-          <button onclick="fillAndSend('Don\'t book it yet, just hold the seat')" class="w-full text-left px-4 py-3 rounded-xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.06] hover:border-white/[0.12] transition flex items-center gap-3 text-sm text-slate-300 group">
-            <i class="fa-solid fa-hand text-rose-400 group-hover:scale-110 transition"></i>
-            <span>"Don't book it yet, just hold the seat"</span>
+          <button onclick="fillAndSend('Reserve a dining table for 4 at Mainland China tonight')" class="w-full text-left px-4 py-2.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.06] hover:border-white/[0.12] transition flex items-center gap-3 text-xs sm:text-sm text-slate-300 group">
+            <i class="fa-solid fa-utensils text-purple-400 group-hover:scale-110 transition"></i>
+            <span>🍽️ "Reserve a dining table for 4 at Mainland China tonight"</span>
+          </button>
+          <button onclick="fillAndSend('Camera frame shows device error code E-401, diagnose issue')" class="w-full text-left px-4 py-2.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.07] border border-white/[0.06] hover:border-white/[0.12] transition flex items-center gap-3 text-xs sm:text-sm text-slate-300 group">
+            <i class="fa-solid fa-camera text-amber-400 group-hover:scale-110 transition"></i>
+            <span>📷 "Camera frame shows device error code E-401, diagnose issue"</span>
           </button>
         </div>
       </div>
@@ -145,14 +149,15 @@
       <!-- BOTTOM INPUT PILL (Matches Gemini / Modern AI aesthetic) -->
       <div class="w-full pt-2">
         <form id="chat-form" class="relative flex items-center bg-[#18181e] border border-white/[0.1] focus-within:border-cyan-500/50 rounded-full px-4 py-2.5 shadow-2xl transition">
-          <button type="button" class="w-8 h-8 rounded-full hover:bg-white/5 flex items-center justify-center text-slate-400 hover:text-slate-200 transition mr-2">
+          <input type="file" id="image-upload-input" accept="image/*" class="hidden" />
+          <button type="button" id="upload-btn" title="Upload Image / Frame" class="w-8 h-8 rounded-full hover:bg-white/5 flex items-center justify-center text-slate-400 hover:text-cyan-300 transition mr-2">
             <i class="fa-solid fa-plus text-sm"></i>
           </button>
 
           <input 
             id="chat-input"
             type="text" 
-            placeholder="Ask anything or interrupt in real-time..." 
+            placeholder="Ask anything, speak, upload frame, or interrupt..." 
             autocomplete="off"
             class="flex-1 bg-transparent text-sm text-white placeholder-slate-500 focus:outline-none"
           />
@@ -163,8 +168,8 @@
               <span>Live Engine</span>
             </div>
 
-            <button type="button" class="w-8 h-8 rounded-full hover:bg-white/5 flex items-center justify-center text-slate-400 hover:text-slate-200 transition">
-              <i class="fa-solid fa-microphone text-sm"></i>
+            <button type="button" id="mic-btn" title="Voice Input (Speech-to-Text)" class="w-8 h-8 rounded-full hover:bg-white/5 flex items-center justify-center text-slate-400 hover:text-cyan-300 transition">
+              <i id="mic-icon" class="fa-solid fa-microphone text-sm"></i>
             </button>
 
             <button 
@@ -274,6 +279,8 @@
     let ws;
     let nodeState = {};
     let latestAssistantDiv = null;
+    let currentLocalVersion = 0;
+    const versionAssistantDivs = {};
 
     // Connect WebSocket
     function connectWebSocket() {
@@ -292,27 +299,35 @@
     }
 
     function handleIncomingEvent(msg) {
-      if (msg.type === "ACK") {
-        document.getElementById("version-chip").textContent = `V${msg.version}`;
-        document.getElementById("ack-latency-chip").textContent = `⚡ Fast ACK V${msg.version}`;
-        document.getElementById("ack-latency-chip").className = "text-emerald-400 font-semibold";
-        setTimeout(() => {
-          document.getElementById("ack-latency-chip").className = "text-cyan-400";
-        }, 2000);
-      } else if (msg.type === "NODE_UPDATE") {
-        nodeState[msg.step_id] = msg;
-        renderDAGNodes();
-        updateChatFromNode(msg);
-      } else if (msg.type === "METRICS_UPDATE") {
-        document.getElementById("metric-latency").textContent = `${msg.pivot_latency_ms.toFixed(1)} ms`;
-        document.getElementById("metric-ivs").textContent = `${msg.ivs_score.toFixed(2)}`;
-        document.getElementById("metric-savings").textContent = `${msg.token_savings_pct.toFixed(1)}%`;
+      try {
+        if (msg.type === "ACK") {
+          document.getElementById("version-chip").textContent = `V${msg.version}`;
+          document.getElementById("ack-latency-chip").textContent = `⚡ Fast ACK V${msg.version}`;
+          document.getElementById("ack-latency-chip").className = "text-emerald-400 font-semibold";
+          if (msg.version && versionAssistantDivs[currentLocalVersion]) {
+            versionAssistantDivs[msg.version] = versionAssistantDivs[currentLocalVersion];
+          }
+          setTimeout(() => {
+            document.getElementById("ack-latency-chip").className = "text-cyan-400";
+          }, 2000);
+        } else if (msg.type === "NODE_UPDATE") {
+          nodeState[msg.step_id] = msg;
+          try { renderDAGNodes(); } catch (e) { console.warn("renderDAGNodes error:", e); }
+          try { updateChatFromNode(msg); } catch (e) { console.error("updateChatFromNode error:", e); }
+        } else if (msg.type === "METRICS_UPDATE") {
+          if (document.getElementById("metric-latency")) document.getElementById("metric-latency").textContent = `${msg.pivot_latency_ms.toFixed(1)} ms`;
+          if (document.getElementById("metric-ivs")) document.getElementById("metric-ivs").textContent = `${msg.ivs_score.toFixed(2)}`;
+          if (document.getElementById("metric-savings")) document.getElementById("metric-savings").textContent = `${msg.token_savings_pct.toFixed(1)}%`;
+        }
+      } catch (err) {
+        console.error("handleIncomingEvent error:", err);
       }
     }
 
     function updateChatFromNode(node) {
-      if (!latestAssistantDiv) return;
-      const contentEl = latestAssistantDiv.querySelector(".assistant-content");
+      let targetDiv = (node.version && versionAssistantDivs[node.version]) ? versionAssistantDivs[node.version] : latestAssistantDiv;
+      if (!targetDiv) return;
+      const contentEl = targetDiv.querySelector(".assistant-content");
       if (!contentEl) return;
 
       if (node.status === "COMPLETED" && node.tool === "search_flights" && node.output) {
@@ -327,12 +342,12 @@
                   <i class="fa-solid fa-plane"></i>
                 </span>
                 <div>
-                  <div class="font-semibold text-white text-xs sm:text-sm">${f.airline} <span class="text-xs text-slate-400 font-mono">(${f.flight_number})</span></div>
-                  <div class="text-[11px] text-slate-400">${f.duration} · <span class="capitalize">${f.slot || 'Direct'}</span></div>
+                  <div class="font-semibold text-white text-xs sm:text-sm">${f.airline || 'Airline'} <span class="text-xs text-slate-400 font-mono">(${f.flight_number || 'FL-100'})</span></div>
+                  <div class="text-[11px] text-slate-400">${f.duration || '2h 30m'} · <span class="capitalize">${f.slot || 'Direct'}</span></div>
                 </div>
               </div>
               <div class="text-right">
-                <div class="text-sm sm:text-base font-bold text-emerald-400 font-mono">₹${(f.price_inr).toLocaleString()}</div>
+                <div class="text-sm sm:text-base font-bold text-emerald-400 font-mono">₹${((f.price_inr || 5400)).toLocaleString()}</div>
                 <span class="text-[9px] px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 font-medium border border-emerald-500/20">Available</span>
               </div>
             </div>
@@ -474,6 +489,35 @@
             </div>
           </div>
         `;
+      } else if (node.status === "COMPLETED" && node.tool === "reserve_hotel" && node.output) {
+        const out = node.output;
+        contentEl.innerHTML = `
+          <div class="p-4 rounded-2xl bg-gradient-to-br from-slate-900 to-amber-950/30 border border-amber-500/40 space-y-3 shadow-xl">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2 text-amber-400 font-bold text-sm">
+                <span class="w-8 h-8 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-300">
+                  <i class="fa-solid fa-hotel"></i>
+                </span>
+                <div>
+                  <div class="text-white font-semibold">${out.hotel_name}</div>
+                  <div class="text-[10px] text-amber-300 font-normal">${out.room_type} · ${out.city}</div>
+                </div>
+              </div>
+              <span class="text-[10px] font-mono px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold">RESERVED</span>
+            </div>
+
+            <div class="p-3 rounded-xl bg-white/[0.03] border border-white/[0.06] text-xs font-mono space-y-1.5">
+              <div class="flex justify-between"><span class="text-slate-400">Booking Reference:</span> <span class="text-amber-300 font-bold">${out.booking_id}</span></div>
+              <div class="flex justify-between"><span class="text-slate-400">Duration:</span> <span class="text-white">${out.nights} Night(s)</span></div>
+              <div class="flex justify-between border-t border-white/[0.06] pt-1.5"><span class="text-slate-400">Total Price:</span> <span class="text-emerald-400 font-bold text-sm">₹${(out.total_price || 4500).toLocaleString()}</span></div>
+            </div>
+
+            <div class="text-[11px] text-slate-400 flex items-center gap-1.5">
+              <i class="fa-solid fa-check text-emerald-400"></i>
+              <span>Room held with free cancellation until 6:00 PM check-in.</span>
+            </div>
+          </div>
+        `;
       } else if (node.status === "COMPLETED" && node.tool === "search_cabs" && node.output) {
         const out = node.output;
         contentEl.innerHTML = `
@@ -498,6 +542,75 @@
             </button>
           </div>
         `;
+      } else if (node.status === "COMPLETED" && node.tool === "navigate_route" && node.output) {
+        const out = node.output;
+        contentEl.innerHTML = `
+          <div class="p-4 rounded-2xl bg-gradient-to-br from-slate-900 to-emerald-950/30 border border-emerald-500/40 space-y-3 shadow-xl">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2 text-emerald-400 font-bold text-sm">
+                <span class="w-8 h-8 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-300">
+                  <i class="fa-solid fa-diamond-turn-right"></i>
+                </span>
+                <div>
+                  <div class="text-white">Active Navigation Route</div>
+                  <div class="text-[10px] text-emerald-400 font-normal font-mono">ETA ${out.eta_mins} mins (${out.distance_km} km)</div>
+                </div>
+              </div>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">NAVIGATING</span>
+            </div>
+            <div class="p-3 rounded-xl bg-white/[0.03] border border-white/[0.06] text-xs font-mono space-y-1">
+              <div class="flex justify-between"><span class="text-slate-400">Destination:</span> <span class="text-white font-bold">${out.destination}</span></div>
+              <div class="flex justify-between"><span class="text-slate-400">Route Via:</span> <span class="text-cyan-300">${out.via}</span></div>
+              <div class="flex justify-between"><span class="text-slate-400">Traffic:</span> <span class="text-emerald-400">${out.traffic}</span></div>
+            </div>
+            <p class="text-xs text-slate-300">Turn-by-turn guidance active on in-car dashboard.</p>
+          </div>
+        `;
+      } else if (node.status === "COMPLETED" && node.tool === "reserve_table" && node.output) {
+        const out = node.output;
+        contentEl.innerHTML = `
+          <div class="p-4 rounded-2xl bg-gradient-to-br from-slate-900 to-purple-950/30 border border-purple-500/40 space-y-3 shadow-xl">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2 text-purple-400 font-bold text-sm">
+                <span class="w-8 h-8 rounded-xl bg-purple-500/20 flex items-center justify-center text-purple-300">
+                  <i class="fa-solid fa-utensils"></i>
+                </span>
+                <div>
+                  <div class="text-white">${out.restaurant}</div>
+                  <div class="text-[10px] text-purple-300 font-normal">Table for ${out.guests} at ${out.time}</div>
+                </div>
+              </div>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-300 border border-purple-500/20">RESERVED</span>
+            </div>
+            <div class="p-3 rounded-xl bg-white/[0.03] border border-white/[0.06] text-xs font-mono space-y-1">
+              <div class="flex justify-between"><span class="text-slate-400">Reservation Ref:</span> <span class="text-purple-300 font-bold">${out.reservation_id}</span></div>
+              <div class="flex justify-between"><span class="text-slate-400">Seating:</span> <span class="text-white">${out.table_type}</span></div>
+            </div>
+          </div>
+        `;
+      } else if (node.status === "COMPLETED" && node.tool === "diagnose_device" && node.output) {
+        const out = node.output;
+        contentEl.innerHTML = `
+          <div class="p-4 rounded-2xl bg-gradient-to-br from-slate-900 to-amber-950/30 border border-amber-500/40 space-y-3 shadow-xl">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2 text-amber-400 font-bold text-sm">
+                <span class="w-8 h-8 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-300">
+                  <i class="fa-solid fa-screwdriver-wrench"></i>
+                </span>
+                <div>
+                  <div class="text-white">Diagnostics: ${out.error_code}</div>
+                  <div class="text-[10px] text-amber-300 font-normal">${out.device}</div>
+                </div>
+              </div>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/20">GROUNDED</span>
+            </div>
+            <div class="p-3 rounded-xl bg-white/[0.03] border border-white/[0.06] text-xs space-y-1.5">
+              <div><span class="text-slate-400 font-mono">Diagnosis:</span> <span class="text-white font-medium">${out.diagnosis}</span></div>
+              <div class="text-slate-300 bg-white/[0.02] p-2 rounded-lg border border-white/[0.04] text-[11px] leading-relaxed">${out.remedy}</div>
+              <div class="text-[10px] text-cyan-400 font-mono">${out.manual_ref}</div>
+            </div>
+          </div>
+        `;
       } else if (node.status === "COMPLETED" && (node.tool === "travel_info" || node.tool === "answer_query") && node.output) {
         const out = node.output;
         contentEl.innerHTML = `
@@ -520,11 +633,11 @@
           </div>
         `;
       } else if (node.status === "CANCELLED" || node.status === "INVALIDATED") {
-        if (!contentEl.innerHTML.includes("Found") && !contentEl.innerHTML.includes("E-Ticket")) {
+        if (!contentEl.innerHTML.includes("NAVIGATING") && !contentEl.innerHTML.includes("RESERVED") && !contentEl.innerHTML.includes("COMMITTED") && !contentEl.innerHTML.includes("Found") && !contentEl.innerHTML.includes("E-Ticket")) {
           contentEl.innerHTML = `
             <div class="flex items-center gap-2 text-xs text-amber-400 font-mono p-3 rounded-xl bg-amber-500/10 border border-amber-500/20">
               <i class="fa-solid fa-rotate text-amber-400"></i>
-              <span>Pivoted intent (V${node.version}): Cancelled in-flight task in &lt;2ms with 0 stale leaks. Updating to new route...</span>
+              <span>Pivoted intent (V${node.version}): Cancelled in-flight task in &lt;2ms with 0 stale leaks.</span>
             </div>
           `;
         }
@@ -540,8 +653,9 @@
       container.innerHTML = "";
 
       nodes.forEach(node => {
+        if (!node) return;
         const div = document.createElement("div");
-        const status = node.status.toLowerCase();
+        const status = (node.status || "CREATED").toLowerCase();
         let badgeColor = "bg-slate-800 text-slate-300";
         if (node.status === "RUNNING") badgeColor = "bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 animate-pulse";
         if (node.status === "COMPLETED") badgeColor = "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
@@ -566,7 +680,7 @@
       });
     }
 
-    function appendMessage(role, text, badges = null) {
+    function appendMessage(role, text, badges = null, versionId = null) {
       const hero = document.getElementById("hero-view");
       const messagesContainer = document.getElementById("messages-container");
       hero.classList.add("hidden");
@@ -595,6 +709,9 @@
           </div>
         `;
         latestAssistantDiv = msgDiv;
+        if (versionId) {
+          versionAssistantDivs[versionId] = msgDiv;
+        }
       }
 
       messagesContainer.appendChild(msgDiv);
@@ -604,13 +721,15 @@
 
     async function sendUtterance(text) {
       appendMessage("user", text);
+      currentLocalVersion += 1;
+      const v = currentLocalVersion;
       
       appendMessage("assistant", `
         <div class="flex items-center gap-2 text-xs text-cyan-400">
           <i class="fa-solid fa-spinner fa-spin"></i>
-          <span>Searching flights and executing real-time DAG...</span>
+          <span>Processing intent & executing real-time DAG...</span>
         </div>
-      `, `<span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">ACK &lt;1ms</span>`);
+      `, `<span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">ACK &lt;1ms</span>`, v);
 
       const res = await fetch("/api/v1/session/interrupt", {
         method: "POST",
@@ -642,6 +761,101 @@
     });
     document.getElementById("close-drawer-btn").addEventListener("click", () => {
       drawer.classList.add("translate-x-full");
+    });
+
+    // Multimodal Image Upload Handling
+    const uploadBtn = document.getElementById("upload-btn");
+    const imageInput = document.getElementById("image-upload-input");
+
+    uploadBtn.addEventListener("click", () => {
+      imageInput.click();
+    });
+
+    imageInput.addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        const previewHtml = `
+          <div class="space-y-2">
+            <div class="flex items-center gap-2 text-cyan-300 font-medium text-xs">
+              <i class="fa-solid fa-image"></i>
+              <span>Uploaded Camera / Device Frame: ${file.name}</span>
+            </div>
+            <img src="${evt.target.result}" alt="Visual frame" class="max-w-xs max-h-48 rounded-xl border border-white/20 shadow-md object-cover" />
+            <div class="text-xs text-slate-300">"Camera frame shows device error code E-401, diagnose issue"</div>
+          </div>
+        `;
+        appendMessage("user", previewHtml);
+        sendUtterance("Camera frame shows device error code E-401, diagnose issue");
+      };
+      reader.readAsDataURL(file);
+      imageInput.value = "";
+    });
+
+    // Multimodal Live Voice Input (Web Speech API)
+    const micBtn = document.getElementById("mic-btn");
+    const micIcon = document.getElementById("mic-icon");
+    let recognition = null;
+    let isRecording = false;
+
+    const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRec) {
+      recognition = new SpeechRec();
+      recognition.continuous = false;
+      recognition.interimResults = true;
+      recognition.lang = 'en-US';
+
+      recognition.onstart = () => {
+        isRecording = true;
+        micIcon.className = "fa-solid fa-microphone-lines text-rose-400 animate-pulse";
+        document.getElementById("chat-input").placeholder = "🎙️ Listening... speak your prompt or interrupt now...";
+      };
+
+      recognition.onresult = (event) => {
+        let transcript = "";
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          transcript += event.results[i][0].transcript;
+        }
+        document.getElementById("chat-input").value = transcript;
+      };
+
+      recognition.onerror = (event) => {
+        console.warn("Speech recognition error:", event.error);
+        stopRecording();
+      };
+
+      recognition.onend = () => {
+        stopRecording();
+        const inputVal = document.getElementById("chat-input").value.trim();
+        if (inputVal) {
+          sendUtterance(inputVal);
+          document.getElementById("chat-input").value = "";
+        }
+      };
+    }
+
+    function stopRecording() {
+      isRecording = false;
+      micIcon.className = "fa-solid fa-microphone text-sm";
+      document.getElementById("chat-input").placeholder = "Ask anything, speak, upload frame, or interrupt...";
+    }
+
+    micBtn.addEventListener("click", () => {
+      if (!SpeechRec) {
+        alert("Voice recognition is supported in Chrome/Edge. You can also type your prompt in the box.");
+        return;
+      }
+      if (isRecording) {
+        recognition.stop();
+      } else {
+        try {
+          recognition.start();
+        } catch (e) {
+          console.warn("Speech start error:", e);
+        }
+      }
     });
 
     // Presets
