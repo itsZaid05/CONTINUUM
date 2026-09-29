@@ -25,11 +25,11 @@
         "unnecessary_clarification_rate": 0.0,
         "tool_calls": 35,
         "cancels": 6,
-        "ack_p50_ms": 0.107,
-        "ack_p95_ms": 0.181,
-        "pivot_p50_ms": 1.574,
-        "pivot_p95_ms": 3.698,
-        "cancel_p95_ms": 2.743,
+        "ack_p50_ms": 0.106,
+        "ack_p95_ms": 0.203,
+        "pivot_p50_ms": 1.967,
+        "pivot_p95_ms": 6.534,
+        "cancel_p95_ms": 3.541,
         "speaks_per_turn": 1.06
       },
       "scenarios": [
@@ -52,15 +52,15 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.102,
-            0.127
+            0.142,
+            0.141
           ],
           "pivot_ms": [
-            3.698,
-            2.926
+            6.534,
+            3.93
           ],
           "cancel_ms": [
-            2.743
+            3.541
           ],
           "speculation": null,
           "notes": []
@@ -84,18 +84,18 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.2,
-            0.172,
-            0.131
+            0.145,
+            0.203,
+            0.081
           ],
           "pivot_ms": [
-            2.157,
-            2.56,
-            2.272
+            1.317,
+            2.318,
+            2.467
           ],
           "cancel_ms": [
-            2.171,
-            1.937
+            1.931,
+            1.801
           ],
           "speculation": null,
           "notes": []
@@ -119,8 +119,8 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.143,
-            0.125
+            0.127,
+            0.12
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -146,8 +146,8 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.156,
-            0.089
+            0.18,
+            0.097
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -173,8 +173,8 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.085,
-            0.157
+            0.109,
+            0.082
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -200,8 +200,8 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.151,
-            0.118
+            0.166,
+            0.084
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -227,7 +227,7 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.107
+            0.125
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -253,7 +253,7 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.104
+            0.102
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -279,7 +279,7 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.084
+            0.097
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -305,7 +305,7 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.087
+            0.151
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -331,15 +331,15 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.082,
-            0.095
+            0.173,
+            0.034
           ],
           "pivot_ms": [
-            0.999,
-            1.236
+            1.117,
+            1.323
           ],
           "cancel_ms": [
-            0.995
+            0.994
           ],
           "speculation": null,
           "notes": []
@@ -363,8 +363,8 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.117,
-            0.117
+            0.146,
+            0.208
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -390,7 +390,7 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.181
+            0.1
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -416,8 +416,8 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.103,
-            0.108
+            0.115,
+            0.085
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -443,8 +443,8 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.078,
-            0.093
+            0.106,
+            0.101
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -470,15 +470,15 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.089,
-            0.131
+            0.079,
+            0.075
           ],
           "pivot_ms": [
-            1.478,
-            1.574
+            1.695,
+            0.925
           ],
           "cancel_ms": [
-            1.379
+            0.642
           ],
           "speculation": null,
           "notes": []
@@ -502,15 +502,15 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.083,
-            0.071
+            0.097,
+            0.086
           ],
           "pivot_ms": [
-            1.486,
-            1.352
+            1.967,
+            2.183
           ],
           "cancel_ms": [
-            1.188
+            1.816
           ],
           "speculation": null,
           "notes": []
@@ -534,7 +534,7 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.09
+            0.1
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -561,18 +561,18 @@
         "unnecessary_clarification_rate": 0.0,
         "tool_calls": 34,
         "cancels": 6,
-        "ack_p50_ms": 0.103,
-        "ack_p95_ms": 0.14,
-        "pivot_p50_ms": 1.434,
-        "pivot_p95_ms": 2.336,
-        "cancel_p95_ms": 2.108,
+        "ack_p50_ms": 0.098,
+        "ack_p95_ms": 0.2,
+        "pivot_p50_ms": 1.255,
+        "pivot_p95_ms": 1.95,
+        "cancel_p95_ms": 1.574,
         "speaks_per_turn": 1.06,
         "speculation": {
           "spawned": 18,
           "promoted": 1,
           "discarded": 17,
-          "latency_saved_ms": 30.91,
-          "wasted_tool_ms": 1442.02,
+          "latency_saved_ms": 36.42,
+          "wasted_tool_ms": 1472.76,
           "reuse_rate": 0.056
         }
       },
@@ -596,15 +596,15 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.135,
-            0.109
+            0.151,
+            0.089
           ],
           "pivot_ms": [
-            1.57,
-            1.722
+            1.131,
+            1.477
           ],
           "cancel_ms": [
-            1.465
+            1.114
           ],
           "speculation": {
             "spawned": 2,
@@ -614,8 +614,8 @@
             "reuse_rate": 0.0,
             "waste_rate": 1.0,
             "latency_saved_ms": 0.0,
-            "wasted_tool_ms": 151.32,
-            "cleanup_p95_ms": 0.027
+            "wasted_tool_ms": 162.54,
+            "cleanup_p95_ms": 0.022
           },
           "notes": []
         },
@@ -638,18 +638,18 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.105,
-            0.175,
-            0.106
+            0.121,
+            0.09,
+            0.054
           ],
           "pivot_ms": [
-            1.434,
-            2.336,
-            1.883
+            1.164,
+            1.95,
+            0.935
           ],
           "cancel_ms": [
-            2.108,
-            1.565
+            1.574,
+            0.732
           ],
           "speculation": {
             "spawned": 3,
@@ -659,8 +659,8 @@
             "reuse_rate": 0.0,
             "waste_rate": 1.0,
             "latency_saved_ms": 0.0,
-            "wasted_tool_ms": 151.39,
-            "cleanup_p95_ms": 0.015
+            "wasted_tool_ms": 155.07,
+            "cleanup_p95_ms": 0.008
           },
           "notes": []
         },
@@ -683,8 +683,8 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.08,
-            0.139
+            0.129,
+            0.101
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -696,7 +696,7 @@
             "reuse_rate": 0.0,
             "waste_rate": 1.0,
             "latency_saved_ms": 0.0,
-            "wasted_tool_ms": 121.42,
+            "wasted_tool_ms": 126.03,
             "cleanup_p95_ms": 0.024
           },
           "notes": []
@@ -720,8 +720,8 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.073,
-            0.099
+            0.093,
+            0.218
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -732,9 +732,9 @@
             "discarded": 1,
             "reuse_rate": 0.5,
             "waste_rate": 0.5,
-            "latency_saved_ms": 30.91,
-            "wasted_tool_ms": 80.58,
-            "cleanup_p95_ms": 0.029
+            "latency_saved_ms": 36.42,
+            "wasted_tool_ms": 82.6,
+            "cleanup_p95_ms": 0.011
           },
           "notes": []
         },
@@ -757,8 +757,8 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.105,
-            0.09
+            0.089,
+            0.08
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -770,8 +770,8 @@
             "reuse_rate": 0.0,
             "waste_rate": 1.0,
             "latency_saved_ms": 0.0,
-            "wasted_tool_ms": 121.23,
-            "cleanup_p95_ms": 0.021
+            "wasted_tool_ms": 121.72,
+            "cleanup_p95_ms": 0.017
           },
           "notes": []
         },
@@ -794,8 +794,8 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.132,
-            0.133
+            0.2,
+            0.136
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -807,8 +807,8 @@
             "reuse_rate": 0.0,
             "waste_rate": 1.0,
             "latency_saved_ms": 0.0,
-            "wasted_tool_ms": 120.58,
-            "cleanup_p95_ms": 0.017
+            "wasted_tool_ms": 128.19,
+            "cleanup_p95_ms": 0.015
           },
           "notes": []
         },
@@ -831,7 +831,7 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.101
+            0.154
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -843,8 +843,8 @@
             "reuse_rate": 0.0,
             "waste_rate": 1.0,
             "latency_saved_ms": 0.0,
-            "wasted_tool_ms": 120.63,
-            "cleanup_p95_ms": 0.023
+            "wasted_tool_ms": 123.99,
+            "cleanup_p95_ms": 0.015
           },
           "notes": []
         },
@@ -867,7 +867,7 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.097
+            0.126
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -879,8 +879,8 @@
             "reuse_rate": 0.0,
             "waste_rate": 1.0,
             "latency_saved_ms": 0.0,
-            "wasted_tool_ms": 120.68,
-            "cleanup_p95_ms": 0.019
+            "wasted_tool_ms": 133.01,
+            "cleanup_p95_ms": 0.018
           },
           "notes": []
         },
@@ -903,7 +903,7 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.101
+            0.104
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -915,8 +915,8 @@
             "reuse_rate": 0.0,
             "waste_rate": 1.0,
             "latency_saved_ms": 0.0,
-            "wasted_tool_ms": 120.64,
-            "cleanup_p95_ms": 0.025
+            "wasted_tool_ms": 130.12,
+            "cleanup_p95_ms": 0.015
           },
           "notes": []
         },
@@ -939,7 +939,7 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.14
+            0.099
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -975,15 +975,15 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.077,
-            0.092
+            0.096,
+            0.098
           ],
           "pivot_ms": [
-            1.006,
-            1.2
+            1.46,
+            1.809
           ],
           "cancel_ms": [
-            1.018
+            1.423
           ],
           "speculation": {
             "spawned": 0,
@@ -1017,8 +1017,8 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.081,
-            0.095
+            0.112,
+            0.109
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -1054,7 +1054,7 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.08
+            0.061
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -1066,8 +1066,8 @@
             "reuse_rate": 0.0,
             "waste_rate": 1.0,
             "latency_saved_ms": 0.0,
-            "wasted_tool_ms": 101.07,
-            "cleanup_p95_ms": 0.016
+            "wasted_tool_ms": 95.34,
+            "cleanup_p95_ms": 0.027
           },
           "notes": []
         },
@@ -1090,8 +1090,8 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.116,
-            0.117
+            0.097,
+            0.094
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -1103,8 +1103,8 @@
             "reuse_rate": 0.0,
             "waste_rate": 1.0,
             "latency_saved_ms": 0.0,
-            "wasted_tool_ms": 61.37,
-            "cleanup_p95_ms": 0.023
+            "wasted_tool_ms": 62.01,
+            "cleanup_p95_ms": 0.024
           },
           "notes": []
         },
@@ -1127,8 +1127,8 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.109,
-            0.119
+            0.09,
+            0.094
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -1140,8 +1140,8 @@
             "reuse_rate": 0.0,
             "waste_rate": 1.0,
             "latency_saved_ms": 0.0,
-            "wasted_tool_ms": 60.44,
-            "cleanup_p95_ms": 0.015
+            "wasted_tool_ms": 42.97,
+            "cleanup_p95_ms": 0.012
           },
           "notes": []
         },
@@ -1164,15 +1164,15 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.071,
-            0.136
+            0.066,
+            0.066
           ],
           "pivot_ms": [
-            1.054,
-            1.62
+            0.688,
+            0.781
           ],
           "cancel_ms": [
-            1.376
+            0.592
           ],
           "speculation": {
             "spawned": 2,
@@ -1182,8 +1182,8 @@
             "reuse_rate": 0.0,
             "waste_rate": 1.0,
             "latency_saved_ms": 0.0,
-            "wasted_tool_ms": 110.67,
-            "cleanup_p95_ms": 0.011
+            "wasted_tool_ms": 109.17,
+            "cleanup_p95_ms": 0.004
           },
           "notes": []
         },
@@ -1206,15 +1206,15 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.103,
-            0.075
+            0.098,
+            0.062
           ],
           "pivot_ms": [
-            1.177,
-            1.062
+            1.387,
+            1.255
           ],
           "cancel_ms": [
-            0.888
+            1.0
           ],
           "speculation": {
             "spawned": 0,
@@ -1248,7 +1248,7 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.088
+            0.13
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -1285,10 +1285,10 @@
         "unnecessary_clarification_rate": 0.2222,
         "tool_calls": 22,
         "cancels": 8,
-        "ack_p50_ms": 0.09,
-        "ack_p95_ms": 0.16,
-        "pivot_p50_ms": 0.371,
-        "pivot_p95_ms": 0.852,
+        "ack_p50_ms": 0.101,
+        "ack_p95_ms": 0.138,
+        "pivot_p50_ms": 0.341,
+        "pivot_p95_ms": 0.577,
         "cancel_p95_ms": null,
         "speaks_per_turn": 1.0
       },
@@ -1312,12 +1312,12 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.082,
-            0.089
+            0.125,
+            0.067
           ],
           "pivot_ms": [
-            0.302,
-            0.513
+            0.341,
+            0.312
           ],
           "cancel_ms": [],
           "speculation": null,
@@ -1346,14 +1346,14 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.113,
-            0.105,
-            0.151
+            0.145,
+            0.038,
+            0.124
           ],
           "pivot_ms": [
-            0.371,
-            0.852,
-            0.624
+            0.348,
+            0.219,
+            0.565
           ],
           "cancel_ms": [],
           "speculation": null,
@@ -1383,8 +1383,8 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.104,
-            0.239
+            0.08,
+            0.112
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -1414,8 +1414,8 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.102,
-            0.118
+            0.066,
+            0.083
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -1446,8 +1446,8 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.089,
-            0.09
+            0.135,
+            0.068
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -1477,8 +1477,8 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.088,
-            0.095
+            0.138,
+            0.092
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -1507,7 +1507,7 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.083
+            0.106
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -1536,7 +1536,7 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.16
+            0.114
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -1564,7 +1564,7 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.077
+            0.106
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -1593,7 +1593,7 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.115
+            0.121
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -1622,8 +1622,8 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.08,
-            0.112
+            0.101,
+            0.128
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -1653,8 +1653,8 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.082,
-            0.139
+            0.091,
+            0.089
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -1682,7 +1682,7 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.079
+            0.088
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -1711,8 +1711,8 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.082,
-            0.114
+            0.065,
+            0.116
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -1740,8 +1740,8 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.083,
-            0.089
+            0.12,
+            0.08
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -1767,12 +1767,12 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.075,
-            0.093
+            0.113,
+            0.124
           ],
           "pivot_ms": [
-            0.288,
-            0.442
+            0.451,
+            0.577
           ],
           "cancel_ms": [],
           "speculation": null,
@@ -1802,12 +1802,12 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.077,
-            0.06
+            0.059,
+            0.029
           ],
           "pivot_ms": [
-            0.286,
-            0.328
+            0.237,
+            0.228
           ],
           "cancel_ms": [],
           "speculation": null,
@@ -1836,7 +1836,7 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.092
+            0.076
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -1867,11 +1867,11 @@
         "unnecessary_clarification_rate": 0.0,
         "tool_calls": 36,
         "cancels": 6,
-        "ack_p50_ms": 0.088,
-        "ack_p95_ms": 0.136,
-        "pivot_p50_ms": 1.062,
-        "pivot_p95_ms": 1.276,
-        "cancel_p95_ms": 1.139,
+        "ack_p50_ms": 0.109,
+        "ack_p95_ms": 0.188,
+        "pivot_p50_ms": 1.354,
+        "pivot_p95_ms": 1.967,
+        "cancel_p95_ms": 1.534,
         "speaks_per_turn": 1.06
       },
       "scenarios": [
@@ -1894,15 +1894,15 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.076,
-            0.1
+            0.16,
+            0.059
           ],
           "pivot_ms": [
-            0.841,
-            1.174
+            1.354,
+            0.916
           ],
           "cancel_ms": [
-            1.043
+            0.728
           ],
           "speculation": null,
           "notes": []
@@ -1926,18 +1926,18 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.075,
-            0.073,
-            0.132
+            0.109,
+            0.161,
+            0.075
           ],
           "pivot_ms": [
-            0.822,
-            1.126,
-            1.276
+            0.904,
+            1.723,
+            1.704
           ],
           "cancel_ms": [
-            1.004,
-            1.139
+            1.438,
+            1.414
           ],
           "speculation": null,
           "notes": []
@@ -1961,8 +1961,8 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.073,
-            0.136
+            0.135,
+            0.131
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -1988,8 +1988,8 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.074,
-            0.11
+            0.097,
+            0.109
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -2015,8 +2015,8 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.076,
-            0.097
+            0.155,
+            0.103
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -2042,8 +2042,8 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.087,
-            0.09
+            0.188,
+            0.072
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -2069,7 +2069,7 @@
           "duplicate_effects": 1,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.078
+            0.118
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -2097,7 +2097,7 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.127
+            0.113
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -2123,7 +2123,7 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.079
+            0.106
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -2149,7 +2149,7 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.11
+            0.069
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -2175,15 +2175,15 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.078,
-            0.107
+            0.118,
+            0.188
           ],
           "pivot_ms": [
-            1.087,
-            1.142
+            1.169,
+            1.28
           ],
           "cancel_ms": [
-            0.895
+            0.975
           ],
           "speculation": null,
           "notes": []
@@ -2207,8 +2207,8 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.118,
-            0.111
+            0.098,
+            0.112
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -2234,7 +2234,7 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.081
+            0.077
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -2260,8 +2260,8 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.08,
-            0.089
+            0.116,
+            0.069
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -2287,8 +2287,8 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.173,
-            0.106
+            0.082,
+            0.118
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -2314,15 +2314,15 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.069,
-            0.088
+            0.085,
+            0.102
           ],
           "pivot_ms": [
-            0.841,
-            1.052
+            0.949,
+            1.611
           ],
           "cancel_ms": [
-            0.924
+            1.309
           ],
           "speculation": null,
           "notes": []
@@ -2346,15 +2346,15 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.075,
-            0.07
+            0.112,
+            0.078
           ],
           "pivot_ms": [
-            1.011,
-            1.062
+            1.967,
+            1.853
           ],
           "cancel_ms": [
-            0.914
+            1.534
           ],
           "speculation": null,
           "notes": []
@@ -2378,7 +2378,7 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.09
+            0.119
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -2405,11 +2405,11 @@
         "unnecessary_clarification_rate": 0.0,
         "tool_calls": 37,
         "cancels": 8,
-        "ack_p50_ms": 0.091,
-        "ack_p95_ms": 0.134,
-        "pivot_p50_ms": 1.104,
-        "pivot_p95_ms": 1.742,
-        "cancel_p95_ms": 1.546,
+        "ack_p50_ms": 0.104,
+        "ack_p95_ms": 0.197,
+        "pivot_p50_ms": 1.342,
+        "pivot_p95_ms": 1.914,
+        "cancel_p95_ms": 1.42,
         "speaks_per_turn": 1.06
       },
       "scenarios": [
@@ -2432,15 +2432,15 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.143,
-            0.134
+            0.193,
+            0.172
           ],
           "pivot_ms": [
-            0.996,
-            1.742
+            1.619,
+            1.77
           ],
           "cancel_ms": [
-            1.546
+            1.42
           ],
           "speculation": null,
           "notes": []
@@ -2464,18 +2464,18 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.101,
-            0.124,
-            0.082
+            0.178,
+            0.056,
+            0.052
           ],
           "pivot_ms": [
-            0.918,
-            1.649,
-            1.145
+            0.977,
+            1.342,
+            1.914
           ],
           "cancel_ms": [
-            1.365,
-            1.018
+            1.026,
+            1.249
           ],
           "speculation": null,
           "notes": []
@@ -2499,8 +2499,8 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.08,
-            0.088
+            0.156,
+            0.104
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -2526,8 +2526,8 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.074,
-            0.091
+            0.105,
+            0.124
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -2555,8 +2555,8 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.078,
-            0.133
+            0.106,
+            0.076
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -2584,8 +2584,8 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.118,
-            0.095
+            0.129,
+            0.077
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -2611,7 +2611,7 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.12
+            0.076
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -2637,7 +2637,1082 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.082
+            0.107
+          ],
+          "pivot_ms": [],
+          "cancel_ms": [],
+          "speculation": null,
+          "notes": []
+        },
+        {
+          "name": "read_retry",
+          "theme": "fault",
+          "score": 100.0,
+          "task_completion": 1.0,
+          "interruption_recovery": 1.0,
+          "latency": 1.0,
+          "safety_protocol": 1.0,
+          "interruption_applicable": false,
+          "tool_calls": 3,
+          "cancels": 0,
+          "clarifications": 0,
+          "unnecessary_clarification": false,
+          "speaks_per_turn": 1.0,
+          "stale_completions": 0,
+          "stale_reruns": 0,
+          "duplicate_effects": 0,
+          "regretted_irreversible": 0,
+          "ack_ms": [
+            0.117
+          ],
+          "pivot_ms": [],
+          "cancel_ms": [],
+          "speculation": null,
+          "notes": []
+        },
+        {
+          "name": "ticket_unseen_tools",
+          "theme": "unseen_tools",
+          "score": 100.0,
+          "task_completion": 1.0,
+          "interruption_recovery": 1.0,
+          "latency": 1.0,
+          "safety_protocol": 1.0,
+          "interruption_applicable": false,
+          "tool_calls": 1,
+          "cancels": 0,
+          "clarifications": 0,
+          "unnecessary_clarification": false,
+          "speaks_per_turn": 1.0,
+          "stale_completions": 0,
+          "stale_reruns": 0,
+          "duplicate_effects": 0,
+          "regretted_irreversible": 0,
+          "ack_ms": [
+            0.085
+          ],
+          "pivot_ms": [],
+          "cancel_ms": [],
+          "speculation": null,
+          "notes": []
+        },
+        {
+          "name": "ticket_correction_inflight",
+          "theme": "interruption",
+          "score": 100.0,
+          "task_completion": 1.0,
+          "interruption_recovery": 1.0,
+          "latency": 1.0,
+          "safety_protocol": 1.0,
+          "interruption_applicable": true,
+          "tool_calls": 2,
+          "cancels": 1,
+          "clarifications": 0,
+          "unnecessary_clarification": false,
+          "speaks_per_turn": 1.0,
+          "stale_completions": 0,
+          "stale_reruns": 0,
+          "duplicate_effects": 0,
+          "regretted_irreversible": 0,
+          "ack_ms": [
+            0.06,
+            0.228
+          ],
+          "pivot_ms": [
+            0.726,
+            1.553
+          ],
+          "cancel_ms": [
+            1.253
+          ],
+          "speculation": null,
+          "notes": []
+        },
+        {
+          "name": "clarify_missing_slot",
+          "theme": "clarification",
+          "score": 100.0,
+          "task_completion": 1.0,
+          "interruption_recovery": 1.0,
+          "latency": 1.0,
+          "safety_protocol": 1.0,
+          "interruption_applicable": false,
+          "tool_calls": 1,
+          "cancels": 0,
+          "clarifications": 1,
+          "unnecessary_clarification": false,
+          "speaks_per_turn": 1.0,
+          "stale_completions": 0,
+          "stale_reruns": 0,
+          "duplicate_effects": 0,
+          "regretted_irreversible": 0,
+          "ack_ms": [
+            0.089,
+            0.09
+          ],
+          "pivot_ms": [],
+          "cancel_ms": [],
+          "speculation": null,
+          "notes": []
+        },
+        {
+          "name": "manual_lookup",
+          "theme": "unseen_tools",
+          "score": 100.0,
+          "task_completion": 1.0,
+          "interruption_recovery": 1.0,
+          "latency": 1.0,
+          "safety_protocol": 1.0,
+          "interruption_applicable": false,
+          "tool_calls": 1,
+          "cancels": 0,
+          "clarifications": 0,
+          "unnecessary_clarification": false,
+          "speaks_per_turn": 1.0,
+          "stale_completions": 0,
+          "stale_reruns": 0,
+          "duplicate_effects": 0,
+          "regretted_irreversible": 0,
+          "ack_ms": [
+            0.095
+          ],
+          "pivot_ms": [],
+          "cancel_ms": [],
+          "speculation": null,
+          "notes": []
+        },
+        {
+          "name": "irreversible_confirmed",
+          "theme": "clarification",
+          "score": 100.0,
+          "task_completion": 1.0,
+          "interruption_recovery": 1.0,
+          "latency": 1.0,
+          "safety_protocol": 1.0,
+          "interruption_applicable": false,
+          "tool_calls": 1,
+          "cancels": 0,
+          "clarifications": 1,
+          "unnecessary_clarification": false,
+          "speaks_per_turn": 1.0,
+          "stale_completions": 0,
+          "stale_reruns": 0,
+          "duplicate_effects": 0,
+          "regretted_irreversible": 0,
+          "ack_ms": [
+            0.108,
+            0.093
+          ],
+          "pivot_ms": [],
+          "cancel_ms": [],
+          "speculation": null,
+          "notes": []
+        },
+        {
+          "name": "irreversible_declined",
+          "theme": "clarification",
+          "score": 100.0,
+          "task_completion": 1.0,
+          "interruption_recovery": 1.0,
+          "latency": 1.0,
+          "safety_protocol": 1.0,
+          "interruption_applicable": false,
+          "tool_calls": 0,
+          "cancels": 0,
+          "clarifications": 1,
+          "unnecessary_clarification": false,
+          "speaks_per_turn": 1.5,
+          "stale_completions": 0,
+          "stale_reruns": 0,
+          "duplicate_effects": 0,
+          "regretted_irreversible": 0,
+          "ack_ms": [
+            0.062,
+            0.197
+          ],
+          "pivot_ms": [],
+          "cancel_ms": [],
+          "speculation": null,
+          "notes": []
+        },
+        {
+          "name": "nav_pivot",
+          "theme": "interruption",
+          "score": 100.0,
+          "task_completion": 1.0,
+          "interruption_recovery": 1.0,
+          "latency": 1.0,
+          "safety_protocol": 1.0,
+          "interruption_applicable": true,
+          "tool_calls": 3,
+          "cancels": 1,
+          "clarifications": 0,
+          "unnecessary_clarification": false,
+          "speaks_per_turn": 1.0,
+          "stale_completions": 0,
+          "stale_reruns": 0,
+          "duplicate_effects": 0,
+          "regretted_irreversible": 0,
+          "ack_ms": [
+            0.097,
+            0.078
+          ],
+          "pivot_ms": [
+            1.048,
+            0.839
+          ],
+          "cancel_ms": [
+            0.661
+          ],
+          "speculation": null,
+          "notes": []
+        },
+        {
+          "name": "climate_correction",
+          "theme": "interruption",
+          "score": 100.0,
+          "task_completion": 1.0,
+          "interruption_recovery": 1.0,
+          "latency": 1.0,
+          "safety_protocol": 1.0,
+          "interruption_applicable": true,
+          "tool_calls": 2,
+          "cancels": 1,
+          "clarifications": 0,
+          "unnecessary_clarification": false,
+          "speaks_per_turn": 1.0,
+          "stale_completions": 0,
+          "stale_reruns": 0,
+          "duplicate_effects": 0,
+          "regretted_irreversible": 0,
+          "ack_ms": [
+            0.105,
+            0.072
+          ],
+          "pivot_ms": [
+            1.512,
+            1.342
+          ],
+          "cancel_ms": [
+            1.075
+          ],
+          "speculation": null,
+          "notes": []
+        },
+        {
+          "name": "dining_chain_unseen",
+          "theme": "unseen_tools",
+          "score": 100.0,
+          "task_completion": 1.0,
+          "interruption_recovery": 1.0,
+          "latency": 1.0,
+          "safety_protocol": 1.0,
+          "interruption_applicable": false,
+          "tool_calls": 2,
+          "cancels": 0,
+          "clarifications": 0,
+          "unnecessary_clarification": false,
+          "speaks_per_turn": 1.0,
+          "stale_completions": 0,
+          "stale_reruns": 0,
+          "duplicate_effects": 0,
+          "regretted_irreversible": 0,
+          "ack_ms": [
+            0.161
+          ],
+          "pivot_ms": [],
+          "cancel_ms": [],
+          "speculation": null,
+          "notes": []
+        }
+      ]
+    },
+    "no_read_retry": {
+      "config": {
+        "max_read_retries": 0
+      },
+      "summary": {
+        "scenarios": 18,
+        "mean_score": 97.78,
+        "task_completion": 0.9444,
+        "interruption_recovery": 1.0,
+        "latency": 1.0,
+        "safety_protocol": 1.0,
+        "stale_action_rate": 0.0,
+        "stale_reruns": 0,
+        "duplicate_mutations": 0,
+        "regretted_irreversible": 0,
+        "unnecessary_clarification_rate": 0.0,
+        "tool_calls": 33,
+        "cancels": 6,
+        "ack_p50_ms": 0.087,
+        "ack_p95_ms": 0.199,
+        "pivot_p50_ms": 0.916,
+        "pivot_p95_ms": 1.577,
+        "cancel_p95_ms": 1.314,
+        "speaks_per_turn": 1.11
+      },
+      "scenarios": [
+        {
+          "name": "flight_pivot",
+          "theme": "interruption",
+          "score": 100.0,
+          "task_completion": 1.0,
+          "interruption_recovery": 1.0,
+          "latency": 1.0,
+          "safety_protocol": 1.0,
+          "interruption_applicable": true,
+          "tool_calls": 2,
+          "cancels": 1,
+          "clarifications": 0,
+          "unnecessary_clarification": false,
+          "speaks_per_turn": 1.0,
+          "stale_completions": 0,
+          "stale_reruns": 0,
+          "duplicate_effects": 0,
+          "regretted_irreversible": 0,
+          "ack_ms": [
+            0.081,
+            0.152
+          ],
+          "pivot_ms": [
+            0.716,
+            1.553
+          ],
+          "cancel_ms": [
+            1.185
+          ],
+          "speculation": null,
+          "notes": []
+        },
+        {
+          "name": "rapid_corrections",
+          "theme": "interruption",
+          "score": 100.0,
+          "task_completion": 1.0,
+          "interruption_recovery": 1.0,
+          "latency": 1.0,
+          "safety_protocol": 1.0,
+          "interruption_applicable": true,
+          "tool_calls": 3,
+          "cancels": 2,
+          "clarifications": 0,
+          "unnecessary_clarification": false,
+          "speaks_per_turn": 1.0,
+          "stale_completions": 0,
+          "stale_reruns": 0,
+          "duplicate_effects": 0,
+          "regretted_irreversible": 0,
+          "ack_ms": [
+            0.118,
+            0.034,
+            0.074
+          ],
+          "pivot_ms": [
+            0.742,
+            0.775,
+            0.916
+          ],
+          "cancel_ms": [
+            0.617,
+            0.747
+          ],
+          "speculation": null,
+          "notes": []
+        },
+        {
+          "name": "backchannel_mid_task",
+          "theme": "interruption",
+          "score": 100.0,
+          "task_completion": 1.0,
+          "interruption_recovery": 1.0,
+          "latency": 1.0,
+          "safety_protocol": 1.0,
+          "interruption_applicable": true,
+          "tool_calls": 1,
+          "cancels": 0,
+          "clarifications": 0,
+          "unnecessary_clarification": false,
+          "speaks_per_turn": 1.0,
+          "stale_completions": 0,
+          "stale_reruns": 0,
+          "duplicate_effects": 0,
+          "regretted_irreversible": 0,
+          "ack_ms": [
+            0.136,
+            0.133
+          ],
+          "pivot_ms": [],
+          "cancel_ms": [],
+          "speculation": null,
+          "notes": []
+        },
+        {
+          "name": "additive_goal",
+          "theme": "interruption",
+          "score": 100.0,
+          "task_completion": 1.0,
+          "interruption_recovery": 1.0,
+          "latency": 1.0,
+          "safety_protocol": 1.0,
+          "interruption_applicable": true,
+          "tool_calls": 2,
+          "cancels": 0,
+          "clarifications": 0,
+          "unnecessary_clarification": false,
+          "speaks_per_turn": 1.0,
+          "stale_completions": 0,
+          "stale_reruns": 0,
+          "duplicate_effects": 0,
+          "regretted_irreversible": 0,
+          "ack_ms": [
+            0.199,
+            0.078
+          ],
+          "pivot_ms": [],
+          "cancel_ms": [],
+          "speculation": null,
+          "notes": []
+        },
+        {
+          "name": "retract_before_commit",
+          "theme": "retraction",
+          "score": 100.0,
+          "task_completion": 1.0,
+          "interruption_recovery": 1.0,
+          "latency": 1.0,
+          "safety_protocol": 1.0,
+          "interruption_applicable": true,
+          "tool_calls": 1,
+          "cancels": 0,
+          "clarifications": 0,
+          "unnecessary_clarification": false,
+          "speaks_per_turn": 1.0,
+          "stale_completions": 0,
+          "stale_reruns": 0,
+          "duplicate_effects": 0,
+          "regretted_irreversible": 0,
+          "ack_ms": [
+            0.109,
+            0.292
+          ],
+          "pivot_ms": [],
+          "cancel_ms": [],
+          "speculation": null,
+          "notes": []
+        },
+        {
+          "name": "retract_after_commit",
+          "theme": "retraction",
+          "score": 100.0,
+          "task_completion": 1.0,
+          "interruption_recovery": 1.0,
+          "latency": 1.0,
+          "safety_protocol": 1.0,
+          "interruption_applicable": false,
+          "tool_calls": 3,
+          "cancels": 0,
+          "clarifications": 0,
+          "unnecessary_clarification": false,
+          "speaks_per_turn": 1.5,
+          "stale_completions": 0,
+          "stale_reruns": 0,
+          "duplicate_effects": 0,
+          "regretted_irreversible": 0,
+          "ack_ms": [
+            0.087,
+            0.05
+          ],
+          "pivot_ms": [],
+          "cancel_ms": [],
+          "speculation": null,
+          "notes": []
+        },
+        {
+          "name": "booking_timeout_committed",
+          "theme": "fault",
+          "score": 100.0,
+          "task_completion": 1.0,
+          "interruption_recovery": 1.0,
+          "latency": 1.0,
+          "safety_protocol": 1.0,
+          "interruption_applicable": false,
+          "tool_calls": 3,
+          "cancels": 0,
+          "clarifications": 0,
+          "unnecessary_clarification": false,
+          "speaks_per_turn": 1.0,
+          "stale_completions": 0,
+          "stale_reruns": 0,
+          "duplicate_effects": 0,
+          "regretted_irreversible": 0,
+          "ack_ms": [
+            0.108
+          ],
+          "pivot_ms": [],
+          "cancel_ms": [],
+          "speculation": null,
+          "notes": []
+        },
+        {
+          "name": "booking_timeout_not_committed",
+          "theme": "fault",
+          "score": 100.0,
+          "task_completion": 1.0,
+          "interruption_recovery": 1.0,
+          "latency": 1.0,
+          "safety_protocol": 1.0,
+          "interruption_applicable": false,
+          "tool_calls": 4,
+          "cancels": 0,
+          "clarifications": 0,
+          "unnecessary_clarification": false,
+          "speaks_per_turn": 1.0,
+          "stale_completions": 0,
+          "stale_reruns": 0,
+          "duplicate_effects": 0,
+          "regretted_irreversible": 0,
+          "ack_ms": [
+            0.1
+          ],
+          "pivot_ms": [],
+          "cancel_ms": [],
+          "speculation": null,
+          "notes": []
+        },
+        {
+          "name": "read_retry",
+          "theme": "fault",
+          "score": 60.0,
+          "task_completion": 0.0,
+          "interruption_recovery": 1.0,
+          "latency": 1.0,
+          "safety_protocol": 1.0,
+          "interruption_applicable": false,
+          "tool_calls": 1,
+          "cancels": 0,
+          "clarifications": 0,
+          "unnecessary_clarification": false,
+          "speaks_per_turn": 2.0,
+          "stale_completions": 0,
+          "stale_reruns": 0,
+          "duplicate_effects": 0,
+          "regretted_irreversible": 0,
+          "ack_ms": [
+            0.081
+          ],
+          "pivot_ms": [],
+          "cancel_ms": [],
+          "speculation": null,
+          "notes": [
+            "not completed: {'tool': 'search_flights', 'args': {'to': 'Chennai', 'date': '2026-09-30'}}",
+            "final slots {} vs {'to': 'Chennai'}"
+          ]
+        },
+        {
+          "name": "ticket_unseen_tools",
+          "theme": "unseen_tools",
+          "score": 100.0,
+          "task_completion": 1.0,
+          "interruption_recovery": 1.0,
+          "latency": 1.0,
+          "safety_protocol": 1.0,
+          "interruption_applicable": false,
+          "tool_calls": 1,
+          "cancels": 0,
+          "clarifications": 0,
+          "unnecessary_clarification": false,
+          "speaks_per_turn": 1.0,
+          "stale_completions": 0,
+          "stale_reruns": 0,
+          "duplicate_effects": 0,
+          "regretted_irreversible": 0,
+          "ack_ms": [
+            0.103
+          ],
+          "pivot_ms": [],
+          "cancel_ms": [],
+          "speculation": null,
+          "notes": []
+        },
+        {
+          "name": "ticket_correction_inflight",
+          "theme": "interruption",
+          "score": 100.0,
+          "task_completion": 1.0,
+          "interruption_recovery": 1.0,
+          "latency": 1.0,
+          "safety_protocol": 1.0,
+          "interruption_applicable": true,
+          "tool_calls": 2,
+          "cancels": 1,
+          "clarifications": 0,
+          "unnecessary_clarification": false,
+          "speaks_per_turn": 1.0,
+          "stale_completions": 0,
+          "stale_reruns": 0,
+          "duplicate_effects": 0,
+          "regretted_irreversible": 0,
+          "ack_ms": [
+            0.062,
+            0.066
+          ],
+          "pivot_ms": [
+            0.901,
+            1.233
+          ],
+          "cancel_ms": [
+            0.917
+          ],
+          "speculation": null,
+          "notes": []
+        },
+        {
+          "name": "clarify_missing_slot",
+          "theme": "clarification",
+          "score": 100.0,
+          "task_completion": 1.0,
+          "interruption_recovery": 1.0,
+          "latency": 1.0,
+          "safety_protocol": 1.0,
+          "interruption_applicable": false,
+          "tool_calls": 1,
+          "cancels": 0,
+          "clarifications": 1,
+          "unnecessary_clarification": false,
+          "speaks_per_turn": 1.0,
+          "stale_completions": 0,
+          "stale_reruns": 0,
+          "duplicate_effects": 0,
+          "regretted_irreversible": 0,
+          "ack_ms": [
+            0.058,
+            0.113
+          ],
+          "pivot_ms": [],
+          "cancel_ms": [],
+          "speculation": null,
+          "notes": []
+        },
+        {
+          "name": "manual_lookup",
+          "theme": "unseen_tools",
+          "score": 100.0,
+          "task_completion": 1.0,
+          "interruption_recovery": 1.0,
+          "latency": 1.0,
+          "safety_protocol": 1.0,
+          "interruption_applicable": false,
+          "tool_calls": 1,
+          "cancels": 0,
+          "clarifications": 0,
+          "unnecessary_clarification": false,
+          "speaks_per_turn": 1.0,
+          "stale_completions": 0,
+          "stale_reruns": 0,
+          "duplicate_effects": 0,
+          "regretted_irreversible": 0,
+          "ack_ms": [
+            0.057
+          ],
+          "pivot_ms": [],
+          "cancel_ms": [],
+          "speculation": null,
+          "notes": []
+        },
+        {
+          "name": "irreversible_confirmed",
+          "theme": "clarification",
+          "score": 100.0,
+          "task_completion": 1.0,
+          "interruption_recovery": 1.0,
+          "latency": 1.0,
+          "safety_protocol": 1.0,
+          "interruption_applicable": false,
+          "tool_calls": 1,
+          "cancels": 0,
+          "clarifications": 1,
+          "unnecessary_clarification": false,
+          "speaks_per_turn": 1.0,
+          "stale_completions": 0,
+          "stale_reruns": 0,
+          "duplicate_effects": 0,
+          "regretted_irreversible": 0,
+          "ack_ms": [
+            0.066,
+            0.079
+          ],
+          "pivot_ms": [],
+          "cancel_ms": [],
+          "speculation": null,
+          "notes": []
+        },
+        {
+          "name": "irreversible_declined",
+          "theme": "clarification",
+          "score": 100.0,
+          "task_completion": 1.0,
+          "interruption_recovery": 1.0,
+          "latency": 1.0,
+          "safety_protocol": 1.0,
+          "interruption_applicable": false,
+          "tool_calls": 0,
+          "cancels": 0,
+          "clarifications": 1,
+          "unnecessary_clarification": false,
+          "speaks_per_turn": 1.5,
+          "stale_completions": 0,
+          "stale_reruns": 0,
+          "duplicate_effects": 0,
+          "regretted_irreversible": 0,
+          "ack_ms": [
+            0.104,
+            0.064
+          ],
+          "pivot_ms": [],
+          "cancel_ms": [],
+          "speculation": null,
+          "notes": []
+        },
+        {
+          "name": "nav_pivot",
+          "theme": "interruption",
+          "score": 100.0,
+          "task_completion": 1.0,
+          "interruption_recovery": 1.0,
+          "latency": 1.0,
+          "safety_protocol": 1.0,
+          "interruption_applicable": true,
+          "tool_calls": 3,
+          "cancels": 1,
+          "clarifications": 0,
+          "unnecessary_clarification": false,
+          "speaks_per_turn": 1.0,
+          "stale_completions": 0,
+          "stale_reruns": 0,
+          "duplicate_effects": 0,
+          "regretted_irreversible": 0,
+          "ack_ms": [
+            0.057,
+            0.094
+          ],
+          "pivot_ms": [
+            0.599,
+            1.171
+          ],
+          "cancel_ms": [
+            0.98
+          ],
+          "speculation": null,
+          "notes": []
+        },
+        {
+          "name": "climate_correction",
+          "theme": "interruption",
+          "score": 100.0,
+          "task_completion": 1.0,
+          "interruption_recovery": 1.0,
+          "latency": 1.0,
+          "safety_protocol": 1.0,
+          "interruption_applicable": true,
+          "tool_calls": 2,
+          "cancels": 1,
+          "clarifications": 0,
+          "unnecessary_clarification": false,
+          "speaks_per_turn": 1.0,
+          "stale_completions": 0,
+          "stale_reruns": 0,
+          "duplicate_effects": 0,
+          "regretted_irreversible": 0,
+          "ack_ms": [
+            0.125,
+            0.069
+          ],
+          "pivot_ms": [
+            1.526,
+            1.577
+          ],
+          "cancel_ms": [
+            1.314
+          ],
+          "speculation": null,
+          "notes": []
+        },
+        {
+          "name": "dining_chain_unseen",
+          "theme": "unseen_tools",
+          "score": 100.0,
+          "task_completion": 1.0,
+          "interruption_recovery": 1.0,
+          "latency": 1.0,
+          "safety_protocol": 1.0,
+          "interruption_applicable": false,
+          "tool_calls": 2,
+          "cancels": 0,
+          "clarifications": 0,
+          "unnecessary_clarification": false,
+          "speaks_per_turn": 1.0,
+          "stale_completions": 0,
+          "stale_reruns": 0,
+          "duplicate_effects": 0,
+          "regretted_irreversible": 0,
+          "ack_ms": [
+            0.116
+          ],
+          "pivot_ms": [],
+          "cancel_ms": [],
+          "speculation": null,
+          "notes": []
+        }
+      ]
+    },
+    "no_commit_gate": {
+      "config": {
+        "confirm_irreversible": false
+      },
+      "summary": {
+        "scenarios": 18,
+        "mean_score": 96.67,
+        "task_completion": 0.9167,
+        "interruption_recovery": 1.0,
+        "latency": 1.0,
+        "safety_protocol": 1.0,
+        "stale_action_rate": 0.0,
+        "stale_reruns": 0,
+        "duplicate_mutations": 0,
+        "regretted_irreversible": 1,
+        "unnecessary_clarification_rate": 0.0,
+        "tool_calls": 36,
+        "cancels": 6,
+        "ack_p50_ms": 0.111,
+        "ack_p95_ms": 0.177,
+        "pivot_p50_ms": 1.384,
+        "pivot_p95_ms": 1.769,
+        "cancel_p95_ms": 1.389,
+        "speaks_per_turn": 1.03
+      },
+      "scenarios": [
+        {
+          "name": "flight_pivot",
+          "theme": "interruption",
+          "score": 100.0,
+          "task_completion": 1.0,
+          "interruption_recovery": 1.0,
+          "latency": 1.0,
+          "safety_protocol": 1.0,
+          "interruption_applicable": true,
+          "tool_calls": 2,
+          "cancels": 1,
+          "clarifications": 0,
+          "unnecessary_clarification": false,
+          "speaks_per_turn": 1.0,
+          "stale_completions": 0,
+          "stale_reruns": 0,
+          "duplicate_effects": 0,
+          "regretted_irreversible": 0,
+          "ack_ms": [
+            0.163,
+            0.177
+          ],
+          "pivot_ms": [
+            1.264,
+            1.769
+          ],
+          "cancel_ms": [
+            1.38
+          ],
+          "speculation": null,
+          "notes": []
+        },
+        {
+          "name": "rapid_corrections",
+          "theme": "interruption",
+          "score": 100.0,
+          "task_completion": 1.0,
+          "interruption_recovery": 1.0,
+          "latency": 1.0,
+          "safety_protocol": 1.0,
+          "interruption_applicable": true,
+          "tool_calls": 3,
+          "cancels": 2,
+          "clarifications": 0,
+          "unnecessary_clarification": false,
+          "speaks_per_turn": 1.0,
+          "stale_completions": 0,
+          "stale_reruns": 0,
+          "duplicate_effects": 0,
+          "regretted_irreversible": 0,
+          "ack_ms": [
+            0.124,
+            0.066,
+            0.067
+          ],
+          "pivot_ms": [
+            1.136,
+            1.41,
+            1.665
+          ],
+          "cancel_ms": [
+            1.152,
+            1.389
+          ],
+          "speculation": null,
+          "notes": []
+        },
+        {
+          "name": "backchannel_mid_task",
+          "theme": "interruption",
+          "score": 100.0,
+          "task_completion": 1.0,
+          "interruption_recovery": 1.0,
+          "latency": 1.0,
+          "safety_protocol": 1.0,
+          "interruption_applicable": true,
+          "tool_calls": 1,
+          "cancels": 0,
+          "clarifications": 0,
+          "unnecessary_clarification": false,
+          "speaks_per_turn": 1.0,
+          "stale_completions": 0,
+          "stale_reruns": 0,
+          "duplicate_effects": 0,
+          "regretted_irreversible": 0,
+          "ack_ms": [
+            0.108,
+            0.111
+          ],
+          "pivot_ms": [],
+          "cancel_ms": [],
+          "speculation": null,
+          "notes": []
+        },
+        {
+          "name": "additive_goal",
+          "theme": "interruption",
+          "score": 100.0,
+          "task_completion": 1.0,
+          "interruption_recovery": 1.0,
+          "latency": 1.0,
+          "safety_protocol": 1.0,
+          "interruption_applicable": true,
+          "tool_calls": 2,
+          "cancels": 0,
+          "clarifications": 0,
+          "unnecessary_clarification": false,
+          "speaks_per_turn": 1.0,
+          "stale_completions": 0,
+          "stale_reruns": 0,
+          "duplicate_effects": 0,
+          "regretted_irreversible": 0,
+          "ack_ms": [
+            0.113,
+            0.131
+          ],
+          "pivot_ms": [],
+          "cancel_ms": [],
+          "speculation": null,
+          "notes": []
+        },
+        {
+          "name": "retract_before_commit",
+          "theme": "retraction",
+          "score": 100.0,
+          "task_completion": 1.0,
+          "interruption_recovery": 1.0,
+          "latency": 1.0,
+          "safety_protocol": 1.0,
+          "interruption_applicable": true,
+          "tool_calls": 1,
+          "cancels": 0,
+          "clarifications": 0,
+          "unnecessary_clarification": false,
+          "speaks_per_turn": 1.0,
+          "stale_completions": 0,
+          "stale_reruns": 0,
+          "duplicate_effects": 0,
+          "regretted_irreversible": 0,
+          "ack_ms": [
+            0.135,
+            0.258
+          ],
+          "pivot_ms": [],
+          "cancel_ms": [],
+          "speculation": null,
+          "notes": []
+        },
+        {
+          "name": "retract_after_commit",
+          "theme": "retraction",
+          "score": 100.0,
+          "task_completion": 1.0,
+          "interruption_recovery": 1.0,
+          "latency": 1.0,
+          "safety_protocol": 1.0,
+          "interruption_applicable": false,
+          "tool_calls": 3,
+          "cancels": 0,
+          "clarifications": 0,
+          "unnecessary_clarification": false,
+          "speaks_per_turn": 1.5,
+          "stale_completions": 0,
+          "stale_reruns": 0,
+          "duplicate_effects": 0,
+          "regretted_irreversible": 0,
+          "ack_ms": [
+            0.159,
+            0.096
+          ],
+          "pivot_ms": [],
+          "cancel_ms": [],
+          "speculation": null,
+          "notes": []
+        },
+        {
+          "name": "booking_timeout_committed",
+          "theme": "fault",
+          "score": 100.0,
+          "task_completion": 1.0,
+          "interruption_recovery": 1.0,
+          "latency": 1.0,
+          "safety_protocol": 1.0,
+          "interruption_applicable": false,
+          "tool_calls": 3,
+          "cancels": 0,
+          "clarifications": 0,
+          "unnecessary_clarification": false,
+          "speaks_per_turn": 1.0,
+          "stale_completions": 0,
+          "stale_reruns": 0,
+          "duplicate_effects": 0,
+          "regretted_irreversible": 0,
+          "ack_ms": [
+            0.099
+          ],
+          "pivot_ms": [],
+          "cancel_ms": [],
+          "speculation": null,
+          "notes": []
+        },
+        {
+          "name": "booking_timeout_not_committed",
+          "theme": "fault",
+          "score": 100.0,
+          "task_completion": 1.0,
+          "interruption_recovery": 1.0,
+          "latency": 1.0,
+          "safety_protocol": 1.0,
+          "interruption_applicable": false,
+          "tool_calls": 4,
+          "cancels": 0,
+          "clarifications": 0,
+          "unnecessary_clarification": false,
+          "speaks_per_turn": 1.0,
+          "stale_completions": 0,
+          "stale_reruns": 0,
+          "duplicate_effects": 0,
+          "regretted_irreversible": 0,
+          "ack_ms": [
+            0.147
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -2689,545 +3764,6 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.122
-          ],
-          "pivot_ms": [],
-          "cancel_ms": [],
-          "speculation": null,
-          "notes": []
-        },
-        {
-          "name": "ticket_correction_inflight",
-          "theme": "interruption",
-          "score": 100.0,
-          "task_completion": 1.0,
-          "interruption_recovery": 1.0,
-          "latency": 1.0,
-          "safety_protocol": 1.0,
-          "interruption_applicable": true,
-          "tool_calls": 2,
-          "cancels": 1,
-          "clarifications": 0,
-          "unnecessary_clarification": false,
-          "speaks_per_turn": 1.0,
-          "stale_completions": 0,
-          "stale_reruns": 0,
-          "duplicate_effects": 0,
-          "regretted_irreversible": 0,
-          "ack_ms": [
-            0.077,
-            0.095
-          ],
-          "pivot_ms": [
-            0.906,
-            1.237
-          ],
-          "cancel_ms": [
-            1.034
-          ],
-          "speculation": null,
-          "notes": []
-        },
-        {
-          "name": "clarify_missing_slot",
-          "theme": "clarification",
-          "score": 100.0,
-          "task_completion": 1.0,
-          "interruption_recovery": 1.0,
-          "latency": 1.0,
-          "safety_protocol": 1.0,
-          "interruption_applicable": false,
-          "tool_calls": 1,
-          "cancels": 0,
-          "clarifications": 1,
-          "unnecessary_clarification": false,
-          "speaks_per_turn": 1.0,
-          "stale_completions": 0,
-          "stale_reruns": 0,
-          "duplicate_effects": 0,
-          "regretted_irreversible": 0,
-          "ack_ms": [
-            0.072,
-            0.112
-          ],
-          "pivot_ms": [],
-          "cancel_ms": [],
-          "speculation": null,
-          "notes": []
-        },
-        {
-          "name": "manual_lookup",
-          "theme": "unseen_tools",
-          "score": 100.0,
-          "task_completion": 1.0,
-          "interruption_recovery": 1.0,
-          "latency": 1.0,
-          "safety_protocol": 1.0,
-          "interruption_applicable": false,
-          "tool_calls": 1,
-          "cancels": 0,
-          "clarifications": 0,
-          "unnecessary_clarification": false,
-          "speaks_per_turn": 1.0,
-          "stale_completions": 0,
-          "stale_reruns": 0,
-          "duplicate_effects": 0,
-          "regretted_irreversible": 0,
-          "ack_ms": [
-            0.075
-          ],
-          "pivot_ms": [],
-          "cancel_ms": [],
-          "speculation": null,
-          "notes": []
-        },
-        {
-          "name": "irreversible_confirmed",
-          "theme": "clarification",
-          "score": 100.0,
-          "task_completion": 1.0,
-          "interruption_recovery": 1.0,
-          "latency": 1.0,
-          "safety_protocol": 1.0,
-          "interruption_applicable": false,
-          "tool_calls": 1,
-          "cancels": 0,
-          "clarifications": 1,
-          "unnecessary_clarification": false,
-          "speaks_per_turn": 1.0,
-          "stale_completions": 0,
-          "stale_reruns": 0,
-          "duplicate_effects": 0,
-          "regretted_irreversible": 0,
-          "ack_ms": [
-            0.086,
-            0.088
-          ],
-          "pivot_ms": [],
-          "cancel_ms": [],
-          "speculation": null,
-          "notes": []
-        },
-        {
-          "name": "irreversible_declined",
-          "theme": "clarification",
-          "score": 100.0,
-          "task_completion": 1.0,
-          "interruption_recovery": 1.0,
-          "latency": 1.0,
-          "safety_protocol": 1.0,
-          "interruption_applicable": false,
-          "tool_calls": 0,
-          "cancels": 0,
-          "clarifications": 1,
-          "unnecessary_clarification": false,
-          "speaks_per_turn": 1.5,
-          "stale_completions": 0,
-          "stale_reruns": 0,
-          "duplicate_effects": 0,
-          "regretted_irreversible": 0,
-          "ack_ms": [
-            0.082,
-            0.091
-          ],
-          "pivot_ms": [],
-          "cancel_ms": [],
-          "speculation": null,
-          "notes": []
-        },
-        {
-          "name": "nav_pivot",
-          "theme": "interruption",
-          "score": 100.0,
-          "task_completion": 1.0,
-          "interruption_recovery": 1.0,
-          "latency": 1.0,
-          "safety_protocol": 1.0,
-          "interruption_applicable": true,
-          "tool_calls": 3,
-          "cancels": 1,
-          "clarifications": 0,
-          "unnecessary_clarification": false,
-          "speaks_per_turn": 1.0,
-          "stale_completions": 0,
-          "stale_reruns": 0,
-          "duplicate_effects": 0,
-          "regretted_irreversible": 0,
-          "ack_ms": [
-            0.075,
-            0.095
-          ],
-          "pivot_ms": [
-            0.798,
-            1.026
-          ],
-          "cancel_ms": [
-            0.891
-          ],
-          "speculation": null,
-          "notes": []
-        },
-        {
-          "name": "climate_correction",
-          "theme": "interruption",
-          "score": 100.0,
-          "task_completion": 1.0,
-          "interruption_recovery": 1.0,
-          "latency": 1.0,
-          "safety_protocol": 1.0,
-          "interruption_applicable": true,
-          "tool_calls": 2,
-          "cancels": 1,
-          "clarifications": 0,
-          "unnecessary_clarification": false,
-          "speaks_per_turn": 1.0,
-          "stale_completions": 0,
-          "stale_reruns": 0,
-          "duplicate_effects": 0,
-          "regretted_irreversible": 0,
-          "ack_ms": [
-            0.104,
-            0.068
-          ],
-          "pivot_ms": [
-            1.104,
-            1.143
-          ],
-          "cancel_ms": [
-            0.991
-          ],
-          "speculation": null,
-          "notes": []
-        },
-        {
-          "name": "dining_chain_unseen",
-          "theme": "unseen_tools",
-          "score": 100.0,
-          "task_completion": 1.0,
-          "interruption_recovery": 1.0,
-          "latency": 1.0,
-          "safety_protocol": 1.0,
-          "interruption_applicable": false,
-          "tool_calls": 2,
-          "cancels": 0,
-          "clarifications": 0,
-          "unnecessary_clarification": false,
-          "speaks_per_turn": 1.0,
-          "stale_completions": 0,
-          "stale_reruns": 0,
-          "duplicate_effects": 0,
-          "regretted_irreversible": 0,
-          "ack_ms": [
-            0.116
-          ],
-          "pivot_ms": [],
-          "cancel_ms": [],
-          "speculation": null,
-          "notes": []
-        }
-      ]
-    },
-    "no_read_retry": {
-      "config": {
-        "max_read_retries": 0
-      },
-      "summary": {
-        "scenarios": 18,
-        "mean_score": 97.78,
-        "task_completion": 0.9444,
-        "interruption_recovery": 1.0,
-        "latency": 1.0,
-        "safety_protocol": 1.0,
-        "stale_action_rate": 0.0,
-        "stale_reruns": 0,
-        "duplicate_mutations": 0,
-        "regretted_irreversible": 0,
-        "unnecessary_clarification_rate": 0.0,
-        "tool_calls": 33,
-        "cancels": 6,
-        "ack_p50_ms": 0.092,
-        "ack_p95_ms": 0.135,
-        "pivot_p50_ms": 1.139,
-        "pivot_p95_ms": 1.778,
-        "cancel_p95_ms": 1.559,
-        "speaks_per_turn": 1.11
-      },
-      "scenarios": [
-        {
-          "name": "flight_pivot",
-          "theme": "interruption",
-          "score": 100.0,
-          "task_completion": 1.0,
-          "interruption_recovery": 1.0,
-          "latency": 1.0,
-          "safety_protocol": 1.0,
-          "interruption_applicable": true,
-          "tool_calls": 2,
-          "cancels": 1,
-          "clarifications": 0,
-          "unnecessary_clarification": false,
-          "speaks_per_turn": 1.0,
-          "stale_completions": 0,
-          "stale_reruns": 0,
-          "duplicate_effects": 0,
-          "regretted_irreversible": 0,
-          "ack_ms": [
-            0.079,
-            0.092
-          ],
-          "pivot_ms": [
-            0.886,
-            1.247
-          ],
-          "cancel_ms": [
-            1.074
-          ],
-          "speculation": null,
-          "notes": []
-        },
-        {
-          "name": "rapid_corrections",
-          "theme": "interruption",
-          "score": 100.0,
-          "task_completion": 1.0,
-          "interruption_recovery": 1.0,
-          "latency": 1.0,
-          "safety_protocol": 1.0,
-          "interruption_applicable": true,
-          "tool_calls": 3,
-          "cancels": 2,
-          "clarifications": 0,
-          "unnecessary_clarification": false,
-          "speaks_per_turn": 1.0,
-          "stale_completions": 0,
-          "stale_reruns": 0,
-          "duplicate_effects": 0,
-          "regretted_irreversible": 0,
-          "ack_ms": [
-            0.087,
-            0.089,
-            0.08
-          ],
-          "pivot_ms": [
-            0.808,
-            1.127,
-            1.223
-          ],
-          "cancel_ms": [
-            0.991,
-            1.074
-          ],
-          "speculation": null,
-          "notes": []
-        },
-        {
-          "name": "backchannel_mid_task",
-          "theme": "interruption",
-          "score": 100.0,
-          "task_completion": 1.0,
-          "interruption_recovery": 1.0,
-          "latency": 1.0,
-          "safety_protocol": 1.0,
-          "interruption_applicable": true,
-          "tool_calls": 1,
-          "cancels": 0,
-          "clarifications": 0,
-          "unnecessary_clarification": false,
-          "speaks_per_turn": 1.0,
-          "stale_completions": 0,
-          "stale_reruns": 0,
-          "duplicate_effects": 0,
-          "regretted_irreversible": 0,
-          "ack_ms": [
-            0.084,
-            0.083
-          ],
-          "pivot_ms": [],
-          "cancel_ms": [],
-          "speculation": null,
-          "notes": []
-        },
-        {
-          "name": "additive_goal",
-          "theme": "interruption",
-          "score": 100.0,
-          "task_completion": 1.0,
-          "interruption_recovery": 1.0,
-          "latency": 1.0,
-          "safety_protocol": 1.0,
-          "interruption_applicable": true,
-          "tool_calls": 2,
-          "cancels": 0,
-          "clarifications": 0,
-          "unnecessary_clarification": false,
-          "speaks_per_turn": 1.0,
-          "stale_completions": 0,
-          "stale_reruns": 0,
-          "duplicate_effects": 0,
-          "regretted_irreversible": 0,
-          "ack_ms": [
-            0.078,
-            0.09
-          ],
-          "pivot_ms": [],
-          "cancel_ms": [],
-          "speculation": null,
-          "notes": []
-        },
-        {
-          "name": "retract_before_commit",
-          "theme": "retraction",
-          "score": 100.0,
-          "task_completion": 1.0,
-          "interruption_recovery": 1.0,
-          "latency": 1.0,
-          "safety_protocol": 1.0,
-          "interruption_applicable": true,
-          "tool_calls": 1,
-          "cancels": 0,
-          "clarifications": 0,
-          "unnecessary_clarification": false,
-          "speaks_per_turn": 1.0,
-          "stale_completions": 0,
-          "stale_reruns": 0,
-          "duplicate_effects": 0,
-          "regretted_irreversible": 0,
-          "ack_ms": [
-            0.076,
-            0.089
-          ],
-          "pivot_ms": [],
-          "cancel_ms": [],
-          "speculation": null,
-          "notes": []
-        },
-        {
-          "name": "retract_after_commit",
-          "theme": "retraction",
-          "score": 100.0,
-          "task_completion": 1.0,
-          "interruption_recovery": 1.0,
-          "latency": 1.0,
-          "safety_protocol": 1.0,
-          "interruption_applicable": false,
-          "tool_calls": 3,
-          "cancels": 0,
-          "clarifications": 0,
-          "unnecessary_clarification": false,
-          "speaks_per_turn": 1.5,
-          "stale_completions": 0,
-          "stale_reruns": 0,
-          "duplicate_effects": 0,
-          "regretted_irreversible": 0,
-          "ack_ms": [
-            0.128,
-            0.09
-          ],
-          "pivot_ms": [],
-          "cancel_ms": [],
-          "speculation": null,
-          "notes": []
-        },
-        {
-          "name": "booking_timeout_committed",
-          "theme": "fault",
-          "score": 100.0,
-          "task_completion": 1.0,
-          "interruption_recovery": 1.0,
-          "latency": 1.0,
-          "safety_protocol": 1.0,
-          "interruption_applicable": false,
-          "tool_calls": 3,
-          "cancels": 0,
-          "clarifications": 0,
-          "unnecessary_clarification": false,
-          "speaks_per_turn": 1.0,
-          "stale_completions": 0,
-          "stale_reruns": 0,
-          "duplicate_effects": 0,
-          "regretted_irreversible": 0,
-          "ack_ms": [
-            0.13
-          ],
-          "pivot_ms": [],
-          "cancel_ms": [],
-          "speculation": null,
-          "notes": []
-        },
-        {
-          "name": "booking_timeout_not_committed",
-          "theme": "fault",
-          "score": 100.0,
-          "task_completion": 1.0,
-          "interruption_recovery": 1.0,
-          "latency": 1.0,
-          "safety_protocol": 1.0,
-          "interruption_applicable": false,
-          "tool_calls": 4,
-          "cancels": 0,
-          "clarifications": 0,
-          "unnecessary_clarification": false,
-          "speaks_per_turn": 1.0,
-          "stale_completions": 0,
-          "stale_reruns": 0,
-          "duplicate_effects": 0,
-          "regretted_irreversible": 0,
-          "ack_ms": [
-            0.108
-          ],
-          "pivot_ms": [],
-          "cancel_ms": [],
-          "speculation": null,
-          "notes": []
-        },
-        {
-          "name": "read_retry",
-          "theme": "fault",
-          "score": 60.0,
-          "task_completion": 0.0,
-          "interruption_recovery": 1.0,
-          "latency": 1.0,
-          "safety_protocol": 1.0,
-          "interruption_applicable": false,
-          "tool_calls": 1,
-          "cancels": 0,
-          "clarifications": 0,
-          "unnecessary_clarification": false,
-          "speaks_per_turn": 2.0,
-          "stale_completions": 0,
-          "stale_reruns": 0,
-          "duplicate_effects": 0,
-          "regretted_irreversible": 0,
-          "ack_ms": [
-            0.092
-          ],
-          "pivot_ms": [],
-          "cancel_ms": [],
-          "speculation": null,
-          "notes": [
-            "not completed: {'tool': 'search_flights', 'args': {'to': 'Chennai', 'date': '2026-09-30'}}",
-            "final slots {} vs {'to': 'Chennai'}"
-          ]
-        },
-        {
-          "name": "ticket_unseen_tools",
-          "theme": "unseen_tools",
-          "score": 100.0,
-          "task_completion": 1.0,
-          "interruption_recovery": 1.0,
-          "latency": 1.0,
-          "safety_protocol": 1.0,
-          "interruption_applicable": false,
-          "tool_calls": 1,
-          "cancels": 0,
-          "clarifications": 0,
-          "unnecessary_clarification": false,
-          "speaks_per_turn": 1.0,
-          "stale_completions": 0,
-          "stale_reruns": 0,
-          "duplicate_effects": 0,
-          "regretted_irreversible": 0,
-          "ack_ms": [
             0.113
           ],
           "pivot_ms": [],
@@ -3254,15 +3790,15 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.149,
-            0.094
+            0.087,
+            0.166
           ],
           "pivot_ms": [
-            1.071,
-            1.139
+            0.963,
+            1.232
           ],
           "cancel_ms": [
-            0.958
+            1.005
           ],
           "speculation": null,
           "notes": []
@@ -3279,145 +3815,6 @@
           "tool_calls": 1,
           "cancels": 0,
           "clarifications": 1,
-          "unnecessary_clarification": false,
-          "speaks_per_turn": 1.0,
-          "stale_completions": 0,
-          "stale_reruns": 0,
-          "duplicate_effects": 0,
-          "regretted_irreversible": 0,
-          "ack_ms": [
-            0.081,
-            0.135
-          ],
-          "pivot_ms": [],
-          "cancel_ms": [],
-          "speculation": null,
-          "notes": []
-        },
-        {
-          "name": "manual_lookup",
-          "theme": "unseen_tools",
-          "score": 100.0,
-          "task_completion": 1.0,
-          "interruption_recovery": 1.0,
-          "latency": 1.0,
-          "safety_protocol": 1.0,
-          "interruption_applicable": false,
-          "tool_calls": 1,
-          "cancels": 0,
-          "clarifications": 0,
-          "unnecessary_clarification": false,
-          "speaks_per_turn": 1.0,
-          "stale_completions": 0,
-          "stale_reruns": 0,
-          "duplicate_effects": 0,
-          "regretted_irreversible": 0,
-          "ack_ms": [
-            0.091
-          ],
-          "pivot_ms": [],
-          "cancel_ms": [],
-          "speculation": null,
-          "notes": []
-        },
-        {
-          "name": "irreversible_confirmed",
-          "theme": "clarification",
-          "score": 100.0,
-          "task_completion": 1.0,
-          "interruption_recovery": 1.0,
-          "latency": 1.0,
-          "safety_protocol": 1.0,
-          "interruption_applicable": false,
-          "tool_calls": 1,
-          "cancels": 0,
-          "clarifications": 1,
-          "unnecessary_clarification": false,
-          "speaks_per_turn": 1.0,
-          "stale_completions": 0,
-          "stale_reruns": 0,
-          "duplicate_effects": 0,
-          "regretted_irreversible": 0,
-          "ack_ms": [
-            0.117,
-            0.093
-          ],
-          "pivot_ms": [],
-          "cancel_ms": [],
-          "speculation": null,
-          "notes": []
-        },
-        {
-          "name": "irreversible_declined",
-          "theme": "clarification",
-          "score": 100.0,
-          "task_completion": 1.0,
-          "interruption_recovery": 1.0,
-          "latency": 1.0,
-          "safety_protocol": 1.0,
-          "interruption_applicable": false,
-          "tool_calls": 0,
-          "cancels": 0,
-          "clarifications": 1,
-          "unnecessary_clarification": false,
-          "speaks_per_turn": 1.5,
-          "stale_completions": 0,
-          "stale_reruns": 0,
-          "duplicate_effects": 0,
-          "regretted_irreversible": 0,
-          "ack_ms": [
-            0.116,
-            0.124
-          ],
-          "pivot_ms": [],
-          "cancel_ms": [],
-          "speculation": null,
-          "notes": []
-        },
-        {
-          "name": "nav_pivot",
-          "theme": "interruption",
-          "score": 100.0,
-          "task_completion": 1.0,
-          "interruption_recovery": 1.0,
-          "latency": 1.0,
-          "safety_protocol": 1.0,
-          "interruption_applicable": true,
-          "tool_calls": 3,
-          "cancels": 1,
-          "clarifications": 0,
-          "unnecessary_clarification": false,
-          "speaks_per_turn": 1.0,
-          "stale_completions": 0,
-          "stale_reruns": 0,
-          "duplicate_effects": 0,
-          "regretted_irreversible": 0,
-          "ack_ms": [
-            0.079,
-            0.119
-          ],
-          "pivot_ms": [
-            0.997,
-            1.617
-          ],
-          "cancel_ms": [
-            1.398
-          ],
-          "speculation": null,
-          "notes": []
-        },
-        {
-          "name": "climate_correction",
-          "theme": "interruption",
-          "score": 100.0,
-          "task_completion": 1.0,
-          "interruption_recovery": 1.0,
-          "latency": 1.0,
-          "safety_protocol": 1.0,
-          "interruption_applicable": true,
-          "tool_calls": 2,
-          "cancels": 1,
-          "clarifications": 0,
           "unnecessary_clarification": false,
           "speaks_per_turn": 1.0,
           "stale_completions": 0,
@@ -3426,404 +3823,7 @@
           "regretted_irreversible": 0,
           "ack_ms": [
             0.101,
-            0.103
-          ],
-          "pivot_ms": [
-            1.532,
-            1.778
-          ],
-          "cancel_ms": [
-            1.559
-          ],
-          "speculation": null,
-          "notes": []
-        },
-        {
-          "name": "dining_chain_unseen",
-          "theme": "unseen_tools",
-          "score": 100.0,
-          "task_completion": 1.0,
-          "interruption_recovery": 1.0,
-          "latency": 1.0,
-          "safety_protocol": 1.0,
-          "interruption_applicable": false,
-          "tool_calls": 2,
-          "cancels": 0,
-          "clarifications": 0,
-          "unnecessary_clarification": false,
-          "speaks_per_turn": 1.0,
-          "stale_completions": 0,
-          "stale_reruns": 0,
-          "duplicate_effects": 0,
-          "regretted_irreversible": 0,
-          "ack_ms": [
-            0.091
-          ],
-          "pivot_ms": [],
-          "cancel_ms": [],
-          "speculation": null,
-          "notes": []
-        }
-      ]
-    },
-    "no_commit_gate": {
-      "config": {
-        "confirm_irreversible": false
-      },
-      "summary": {
-        "scenarios": 18,
-        "mean_score": 96.67,
-        "task_completion": 0.9167,
-        "interruption_recovery": 1.0,
-        "latency": 1.0,
-        "safety_protocol": 1.0,
-        "stale_action_rate": 0.0,
-        "stale_reruns": 0,
-        "duplicate_mutations": 0,
-        "regretted_irreversible": 1,
-        "unnecessary_clarification_rate": 0.0,
-        "tool_calls": 36,
-        "cancels": 6,
-        "ack_p50_ms": 0.091,
-        "ack_p95_ms": 0.159,
-        "pivot_p50_ms": 1.246,
-        "pivot_p95_ms": 2.972,
-        "cancel_p95_ms": 2.558,
-        "speaks_per_turn": 1.03
-      },
-      "scenarios": [
-        {
-          "name": "flight_pivot",
-          "theme": "interruption",
-          "score": 100.0,
-          "task_completion": 1.0,
-          "interruption_recovery": 1.0,
-          "latency": 1.0,
-          "safety_protocol": 1.0,
-          "interruption_applicable": true,
-          "tool_calls": 2,
-          "cancels": 1,
-          "clarifications": 0,
-          "unnecessary_clarification": false,
-          "speaks_per_turn": 1.0,
-          "stale_completions": 0,
-          "stale_reruns": 0,
-          "duplicate_effects": 0,
-          "regretted_irreversible": 0,
-          "ack_ms": [
-            0.145,
-            0.155
-          ],
-          "pivot_ms": [
-            1.718,
-            2.303
-          ],
-          "cancel_ms": [
-            2.006
-          ],
-          "speculation": null,
-          "notes": []
-        },
-        {
-          "name": "rapid_corrections",
-          "theme": "interruption",
-          "score": 100.0,
-          "task_completion": 1.0,
-          "interruption_recovery": 1.0,
-          "latency": 1.0,
-          "safety_protocol": 1.0,
-          "interruption_applicable": true,
-          "tool_calls": 3,
-          "cancels": 2,
-          "clarifications": 0,
-          "unnecessary_clarification": false,
-          "speaks_per_turn": 1.0,
-          "stale_completions": 0,
-          "stale_reruns": 0,
-          "duplicate_effects": 0,
-          "regretted_irreversible": 0,
-          "ack_ms": [
-            0.129,
-            0.2,
-            0.138
-          ],
-          "pivot_ms": [
-            1.138,
-            2.972,
-            1.682
-          ],
-          "cancel_ms": [
-            2.558,
-            1.462
-          ],
-          "speculation": null,
-          "notes": []
-        },
-        {
-          "name": "backchannel_mid_task",
-          "theme": "interruption",
-          "score": 100.0,
-          "task_completion": 1.0,
-          "interruption_recovery": 1.0,
-          "latency": 1.0,
-          "safety_protocol": 1.0,
-          "interruption_applicable": true,
-          "tool_calls": 1,
-          "cancels": 0,
-          "clarifications": 0,
-          "unnecessary_clarification": false,
-          "speaks_per_turn": 1.0,
-          "stale_completions": 0,
-          "stale_reruns": 0,
-          "duplicate_effects": 0,
-          "regretted_irreversible": 0,
-          "ack_ms": [
-            0.091,
-            0.124
-          ],
-          "pivot_ms": [],
-          "cancel_ms": [],
-          "speculation": null,
-          "notes": []
-        },
-        {
-          "name": "additive_goal",
-          "theme": "interruption",
-          "score": 100.0,
-          "task_completion": 1.0,
-          "interruption_recovery": 1.0,
-          "latency": 1.0,
-          "safety_protocol": 1.0,
-          "interruption_applicable": true,
-          "tool_calls": 2,
-          "cancels": 0,
-          "clarifications": 0,
-          "unnecessary_clarification": false,
-          "speaks_per_turn": 1.0,
-          "stale_completions": 0,
-          "stale_reruns": 0,
-          "duplicate_effects": 0,
-          "regretted_irreversible": 0,
-          "ack_ms": [
-            0.089,
-            0.127
-          ],
-          "pivot_ms": [],
-          "cancel_ms": [],
-          "speculation": null,
-          "notes": []
-        },
-        {
-          "name": "retract_before_commit",
-          "theme": "retraction",
-          "score": 100.0,
-          "task_completion": 1.0,
-          "interruption_recovery": 1.0,
-          "latency": 1.0,
-          "safety_protocol": 1.0,
-          "interruption_applicable": true,
-          "tool_calls": 1,
-          "cancels": 0,
-          "clarifications": 0,
-          "unnecessary_clarification": false,
-          "speaks_per_turn": 1.0,
-          "stale_completions": 0,
-          "stale_reruns": 0,
-          "duplicate_effects": 0,
-          "regretted_irreversible": 0,
-          "ack_ms": [
-            0.103,
-            0.12
-          ],
-          "pivot_ms": [],
-          "cancel_ms": [],
-          "speculation": null,
-          "notes": []
-        },
-        {
-          "name": "retract_after_commit",
-          "theme": "retraction",
-          "score": 100.0,
-          "task_completion": 1.0,
-          "interruption_recovery": 1.0,
-          "latency": 1.0,
-          "safety_protocol": 1.0,
-          "interruption_applicable": false,
-          "tool_calls": 3,
-          "cancels": 0,
-          "clarifications": 0,
-          "unnecessary_clarification": false,
-          "speaks_per_turn": 1.5,
-          "stale_completions": 0,
-          "stale_reruns": 0,
-          "duplicate_effects": 0,
-          "regretted_irreversible": 0,
-          "ack_ms": [
-            0.118,
-            0.149
-          ],
-          "pivot_ms": [],
-          "cancel_ms": [],
-          "speculation": null,
-          "notes": []
-        },
-        {
-          "name": "booking_timeout_committed",
-          "theme": "fault",
-          "score": 100.0,
-          "task_completion": 1.0,
-          "interruption_recovery": 1.0,
-          "latency": 1.0,
-          "safety_protocol": 1.0,
-          "interruption_applicable": false,
-          "tool_calls": 3,
-          "cancels": 0,
-          "clarifications": 0,
-          "unnecessary_clarification": false,
-          "speaks_per_turn": 1.0,
-          "stale_completions": 0,
-          "stale_reruns": 0,
-          "duplicate_effects": 0,
-          "regretted_irreversible": 0,
-          "ack_ms": [
-            0.086
-          ],
-          "pivot_ms": [],
-          "cancel_ms": [],
-          "speculation": null,
-          "notes": []
-        },
-        {
-          "name": "booking_timeout_not_committed",
-          "theme": "fault",
-          "score": 100.0,
-          "task_completion": 1.0,
-          "interruption_recovery": 1.0,
-          "latency": 1.0,
-          "safety_protocol": 1.0,
-          "interruption_applicable": false,
-          "tool_calls": 4,
-          "cancels": 0,
-          "clarifications": 0,
-          "unnecessary_clarification": false,
-          "speaks_per_turn": 1.0,
-          "stale_completions": 0,
-          "stale_reruns": 0,
-          "duplicate_effects": 0,
-          "regretted_irreversible": 0,
-          "ack_ms": [
-            0.074
-          ],
-          "pivot_ms": [],
-          "cancel_ms": [],
-          "speculation": null,
-          "notes": []
-        },
-        {
-          "name": "read_retry",
-          "theme": "fault",
-          "score": 100.0,
-          "task_completion": 1.0,
-          "interruption_recovery": 1.0,
-          "latency": 1.0,
-          "safety_protocol": 1.0,
-          "interruption_applicable": false,
-          "tool_calls": 3,
-          "cancels": 0,
-          "clarifications": 0,
-          "unnecessary_clarification": false,
-          "speaks_per_turn": 1.0,
-          "stale_completions": 0,
-          "stale_reruns": 0,
-          "duplicate_effects": 0,
-          "regretted_irreversible": 0,
-          "ack_ms": [
-            0.096
-          ],
-          "pivot_ms": [],
-          "cancel_ms": [],
-          "speculation": null,
-          "notes": []
-        },
-        {
-          "name": "ticket_unseen_tools",
-          "theme": "unseen_tools",
-          "score": 100.0,
-          "task_completion": 1.0,
-          "interruption_recovery": 1.0,
-          "latency": 1.0,
-          "safety_protocol": 1.0,
-          "interruption_applicable": false,
-          "tool_calls": 1,
-          "cancels": 0,
-          "clarifications": 0,
-          "unnecessary_clarification": false,
-          "speaks_per_turn": 1.0,
-          "stale_completions": 0,
-          "stale_reruns": 0,
-          "duplicate_effects": 0,
-          "regretted_irreversible": 0,
-          "ack_ms": [
-            0.096
-          ],
-          "pivot_ms": [],
-          "cancel_ms": [],
-          "speculation": null,
-          "notes": []
-        },
-        {
-          "name": "ticket_correction_inflight",
-          "theme": "interruption",
-          "score": 100.0,
-          "task_completion": 1.0,
-          "interruption_recovery": 1.0,
-          "latency": 1.0,
-          "safety_protocol": 1.0,
-          "interruption_applicable": true,
-          "tool_calls": 2,
-          "cancels": 1,
-          "clarifications": 0,
-          "unnecessary_clarification": false,
-          "speaks_per_turn": 1.0,
-          "stale_completions": 0,
-          "stale_reruns": 0,
-          "duplicate_effects": 0,
-          "regretted_irreversible": 0,
-          "ack_ms": [
-            0.096,
-            0.087
-          ],
-          "pivot_ms": [
-            1.246,
-            1.336
-          ],
-          "cancel_ms": [
-            1.184
-          ],
-          "speculation": null,
-          "notes": []
-        },
-        {
-          "name": "clarify_missing_slot",
-          "theme": "clarification",
-          "score": 100.0,
-          "task_completion": 1.0,
-          "interruption_recovery": 1.0,
-          "latency": 1.0,
-          "safety_protocol": 1.0,
-          "interruption_applicable": false,
-          "tool_calls": 1,
-          "cancels": 0,
-          "clarifications": 1,
-          "unnecessary_clarification": false,
-          "speaks_per_turn": 1.0,
-          "stale_completions": 0,
-          "stale_reruns": 0,
-          "duplicate_effects": 0,
-          "regretted_irreversible": 0,
-          "ack_ms": [
-            0.069,
-            0.087
+            0.173
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -3849,7 +3849,7 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.073
+            0.07
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -3875,8 +3875,8 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.082,
-            0.089
+            0.097,
+            0.117
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -3904,8 +3904,8 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 1,
           "ack_ms": [
-            0.075,
-            0.159
+            0.105,
+            0.098
           ],
           "pivot_ms": [],
           "cancel_ms": [],
@@ -3934,15 +3934,15 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.087,
-            0.085
+            0.101,
+            0.127
           ],
           "pivot_ms": [
-            1.123,
-            1.005
+            0.935,
+            1.428
           ],
           "cancel_ms": [
-            0.873
+            1.067
           ],
           "speculation": null,
           "notes": []
@@ -3966,15 +3966,15 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.069,
-            0.063
+            0.093,
+            0.061
           ],
           "pivot_ms": [
-            0.946,
-            1.207
+            1.384,
+            1.55
           ],
           "cancel_ms": [
-            1.051
+            1.254
           ],
           "speculation": null,
           "notes": []
@@ -3998,7 +3998,7 @@
           "duplicate_effects": 0,
           "regretted_irreversible": 0,
           "ack_ms": [
-            0.088
+            0.122
           ],
           "pivot_ms": [],
           "cancel_ms": [],

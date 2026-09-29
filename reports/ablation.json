@@ -21,7 +21,7 @@
         "abandoned": 0,
         "reused_pct": 50.0,
         "wasted_pct": 50.0,
-        "cleanup_p95_ms": 0.017,
+        "cleanup_p95_ms": 0.115,
         "cleanup_samples": 1,
         "primary_slowdown_pct": 4.5,
         "primary_reserved_ms": 49.5,
@@ -45,7 +45,7 @@
         "live_budget": "0/2",
         "by_state": {}
       },
-      "verdict": "50.0% of shadow work reused; cost capped (\u22644.5% primary slowdown, cleanup 0.017ms p95)"
+      "verdict": "50.0% of shadow work reused; cost capped (\u22644.5% primary slowdown, cleanup 0.115ms p95)"
     }
   ]
 }

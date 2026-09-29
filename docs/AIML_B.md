@@ -2,6 +2,7 @@
 
 > **Scope (updated spec §11):** planner DAG, tools, shadow predictor/manager, speculation metrics. Next-value items from the spec: **manifest-driven generic planning** (B-R4/B-R5), retries (B-8), shadows on the harness path (B-12), plus a proper evaluation pipeline.
 > **Status (26 Sep 2026):** final harness-edge build, tested (246 tests pass), evaluated. Reproduce planner, text runtime, and multimodal reports with `make eval-b` (offline; no API keys).
+> **29 Sep 2026:** continuity is now granted to the goal in progress only when the turn fits it (supplies its arguments, is an explicit correction, or fits no other tool). This was found on the new raw-media suite, where a finished `lookup_manual` swallowed a spoken "repair it on Monday" request. Planner dev/held-out scores are unchanged (1.000 / 0.964, same single miss h22). 318 tests pass.
 
 ---
 

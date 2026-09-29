@@ -6,8 +6,8 @@ Suite `data/runtime_scenarios/multimodal_suite.json` (11 multimodal scenarios), 
 
 | System | Score | Task | Interrupt | Latency | Safety | Stale-action rate | Stale reruns | Dup. mutations | Regretted irreversible | Unneeded clarify | Tool calls | Pivot p50 / p95 ms | Ack p95 ms | Cancel p95 ms |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| continuum | **100.0** | 1.0 | 1.0 | 1.0 | 1.0 | 0.0 | 0 | 0 | 0 | 0.0 | 7 | 4.1 / 4.1 | 0.152 | 2.708 |
-| naive_runtime | **81.15** | 0.5818 | 0.9394 | 1.0 | 1.0 | 0.0 | 0 | 0 | 0 | 0.2727 | 2 | 0.525 / 0.525 | 0.117 | None |
+| continuum | **100.0** | 1.0 | 1.0 | 1.0 | 1.0 | 0.0 | 0 | 0 | 0 | 0.0 | 7 | 4.762 / 4.762 | 0.114 | 2.652 |
+| naive_runtime | **81.15** | 0.5818 | 0.9394 | 1.0 | 1.0 | 0.0 | 0 | 0 | 0 | 0.2727 | 2 | 0.497 / 0.497 | 0.095 | None |
 
 `continuum` = generic planner + reconcile/advance executor. `naive_runtime` = the runtime path before this work (first read-only tool, args copied from arbiter state, cancel everything on any change). Rows below the three systems are single-mechanism ablations of `continuum`.
 

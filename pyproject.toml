@@ -30,8 +30,17 @@ dense = [
     "torch>=2.3",
     "rank-bm25>=0.2.2",
 ]
+# Local speech recognition; the model itself is fetched once with
+# `continuum fetch-models` (never at request time).
 asr = [
     "faster-whisper>=1.0",
+]
+# Local OCR for camera frames; detection/recognition models ship in the wheel.
+vision = [
+    "rapidocr-onnxruntime>=1.3",
+]
+multimodal = [
+    "continuum[asr,vision]",
 ]
 # Matches the official FDB-v3 LiveKit stack and includes Gemini native audio.
 # Imports stay lazy, so deterministic core tests do not require cloud keys.

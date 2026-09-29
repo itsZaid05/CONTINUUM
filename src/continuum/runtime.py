@@ -152,6 +152,21 @@ _YES = re.compile(
 _NO = re.compile(r"^\s*(?:no|nope|don't|do not|cancel|stop|not now|never mind)\b", re.I)
 
 
+def _warm_recognizers(asr_model_path: str | None) -> dict[str, Any]:
+    from .perception import _load_local_asr, _ocr_engine, default_asr_model_path, recognizers
+
+    found = recognizers()
+    path = asr_model_path or (str(default_asr_model_path()) if default_asr_model_path() else None)
+    if path is not None:
+        try:
+            _load_local_asr(path)
+            found["asr"] = path
+        except (FileNotFoundError, RuntimeError):
+            found["asr"] = None
+    _ocr_engine()
+    return found
+
+
 def _reference(payload: dict[str, Any]) -> str:
     for k in ("ref", "reservation_id", "order_id", "ticket_id", "visit_id", "event_id"):
         if payload.get(k):
@@ -305,14 +320,16 @@ class AgentRuntime:
     async def warmup(self) -> dict[str, Any]:
         """Warm deterministic code paths without network access.
 
-        Optional dense/ASR models are not downloaded.  A local ASR model is
-        loaded lazily only when an audio event actually requests it.
+        Recognizers that are *installed locally* are loaded here (the Theme 05
+        setup hook allows 300 s) so the first audio/frame turn does not pay
+        for it. Nothing is ever downloaded; see ``continuum fetch-models``.
         """
         probe = self.session("__warmup__")
         perceive_text("find flights to Delhi", self._version(probe))
         self.planner_for(probe)
         self._sessions.pop("__warmup__", None)
-        return {"ready": True, "offline": True, "tools": len(self.registry.all())}
+        found = await asyncio.to_thread(_warm_recognizers, self.asr_model_path)
+        return {"ready": True, "offline": True, "tools": len(self.registry.all()), "recognizers": found}
 
     async def wait_idle(self, session_id: str, timeout_s: float | None = None) -> bool:
         """Wait until the session has no live calls; return ``False`` on timeout."""
@@ -438,13 +455,21 @@ class AgentRuntime:
             return
         if event.type == EventType.AUDIO:
             if event.data:
-                perception = perceive_audio(
+                recognize = not event.text
+                if recognize:
+                    # ASR can take ~1 s on CPU: acknowledge now, recognise off-loop
+                    await self._emit(SpeakAction(text="Listening…"))
+                perception = await self._perceive(
+                    recognize,
+                    perceive_audio,
                     event.data,
                     self._version(s),
                     transcript=event.text,
                     confidence=event.confidence,
                     asr_model_path=self.asr_model_path,
                 )
+                await self._process_evidence(event.session_id, perception, acked=recognize)
+                return
             elif event.text:
                 perception = perceive_text(
                     event.text,
@@ -459,12 +484,19 @@ class AgentRuntime:
             return
         if event.type == EventType.FRAME:
             if event.data:
-                perception = perceive_frame(
+                recognize = not event.text
+                if recognize:
+                    await self._emit(SpeakAction(text="Looking at that…"))
+                perception = await self._perceive(
+                    recognize,
+                    perceive_frame,
                     event.data,
                     self._version(s),
                     text=event.text,
                     confidence=event.confidence,
                 )
+                await self._process_evidence(event.session_id, perception, acked=recognize)
+                return
             elif event.text:
                 # OCR text supplied by the organizer is grounded evidence even
                 # when the transport omits the original (large) frame bytes.
@@ -478,6 +510,14 @@ class AgentRuntime:
             else:
                 return
             await self._process_evidence(event.session_id, perception)
+
+    @staticmethod
+    async def _perceive(offload: bool, fn: Any, *args: Any, **kwargs: Any) -> Any:
+        """Run perception; model-backed recognition goes to a worker thread so
+        the event loop (fast ACKs, in-flight tools, cancels) never stalls."""
+        if offload:
+            return await asyncio.to_thread(fn, *args, **kwargs)
+        return fn(*args, **kwargs)
 
     def _version(self, s: _Session) -> int:
         cur = s.store.current()
@@ -500,9 +540,10 @@ class AgentRuntime:
             perceive_text(utterance.text, self._version(s)),
         )
 
-    async def _process_evidence(self, session_id: str, perception: Any) -> None:
+    async def _process_evidence(self, session_id: str, perception: Any, *, acked: bool = False) -> None:
         s = self.session(session_id)
-        await self._emit(SpeakAction(text=perception.fast_ack))
+        if not acked:
+            await self._emit(SpeakAction(text=perception.fast_ack))
         ambiguity = perception.render_provenance.get("ambiguous")
         if ambiguity:
             await self._emit(ClarifyAction(text=str(ambiguity)))

@@ -54,3 +54,26 @@ jobs:
           assert model.capabilities.audio_output
           print("FDB LiveKit/Gemini import contract passed")
           PY
+
+  multimodal:
+    # Real local ASR (faster-whisper) + OCR (RapidOCR) on the committed raw
+    # WAV/PNG fixtures; the default `test` job skips these without models.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install recognizers
+        run: python -m pip install --upgrade pip && python -m pip install -e '.[dev,multimodal]'
+      - name: Fetch ASR model (setup-time download only)
+        run: continuum fetch-models --asr base.en
+      - name: Real recognition tests (must not skip)
+        run: |
+          python -m pytest -q -rs tests/test_real_recognition.py | tee rec.txt
+          ! grep -q SKIPPED rec.txt
+      - name: Raw-media runtime evaluation
+        run: |
+          continuum eval-multimodal
+          grep -q '"skipped": false' reports/raw_media_eval.json

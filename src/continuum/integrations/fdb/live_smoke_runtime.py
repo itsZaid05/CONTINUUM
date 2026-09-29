@@ -109,13 +109,24 @@ class SubprocessWorker:
         if self._process.poll() is not None:
             return
         try:
-            os.killpg(self._process.pid, signal.SIGTERM)
+            self._signal_group(hard=False)
             await asyncio.to_thread(self._process.wait, 5)
         except subprocess.TimeoutExpired:
-            os.killpg(self._process.pid, signal.SIGKILL)
+            self._signal_group(hard=True)
             await asyncio.to_thread(self._process.wait, 5)
         except ProcessLookupError:
             return
+
+    def _signal_group(self, *, hard: bool) -> None:
+        # start_new_session=True puts the worker in its own process group on
+        # POSIX; killpg reaches its children too. Windows has no process
+        # groups/SIGKILL, so fall back to terminating the process itself.
+        if sys.platform != "win32":
+            os.killpg(self._process.pid, signal.SIGKILL if hard else signal.SIGTERM)
+        elif hard:
+            self._process.kill()
+        else:
+            self._process.terminate()
 
     def finish_log(self, secrets: tuple[str, ...]) -> None:
         if not self._log.closed:

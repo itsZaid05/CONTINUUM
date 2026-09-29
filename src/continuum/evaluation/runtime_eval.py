@@ -75,6 +75,26 @@ def _manifests(names: list[str]) -> list[ToolManifest]:
 # ---------------------------------------------------------------------------
 
 
+def add_noise(wav_bytes: bytes, snr_db: float, *, seed: int = 0) -> bytes:
+    """Deterministically mix white noise into 16-bit PCM WAV at ``snr_db``."""
+    import io
+    import wave
+
+    import numpy as np
+
+    with wave.open(io.BytesIO(wav_bytes)) as w:
+        params = w.getparams()
+        pcm = np.frombuffer(w.readframes(w.getnframes()), np.int16).astype(np.float64)
+    power = float(np.mean(pcm**2)) or 1.0
+    noise = np.random.default_rng(seed).normal(0.0, np.sqrt(power / 10 ** (snr_db / 10)), pcm.shape)
+    mixed = np.clip(pcm + noise, -32768, 32767).astype(np.int16)
+    out = io.BytesIO()
+    with wave.open(out, "wb") as w:
+        w.setparams(params)
+        w.writeframes(mixed.tobytes())
+    return out.getvalue()
+
+
 async def run_scenario(sc: dict[str, Any], *, time_scale: float = 0.1, **runtime_kwargs: Any) -> dict[str, Any]:
     faults = {k: FaultPlan(**v) for k, v in sc.get("faults", {}).items()}
     rt = AgentRuntime(tool_speed=time_scale, faults=faults, today=REF_DATE, **runtime_kwargs)
@@ -85,6 +105,8 @@ async def run_scenario(sc: dict[str, Any], *, time_scale: float = 0.1, **runtime
             actions.append(await rt.output_queue.get())
 
     pump_task = asyncio.create_task(pump())
+    if sc.get("warmup", True):
+        await rt.warmup()  # the setup hook: recognizers load here, not on the first turn
     loop = asyncio.get_running_loop()
     start = loop.time()
     manifests = _manifests(sc.get("manifests", ["builtin"]))
@@ -97,6 +119,10 @@ async def run_scenario(sc: dict[str, Any], *, time_scale: float = 0.1, **runtime
         data = ev.get("data")
         if isinstance(data, str):
             data = base64.b64decode(data)
+        if ev.get("data_file"):
+            data = Path(ev["data_file"]).read_bytes()
+            if ev.get("noise_snr_db") is not None:
+                data = add_noise(data, float(ev["noise_snr_db"]), seed=int(ev.get("noise_seed", 0)))
         await rt.handle(
             RuntimeEvent(
                 session_id=SESSION,

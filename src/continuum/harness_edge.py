@@ -370,7 +370,9 @@ async def serve_stdio(
             return
         async with write_lock:
             for action in actions:
-                sink.write(json.dumps(action, separators=(",", ":"), ensure_ascii=False) + "\n")
+                # ASCII-escaped JSON: "…"/"—" survive whatever encoding the harness
+                # reads our stdout with (raw UTF-8 arrived as "â€¦" on cp1252)
+                sink.write(json.dumps(action, separators=(",", ":"), ensure_ascii=True) + "\n")
             sink.flush()
 
     async def pump() -> None:

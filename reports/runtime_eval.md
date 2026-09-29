@@ -6,13 +6,13 @@ Suite `data/runtime_scenarios/text_suite.json` (18 text scenarios), time scale 0
 
 | System | Score | Task | Interrupt | Latency | Safety | Stale-action rate | Stale reruns | Dup. mutations | Regretted irreversible | Unneeded clarify | Tool calls | Pivot p50 / p95 ms | Ack p95 ms | Cancel p95 ms |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| continuum | **100.0** | 1.0 | 1.0 | 1.0 | 1.0 | 0.0 | 0 | 0 | 0 | 0.0 | 35 | 1.574 / 3.698 | 0.181 | 2.743 |
-| continuum+speculation | **100.0** | 1.0 | 1.0 | 1.0 | 1.0 | 0.0 | 0 | 0 | 0 | 0.0 | 34 | 1.434 / 2.336 | 0.14 | 2.108 |
-| naive_runtime | **54.65** | 0.1296 | 0.6991 | 1.0 | 1.0 | 0.0 | 0 | 0 | 0 | 0.2222 | 22 | 0.371 / 0.852 | 0.16 | None |
-| no_verify_after_timeout | **99.72** | 1.0 | 1.0 | 1.0 | 0.9722 | 0.0 | 0 | 1 | 0 | 0.0 | 36 | 1.062 / 1.276 | 0.136 | 1.139 |
-| no_selective_cancel | **98.7** | 1.0 | 0.963 | 1.0 | 1.0 | 0.0 | 0 | 0 | 0 | 0.0 | 37 | 1.104 / 1.742 | 0.134 | 1.546 |
-| no_read_retry | **97.78** | 0.9444 | 1.0 | 1.0 | 1.0 | 0.0 | 0 | 0 | 0 | 0.0 | 33 | 1.139 / 1.778 | 0.135 | 1.559 |
-| no_commit_gate | **96.67** | 0.9167 | 1.0 | 1.0 | 1.0 | 0.0 | 0 | 0 | 1 | 0.0 | 36 | 1.246 / 2.972 | 0.159 | 2.558 |
+| continuum | **100.0** | 1.0 | 1.0 | 1.0 | 1.0 | 0.0 | 0 | 0 | 0 | 0.0 | 35 | 1.967 / 6.534 | 0.203 | 3.541 |
+| continuum+speculation | **100.0** | 1.0 | 1.0 | 1.0 | 1.0 | 0.0 | 0 | 0 | 0 | 0.0 | 34 | 1.255 / 1.95 | 0.2 | 1.574 |
+| naive_runtime | **54.65** | 0.1296 | 0.6991 | 1.0 | 1.0 | 0.0 | 0 | 0 | 0 | 0.2222 | 22 | 0.341 / 0.577 | 0.138 | None |
+| no_verify_after_timeout | **99.72** | 1.0 | 1.0 | 1.0 | 0.9722 | 0.0 | 0 | 1 | 0 | 0.0 | 36 | 1.354 / 1.967 | 0.188 | 1.534 |
+| no_selective_cancel | **98.7** | 1.0 | 0.963 | 1.0 | 1.0 | 0.0 | 0 | 0 | 0 | 0.0 | 37 | 1.342 / 1.914 | 0.197 | 1.42 |
+| no_read_retry | **97.78** | 0.9444 | 1.0 | 1.0 | 1.0 | 0.0 | 0 | 0 | 0 | 0.0 | 33 | 0.916 / 1.577 | 0.199 | 1.314 |
+| no_commit_gate | **96.67** | 0.9167 | 1.0 | 1.0 | 1.0 | 0.0 | 0 | 0 | 1 | 0.0 | 36 | 1.384 / 1.769 | 0.177 | 1.389 |
 
 `continuum` = generic planner + reconcile/advance executor. `naive_runtime` = the runtime path before this work (first read-only tool, args copied from arbiter state, cancel everything on any change). Rows below the three systems are single-mechanism ablations of `continuum`.
 
@@ -50,4 +50,4 @@ Suite `data/runtime_scenarios/text_suite.json` (18 text scenarios), time scale 0
 
 ## Speculation (read-only shadows)
 
-Spawned 18, promoted 1 (reuse rate 0.056), discarded 17; tool latency hidden by promoted shadows 30.91 ms (scaled clock), shadow tool time wasted 1442.02 ms. Shadows are local and never emitted as harness tool calls, so they do not change the scored action stream; enable them only where the extra backend load is acceptable.
+Spawned 18, promoted 1 (reuse rate 0.056), discarded 17; tool latency hidden by promoted shadows 36.42 ms (scaled clock), shadow tool time wasted 1472.76 ms. Shadows are local and never emitted as harness tool calls, so they do not change the scored action stream; enable them only where the extra backend load is acceptable.

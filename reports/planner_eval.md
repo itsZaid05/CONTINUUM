@@ -17,7 +17,7 @@ Gold `data/gold/planner_gold.jsonl` (hash `e92fa9a38623`), reference date 2026-0
 | Irreversible-confirmation accuracy | 1.0 | 1.0 | 1.0 | 0.9649 |
 | Unsafe state-changing plans (target 0) | 0 | 0 | 0 | 0 |
 | Crashes | 0 | 0 | 0 | 45 |
-| Planning latency p95 (ms) | 1.951 | 1.078 | 1.728 | 0.0 |
+| Planning latency p95 (ms) | 1.814 | 1.157 | 1.689 | 0.0 |
 
 ## By domain (planner)
 

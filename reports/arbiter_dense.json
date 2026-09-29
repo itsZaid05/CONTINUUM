@@ -1,19 +1,19 @@
 {
   "total": 100,
-  "correct": 100,
-  "accuracy": 1.0,
-  "macro_f1": 1.0,
+  "correct": 98,
+  "accuracy": 0.98,
+  "macro_f1": 0.9802,
   "per_category": {
     "NEW_GOAL": {
       "precision": 1.0,
-      "recall": 1.0,
-      "f1": 1.0,
+      "recall": 0.95,
+      "f1": 0.974,
       "support": 20
     },
     "MODIFY": {
-      "precision": 1.0,
+      "precision": 0.909,
       "recall": 1.0,
-      "f1": 1.0,
+      "f1": 0.952,
       "support": 20
     },
     "ADD_CONSTRAINT": {
@@ -24,8 +24,8 @@
     },
     "RETRACT": {
       "precision": 1.0,
-      "recall": 1.0,
-      "f1": 1.0,
+      "recall": 0.95,
+      "f1": 0.974,
       "support": 20
     },
     "NOISE": {
@@ -37,8 +37,8 @@
   },
   "confusion": {
     "NEW_GOAL": {
-      "NEW_GOAL": 20,
-      "MODIFY": 0,
+      "NEW_GOAL": 19,
+      "MODIFY": 1,
       "ADD_CONSTRAINT": 0,
       "RETRACT": 0,
       "NOISE": 0
@@ -59,9 +59,9 @@
     },
     "RETRACT": {
       "NEW_GOAL": 0,
-      "MODIFY": 0,
+      "MODIFY": 1,
       "ADD_CONSTRAINT": 0,
-      "RETRACT": 20,
+      "RETRACT": 19,
       "NOISE": 0
     },
     "NOISE": {
@@ -72,10 +72,10 @@
       "NOISE": 20
     }
   },
-  "ece": 0.106,
+  "ece": 0.247,
   "ece_bins": 10,
-  "latency_p50_ms": 20.5,
-  "latency_p95_ms": 30.0,
+  "latency_p50_ms": 12.0,
+  "latency_p95_ms": 16.0,
   "model": "dense",
   "gold_hash": "b8920267657a"
 }

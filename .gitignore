@@ -51,3 +51,6 @@ credentials.json
 .artifacts/
 fdb_v3_data_released/
 outputs/fdb/
+
+# Locally fetched recognizer models (continuum fetch-models)
+models/
