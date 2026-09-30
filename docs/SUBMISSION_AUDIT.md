@@ -23,11 +23,18 @@ process-salted `hash()`.
 A follow-up runtime review found and corrected a functional FDB integration
 defect: the worker had a named LiveKit dispatch but the pinned, unmodified
 upstream inference client only creates/joins a new room and sends no named
-dispatch request. The worker and Phase 3 smoke backend now intentionally use
-LiveKit automatic dispatch. Regression tests assert the empty dispatch name and
-that the smoke room has no duplicate explicit agent dispatch. Use an isolated
-LiveKit project for official evaluation because automatic dispatch joins every
-new room in that project.
+dispatch request. The production FDB worker now intentionally uses automatic
+unnamed dispatch, so it must run in an isolated LiveKit project. The controlled
+Phase 3 smoke is deliberately separate: it starts a private named worker and
+includes exactly one matching explicit `RoomAgentDispatch` when it creates its
+room. Regression tests cover both dispatch modes.
+
+The live-worker entrypoint also now starts its session handlers and explicitly
+calls `JobContext.connect()` before it announces `session_listening`. Lifecycle
+telemetry distinguishes model construction, session startup, room connection,
+and sanitized failure type. This both fixes the missing participant-join call
+for the current LiveKit recipe and makes any subsequent external failure
+observable without recording credentials or provider exception text.
 
 ## Gates executed
 
@@ -132,6 +139,30 @@ any `.env` file from the build context. `make` now selects the project UV
 virtual environment rather than accidentally invoking an unrelated system
 Python after `uv sync`.
 
+### Post-audit Phase 3 lifecycle repair — 30 Sep 2026
+
+A subsequent manually dispatched Phase 3 run reached the worker entrypoint and
+initialized the configured Gemini model, but timed out before the worker joined
+its room. The worker now explicitly calls `JobContext.connect()` immediately
+after `AgentSession.start()`, before it emits `session_listening`. The lifecycle
+is unit-tested in that exact order. The smoke worker uses a private named
+dispatch with one matching RoomService dispatch, while the unmodified upstream
+FDB path remains automatic/unnamed.
+
+The same repair adds a deliberately narrow lifecycle summary to the sanitized
+smoke report and GitHub Actions failure annotation. It includes only fixed event
+names and, when applicable, an exception class name; it cannot include model
+text, endpoint URLs, worker-log text, or secret values. A new run will therefore
+distinguish session startup, connection, and post-join media failures directly
+from the Actions annotation.
+
+Post-repair local validation passed: **338 passed, 5 skipped** (the skips are
+local OCR/ASR model prerequisites), the focused FDB suite passed (**56 tests**),
+`make lint`, `uv lock --check`, `uv pip check`, isolated wheel/sdist build,
+workflow YAML/action-SHA checks, and repository integrity checks all passed.
+The credential-free Phase 3 command correctly reported
+`skipped_external_gate`; no credential value was read or emitted.
+
 ### Credential and live-service status
 
 No secret value was read, printed, stored, or passed on a command line. The
@@ -154,7 +185,7 @@ passing result is the last live-network gate.
 1. **CI — complete:** retain successful run `36716583044` as evidence of the
    locked Python, FDB-contract, OCR, and real-ASR lanes.
 2. **Phase 3 live smoke — owner action required:** manually dispatch the named
-   workflow on `arena/01a0f211-continuum`. If it fails, read the safe
+   workflow on `arena/01a0f2ba-continuum`. If it fails, read the safe
    `failure_stage` annotation and uploaded sanitized report, correct only that
    stage, and re-run until every report check is `true`.
 3. **Official FDB score — credentialed evaluation environment:** provide the

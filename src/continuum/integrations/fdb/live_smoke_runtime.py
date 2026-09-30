@@ -72,6 +72,12 @@ class RuntimeBackend(Protocol):
 WorkerFactory = Callable[[LiveSmokePaths], Worker]
 BackendFactory = Callable[[LiveSmokePaths], Awaitable[RuntimeBackend]]
 
+# The production FDB runner uses an unnamed worker because the unmodified
+# upstream inference client relies on automatic room dispatch. The live smoke
+# pre-creates a controlled room and therefore launches a separate, explicitly
+# named worker mode for its deterministic API dispatch.
+SMOKE_AGENT_NAME = "continuum-fdb-smoke"
+
 
 class SubprocessWorker:
     """Managed worker subprocess with bounded process-group teardown."""
@@ -90,6 +96,7 @@ class SubprocessWorker:
                 "FDB_TOOL_LOG_PATH": str(paths.official_tools),
                 "CONTINUUM_MEDIA_ARTIFACT_DIR": str(paths.provider_dir),
                 "CONTINUUM_VIDEO_ENABLED": "true",
+                "CONTINUUM_FDB_AGENT_NAME": SMOKE_AGENT_NAME,
             }
         )
         paths.worker_log.parent.mkdir(parents=True, exist_ok=True)
@@ -175,6 +182,34 @@ def _events(path: Path, room_name: str) -> list[dict[str, Any]]:
     return events
 
 
+_SAFE_LIFECYCLE_EVENTS = frozenset(
+    {
+        "session_initializing",
+        "session_starting",
+        "session_started",
+        "session_connecting",
+        "session_listening",
+        "session_start_failed",
+        "session_connect_failed",
+    }
+)
+
+
+def _lifecycle_summary(events: list[dict[str, Any]]) -> list[dict[str, str]]:
+    """Return only whitelisted agent lifecycle data for public smoke reports."""
+    summary: list[dict[str, str]] = []
+    for row in events:
+        name = row.get("event")
+        if name not in _SAFE_LIFECYCLE_EVENTS:
+            continue
+        item = {"event": str(name)}
+        error_type = row.get("error_type")
+        if isinstance(error_type, str):
+            item["error_type"] = error_type
+        summary.append(item)
+    return summary
+
+
 def _wav_metadata(path: Path) -> dict[str, Any] | None:
     if not path.exists() or path.stat().st_size <= 44:
         return None
@@ -235,6 +270,7 @@ def compute_checks(
         "remote_wav": remote,
         "provider_wav": str(provider_wavs[0]) if provider_wavs else None,
         "telemetry_event_count": len(events),
+        "lifecycle": _lifecycle_summary(events),
     }
 
 

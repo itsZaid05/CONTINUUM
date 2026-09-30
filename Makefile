@@ -1,15 +1,19 @@
 .PHONY: sync test baseline eval eval-b ablate demo kit lint replay help
 
-# Prefer a globally installed uv, but also work immediately after a local
-# ``.venv/bin/uv`` install. This prevents `make test`/`make lint` from silently
-# falling back to a system Python after `uv sync` created the project venv.
+# Prefer a globally installed uv. If uv created ``.venv`` but is no longer on
+# PATH (common in a fresh shell), use that environment directly rather than
+# silently falling back to an unrelated system Python.
 UV_BIN := $(firstword $(shell command -v uv 2>/dev/null) $(wildcard .venv/bin/uv))
-ifeq ($(UV_BIN),)
-PY ?= python3
-RUN :=
-else
+VENV_PY := $(wildcard .venv/bin/python)
+ifneq ($(UV_BIN),)
 PY ?= $(UV_BIN) run --frozen python
 RUN := $(UV_BIN) run --frozen
+else ifneq ($(VENV_PY),)
+PY ?= $(VENV_PY)
+RUN := $(VENV_PY) -m
+else
+PY ?= python3
+RUN :=
 endif
 
 help:
