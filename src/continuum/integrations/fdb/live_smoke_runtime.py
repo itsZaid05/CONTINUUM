@@ -268,6 +268,9 @@ async def run_live_smoke(
     remote: Pcm16WavRecorder | None = None
     worker_running = False
     error_type: str | None = None
+    # Keep the public failure report actionable without serializing exception
+    # text, which could contain transport URLs or provider diagnostics.
+    failure_stage = "worker_startup"
     secrets = tuple(
         os.getenv(name, "")
         for name in (
@@ -289,11 +292,16 @@ async def run_live_smoke(
                 raise RuntimeError("worker exited during startup")
             await asyncio.sleep(min(0.1, max(0.0, deadline - time.monotonic())))
         factory = backend_factory or production_backend
+        failure_stage = "backend_initialization"
         backend = await factory(paths)
         metadata = json.dumps({"scenario_id": "phase03-live-smoke"}, separators=(",", ":"))
+        failure_stage = "room_creation"
         await backend.create_room(room_name, metadata)
+        failure_stage = "caller_connection"
         await backend.connect_caller(room_name)
+        failure_stage = "agent_join"
         await backend.wait_for_agent(config.timeout_s)
+        failure_stage = "worker_health_before_media"
         if active_worker.poll() is not None:
             raise RuntimeError("worker exited before media publication")
         input_info = validate_pcm16_wav(config.input_wav)
@@ -302,12 +310,14 @@ async def run_live_smoke(
             sample_rate=input_info["sample_rate"],
             channels=input_info["channels"],
         )
+        failure_stage = "media_publication"
         await backend.publish_media(
             config.input_wav,
             remote,
             video_enabled=config.video_enabled,
             timeout_s=config.timeout_s,
         )
+        failure_stage = "capture_finalization"
         await asyncio.sleep(config.capture_tail_s)
         worker_running = active_worker.poll() is None
     except Exception as exc:  # safe report deliberately excludes exception text
@@ -340,6 +350,7 @@ async def run_live_smoke(
     report["status"] = "passed" if all(value is True for value in checks.values()) else "failed"
     if error_type:
         report["error_type"] = error_type
+        report["failure_stage"] = failure_stage
     return report
 
 

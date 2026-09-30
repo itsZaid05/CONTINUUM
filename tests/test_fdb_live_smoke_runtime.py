@@ -102,6 +102,7 @@ async def test_fake_happy_path_runs_complete_lifecycle(tmp_path):
 async def test_worker_early_exit_is_safe_failure(tmp_path):
     report, events = await execute(tmp_path, worker_exited=True)
     assert report["status"] == "failed" and report["error_type"] == "RuntimeError"
+    assert report["failure_stage"] == "worker_startup"
     assert "worker_stop" in events
 
 
@@ -109,6 +110,7 @@ async def test_worker_early_exit_is_safe_failure(tmp_path):
 async def test_agent_join_timeout_cleans_up(tmp_path):
     report, events = await execute(tmp_path, join=False)
     assert report["error_type"] == "TimeoutError"
+    assert report["failure_stage"] == "agent_join"
     assert "delete" in events and "worker_stop" in events
 
 
@@ -149,7 +151,9 @@ async def test_runtime_exception_reports_type_only(tmp_path, monkeypatch):
     monkeypatch.setenv("GOOGLE_API_KEY", "SECRET")
     report, _ = await execute(tmp_path, explode=True)
     encoded = json.dumps(report)
-    assert report["error_type"] == "ValueError" and "transport failure" not in encoded and "SECRET" not in encoded
+    assert report["error_type"] == "ValueError"
+    assert report["failure_stage"] == "media_publication"
+    assert "transport failure" not in encoded and "SECRET" not in encoded
 
 
 def test_worker_log_scrubs_all_secrets(tmp_path):

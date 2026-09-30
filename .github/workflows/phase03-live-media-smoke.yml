@@ -20,7 +20,7 @@ jobs:
           python-version: "3.11"
 
       - name: Install uv
-        uses: astral-sh/setup-uv@94527f2e458b27549849d47d273a16bec83a01e9
+        uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7
         with:
           enable-cache: true
 
@@ -82,6 +82,28 @@ jobs:
             --worker-startup-s 15 \
             --timeout-s 90
 
+      - name: Emit sanitized live-smoke failure annotation
+        if: failure()
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          path = Path("reports/phase03_live_smoke.json")
+          if not path.exists():
+              print("::error title=Phase 3 live smoke::No sanitized smoke report was written")
+              raise SystemExit(0)
+          report = json.loads(path.read_text())
+          failed = sorted(name for name, ok in report.get("checks", {}).items() if ok is not True)
+          fields = {
+              "status": report.get("status"),
+              "error_type": report.get("error_type"),
+              "failure_stage": report.get("failure_stage"),
+              "failed_checks": failed,
+          }
+          print("::error title=Phase 3 live smoke::" + json.dumps(fields, sort_keys=True))
+          PY
+
       - name: Enforce live smoke gate
         run: |
           python - <<'PY'
@@ -98,7 +120,7 @@ jobs:
 
       - name: Upload sanitized smoke evidence
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
         with:
           name: phase03-live-media-smoke-${{ github.run_id }}
           if-no-files-found: error

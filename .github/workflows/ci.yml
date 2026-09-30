@@ -15,39 +15,43 @@ jobs:
       matrix:
         python-version: ["3.10", "3.11", "3.12"]
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-python@v6
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
         with:
           python-version: ${{ matrix.python-version }}
-          cache: pip
-      - name: Install
-        run: python -m pip install --upgrade pip && python -m pip install -e '.[dev]'
+      - uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7
+        with:
+          enable-cache: true
+      - name: Install locked core environment
+        run: uv sync --frozen --extra dev
       - name: Test
-        run: python -m pytest -q
+        run: uv run python -m pytest -q
       - name: Ruff
-        run: ruff check src tests scripts backend examples
+        run: uv run ruff check src tests scripts backend examples
       - name: Mypy
         run: |
-          mypy src
-          mypy backend
+          uv run mypy src
+          uv run mypy backend
 
   fdb-edge:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-python@v6
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
         with:
           python-version: "3.11"
-          cache: pip
-      - name: Install LiveKit and Gemini edge
-        run: python -m pip install --upgrade pip && python -m pip install -e '.[dev,fdb]'
+      - uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7
+        with:
+          enable-cache: true
+      - name: Install locked LiveKit and Gemini edge
+        run: uv sync --frozen --extra dev --extra fdb
       - name: FDB bridge, dispatch, and provider contracts
-        run: python -m pytest -q tests/test_fdb_contracts.py tests/test_fdb_config.py tests/test_fdb_livekit_bridge.py tests/test_fdb_live_smoke_runtime.py
+        run: uv run python -m pytest -q tests/test_fdb_contracts.py tests/test_fdb_config.py tests/test_fdb_livekit_bridge.py tests/test_fdb_live_smoke_runtime.py
       - name: Optional edge import
         env:
           GOOGLE_API_KEY: contract-test-placeholder
         run: |
-          python - <<'PY'
+          uv run python - <<'PY'
           from continuum.integrations.fdb.agent import server
           from continuum.integrations.fdb.provider import GeminiNativeAudioProvider, NativeAudioConfig
 
@@ -62,22 +66,59 @@ jobs:
     # WAV/PNG fixtures; the default `test` job skips these without models.
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-python@v6
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
         with:
           python-version: "3.12"
-          cache: pip
+      - uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7
+        with:
+          enable-cache: true
       - name: Install Linux OCR runtime libraries
         run: sudo apt-get update && sudo apt-get install --yes libgl1 libglib2.0-0
-      - name: Install recognizers
-        run: python -m pip install --upgrade pip && python -m pip install -e '.[dev,multimodal]'
+      - name: Install locked recognizers
+        run: uv sync --frozen --extra dev --extra multimodal
       - name: Fetch ASR model (setup-time download only)
-        run: continuum fetch-models --asr base.en
+        run: uv run continuum fetch-models --asr base.en
       - name: Real recognition tests (must not skip)
         run: |
-          python -m pytest -q -rs tests/test_real_recognition.py | tee rec.txt
+          uv run python -m pytest -q -rs tests/test_real_recognition.py | tee rec.txt
           ! grep -q SKIPPED rec.txt
       - name: Raw-media runtime evaluation
         run: |
-          continuum eval-multimodal
+          set -o pipefail
+          uv run continuum eval-multimodal 2>&1 | tee raw-media-eval.log
           grep -q '"skipped": false' reports/raw_media_eval.json
+      - name: Emit sanitized raw-media failure annotation
+        if: failure()
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          path = Path("reports/raw_media_eval.json")
+          if not path.exists():
+              print("::error title=Raw-media evaluation::No report was written")
+              raise SystemExit(0)
+          report = json.loads(path.read_text())
+          summary = report.get("systems", {}).get("continuum", {}).get("summary", {})
+          fields = {
+              "skipped": report.get("skipped"),
+              "recognizers": report.get("recognizers"),
+              "mean_score": summary.get("mean_score"),
+              "scenario_count": summary.get("scenario_count"),
+          }
+          print("::error title=Raw-media evaluation::" + json.dumps(fields, sort_keys=True))
+          PY
+      - name: Upload raw-media evaluation diagnostics
+        if: always()
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
+        with:
+          name: multimodal-evaluation-${{ github.run_id }}
+          if-no-files-found: warn
+          retention-days: 14
+          path: |
+            raw-media-eval.log
+            reports/multimodal_eval.json
+            reports/multimodal_eval.md
+            reports/raw_media_eval.json
+            reports/raw_media_eval.md
