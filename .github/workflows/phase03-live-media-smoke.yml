@@ -95,11 +95,13 @@ jobs:
               raise SystemExit(0)
           report = json.loads(path.read_text())
           failed = sorted(name for name, ok in report.get("checks", {}).items() if ok is not True)
+          artifacts = report.get("artifacts")
           fields = {
               "status": report.get("status"),
               "error_type": report.get("error_type"),
               "failure_stage": report.get("failure_stage"),
               "failed_checks": failed,
+              "lifecycle": (artifacts or {}).get("lifecycle", []),
           }
           print("::error title=Phase 3 live smoke::" + json.dumps(fields, sort_keys=True))
           PY

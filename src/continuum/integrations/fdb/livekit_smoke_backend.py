@@ -15,7 +15,7 @@ from typing import Any
 from livekit import api as _livekit_api
 from livekit import rtc as _livekit_rtc
 
-from .live_smoke_runtime import LiveSmokePaths
+from .live_smoke_runtime import SMOKE_AGENT_NAME, LiveSmokePaths
 from .media import Pcm16WavRecorder
 
 api: Any = _livekit_api
@@ -78,15 +78,22 @@ class LiveKitSmokeBackend:
             self.remote_audio.set()
 
     async def create_room(self, room_name: str, metadata: str) -> None:
+        # RoomService creation never produces an automatic agent job, so the
+        # smoke worker is launched with the private dispatch name
+        # ``SMOKE_AGENT_NAME`` and requested here explicitly.  The unmodified
+        # upstream FDB path keeps using an unnamed, automatically dispatched
+        # worker; only this controlled room uses explicit dispatch.
         self.room_name = room_name
-        # An unnamed AgentServer is automatically dispatched when a participant
-        # creates a new room by joining it.  RoomService.create_room creates the
-        # room *without* that automatic job, which leaves the smoke caller
-        # waiting forever at ``wait_for_agent``.  Match the unmodified upstream
-        # inference client: defer creation until ``connect_caller`` joins this
-        # unique room. Automatic dispatch cannot receive metadata, so the smoke
-        # scenario identifier stays only in the local report.
-        del metadata
+        await self.api.room.create_room(
+            api.CreateRoomRequest(
+                name=room_name,
+                metadata=metadata,
+                empty_timeout=300,
+                departure_timeout=60,
+                max_participants=3,
+                agents=[api.RoomAgentDispatch(agent_name=SMOKE_AGENT_NAME, metadata=metadata)],
+            )
+        )
 
     async def connect_caller(self, room_name: str) -> None:
         token = (

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import time
 from collections.abc import AsyncIterable, AsyncIterator
 from pathlib import Path
@@ -122,14 +123,57 @@ class TelemetryVideoSampler:
         return sampled
 
 
-# Keep this unnamed deliberately.  The pinned upstream ``livekit_inference.py``
-# creates a fresh room and joins it as a participant, but does not issue a named
-# agent dispatch.  LiveKit automatically dispatches an unnamed AgentServer to
-# each new room; adding an ``agent_name`` here would make the official, otherwise
-# unmodified FDB inference runner wait forever for an agent that never joins.
-# Run this worker in a dedicated evaluation project because auto-dispatch joins
-# every newly-created room in that project.
-@server.rtc_session()
+# Keep the production worker unnamed deliberately. The pinned upstream
+# ``livekit_inference.py`` creates/joins rooms without named dispatches, so an
+# unnamed AgentServer receives automatic jobs. The Phase 3 smoke process sets a
+# private environment override before importing this module; it is then
+# explicitly dispatched to its pre-created room. Both modes share this exact
+# entrypoint and tool/runtime implementation.
+_dispatch_name = os.getenv("CONTINUUM_FDB_AGENT_NAME", "").strip()
+
+
+async def _start_session_and_connect(
+    ctx: agents.JobContext,
+    session: AgentSession[dict[str, Any]],
+    *,
+    agent: FdbVoiceAgent,
+    room_input_options: RoomInputOptions,
+    room_output_options: RoomOutputOptions,
+    telemetry: JsonlTelemetry,
+) -> None:
+    """Start room I/O before joining the assigned LiveKit room.
+
+    Keeping this small lifecycle boundary explicit protects the required order:
+    room handlers are installed by ``session.start`` before the worker connects,
+    so early caller tracks cannot be missed.  ``JobContext.connect`` is
+    idempotent in the pinned Agents release and is also required by newer
+    releases where session startup no longer joins automatically.
+    """
+    telemetry.emit("session_starting")
+    try:
+        await session.start(
+            room=ctx.room,
+            agent=agent,
+            room_input_options=room_input_options,
+            room_output_options=room_output_options,
+        )
+    except Exception as exc:
+        # Keep the Phase 3 report useful without serializing provider or
+        # transport exception text, which can contain sensitive endpoints.
+        telemetry.emit("session_start_failed", error_type=type(exc).__name__)
+        raise
+
+    telemetry.emit("session_started")
+    telemetry.emit("session_connecting")
+    try:
+        await ctx.connect()
+    except Exception as exc:
+        telemetry.emit("session_connect_failed", error_type=type(exc).__name__)
+        raise
+    telemetry.emit("session_listening")
+
+
+@server.rtc_session(agent_name=_dispatch_name)
 async def entrypoint(ctx: agents.JobContext) -> None:
     config = FdbAgentConfig.from_env()
     provider = selected_provider(config.provider)
@@ -142,8 +186,11 @@ async def entrypoint(ctx: agents.JobContext) -> None:
         official_path=config.official_tool_log_path,
     )
     telemetry.heartbeat()
+    # This records successful configuration/model construction only.  The
+    # separate lifecycle events below distinguish an initialization failure
+    # from session startup or room-join failures in sanitized smoke evidence.
     telemetry.emit(
-        "session_started",
+        "session_initializing",
         provider=provider.name,
         model=config.model,
         latency_profile=config.latency_profile,
@@ -188,8 +235,9 @@ async def entrypoint(ctx: agents.JobContext) -> None:
             telemetry.emit("media_artifact", **recorder.close())
 
     ctx.add_shutdown_callback(shutdown)
-    await session.start(
-        room=ctx.room,
+    await _start_session_and_connect(
+        ctx,
+        session,
         agent=FdbVoiceAgent(recorder, telemetry),
         room_input_options=RoomInputOptions(
             audio_enabled=True,
@@ -205,5 +253,5 @@ async def entrypoint(ctx: agents.JobContext) -> None:
             audio_sample_rate=config.media.output_sample_rate,
             audio_num_channels=config.media.output_channels,
         ),
+        telemetry=telemetry,
     )
-    telemetry.emit("session_listening")

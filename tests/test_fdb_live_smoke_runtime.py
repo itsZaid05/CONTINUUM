@@ -8,6 +8,7 @@ import pytest
 
 from continuum.integrations.fdb.live_smoke_runtime import (
     LiveSmokeRunConfig,
+    _lifecycle_summary,
     run_live_smoke,
     scrub_worker_log,
 )
@@ -156,6 +157,20 @@ async def test_runtime_exception_reports_type_only(tmp_path, monkeypatch):
     assert "transport failure" not in encoded and "SECRET" not in encoded
 
 
+def test_lifecycle_summary_whitelists_only_safe_startup_diagnostics():
+    events = [
+        {"event": "session_initializing", "model": "not-in-report"},
+        {"event": "session_start_failed", "error_type": "RuntimeError", "detail": "hidden"},
+        {"event": "livekit_error", "error_type": "ValueError", "url": "hidden"},
+        {"event": "session_connect_failed", "error_type": "TimeoutError"},
+    ]
+    assert _lifecycle_summary(events) == [
+        {"event": "session_initializing"},
+        {"event": "session_start_failed", "error_type": "RuntimeError"},
+        {"event": "session_connect_failed", "error_type": "TimeoutError"},
+    ]
+
+
 def test_worker_log_scrubs_all_secrets(tmp_path):
     path = tmp_path / "worker.log"; path.write_text("diag one two three four remains")
     scrub_worker_log(path, ("one", "two", "three", "four"))
@@ -170,20 +185,25 @@ def test_worker_argv_contains_no_credentials(tmp_path):
     assert not any("key" in arg.lower() or "secret" in arg.lower() for arg in worker.argv)
 
 
-def test_live_smoke_defers_room_creation_to_the_auto_dispatched_caller():
-    """RoomService creation does not generate an unnamed-agent job."""
+def test_live_smoke_explicitly_dispatches_its_named_worker():
+    """The pre-created smoke room must not rely on automatic dispatch."""
     pytest.importorskip("livekit")
     from types import SimpleNamespace
 
+    from continuum.integrations.fdb.live_smoke_runtime import SMOKE_AGENT_NAME
     from continuum.integrations.fdb.livekit_smoke_backend import LiveKitSmokeBackend
 
-    class RoomServiceMustNotBeCalled:
-        async def create_room(self, request):
-            del request
-            raise AssertionError("automatic dispatch requires caller-created room")
+    class FakeRoomService:
+        request = None
 
+        async def create_room(self, request):
+            self.request = request
+
+    service = FakeRoomService()
     backend = object.__new__(LiveKitSmokeBackend)
-    backend.api = SimpleNamespace(room=RoomServiceMustNotBeCalled())
+    backend.api = SimpleNamespace(room=service)
     asyncio.run(backend.create_room("phase03-room", '{"scenario_id":"phase03-live-smoke"}'))
 
     assert backend.room_name == "phase03-room"
+    assert service.request.name == "phase03-room"
+    assert [item.agent_name for item in service.request.agents] == [SMOKE_AGENT_NAME]

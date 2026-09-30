@@ -84,9 +84,11 @@ The worker intentionally uses **automatic LiveKit dispatch** (it has no named
 `livekit_inference.py` only creates/joins a new room and never sends a named
 agent-dispatch request. Use a dedicated LiveKit project for this benchmark:
 automatic dispatch joins the worker to every new room in that project. The
-Phase 3 media smoke likewise lets its caller join a new isolated room (rather
-than using RoomService creation, which does not create an automatic job) and
-relies on that same automatic dispatch.
+Phase 3 media smoke is intentionally different: it starts an isolated worker
+with the private dispatch name `continuum-fdb-smoke` and explicitly dispatches
+that worker when it creates its controlled room. This avoids relying on an
+automatic job for a RoomService-created room while leaving the official
+upstream-runner path unnamed and unmodified.
 
 ### One-command official reproduction
 
@@ -168,6 +170,15 @@ That command records `skipped_external_gate`; it is not a live pass. A credentia
 run must omit `--allow-skip`. Requested word timestamps and confidence remain null
 unless the provider exposes them. Provider-output and remotely received WAV files
 have distinct provenance. See `reports/phase03_media_audit.md`.
+
+Each live job writes a sanitized lifecycle trail:
+`session_initializing`, `session_starting`, `session_started`,
+`session_connecting`, and `session_listening`. `session_started` is emitted only
+after the room I/O session starts, while `session_listening` is emitted only
+after `JobContext.connect()` completes. Startup errors become either
+`session_start_failed` or `session_connect_failed` with an exception **type**
+only. This makes a Phase 3 `agent_join` timeout diagnosable without emitting
+provider diagnostics, endpoint URLs, or credential values.
 
 ## Honest boundary
 

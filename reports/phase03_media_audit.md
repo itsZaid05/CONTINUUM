@@ -29,7 +29,7 @@ milestone is claimed.
 
 The real orchestration runtime now creates an isolated run directory, starts the
 managed named worker without credentials in argv, creates a room with an explicit
-`continuum-fdb` dispatch, joins a least-privilege caller, publishes PCM16 microphone
+`continuum-fdb-smoke` dispatch, joins a least-privilege caller, publishes PCM16 microphone
 audio and deterministic RGBA camera frames, captures subscribed agent audio to a
 separate atomic WAV, and performs bounded teardown and log scrubbing. Required
 checks are derived only from the unique room's per-run files.
