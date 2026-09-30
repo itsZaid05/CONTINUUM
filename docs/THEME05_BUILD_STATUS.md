@@ -1,10 +1,16 @@
 # CONTINUUM — Theme 05 final build status
 
-> **Updated:** 29 Sep 2026 (specification audit below)
+> **Updated:** 30 Sep 2026 (follow-up release audit)
 >
-> **Verification:** 318 passed, 1 skipped (LiveKit bridge needs the optional `fdb` extra); Ruff and mypy clean (50 files); every source file statically needs ≤ Python 3.10; CI matrix 3.10–3.12 plus a real-recognition job
+> **Verification:** fresh locked core environment: **331 passed, 8 optional skips**;
+> FDB environment: **334 passed, 5 optional local-recognizer skips**; Ruff and
+> mypy clean (50 source files). See [`SUBMISSION_AUDIT.md`](SUBMISSION_AUDIT.md)
+> for exact commands, external gates, and the FDB dispatch repair.
 >
-> **Reproduce:** `make test && make lint && make eval-b`; real ASR/OCR: `pip install -e '.[multimodal]' && continuum fetch-models && continuum eval-multimodal`
+> **Reproduce:** `make test && make lint && make eval-b`; for real ASR/OCR on a
+> Linux host install `libgl1 libglib2.0-0`, then `pip install -e '.[multimodal]'`,
+> `continuum fetch-models`, and `continuum eval-multimodal`. The ASR download is
+> a one-time network setup step, never a request-time download.
 
 ## Specification audit — 29 Sep 2026
 
@@ -25,7 +31,7 @@ Every requirement of the Theme 05 guide and the updated specification's definiti
 | Fast path, no false completion, no excess fillers (guide §3.2.1) | ✅ | ACK p95 ≈ 0.03 ms even during ASR/OCR; finals only after accepted results; ~1 speak per turn |
 | Python 3.10–3.12, 120 s cap, 300 s warm-up (guide §6) | ✅ | `_compat` shims + vermin check; `kit --watchdog`; warm-up loads ASR/OCR from disk and reports them |
 | Session-scoped memory (guide §6) | ✅ | Per-session registry, sandbox, slots, speculator |
-| Docker / one-command run (spec §12) | ✅ *(not built here)* | Image installs `.[multimodal]` and fetches the ASR model at build time; Docker is not installed on the audit machine |
+| Docker / one-command run (spec §12) | ✅ *(not built here)* | Image installs `.[multimodal]` and its OpenCV system libraries; provide a pre-fetched `models/faster-whisper-*` directory at `/app/models` (or set `CONTINUUM_ASR_MODEL`) for raw-ASR runs. Docker is not available on the audit machine. |
 | 5-minute demo (spec §12) | ⬜ outside code | `docs/DEMO_SCRIPT.md`; recording is a team task |
 
 **Fixed in this audit:**

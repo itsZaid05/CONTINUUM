@@ -79,6 +79,14 @@ continuum-fdb-agent dev
 continuum-fdb-agent --latency normal start
 ```
 
+The worker intentionally uses **automatic LiveKit dispatch** (it has no named
+`agent_name`). This is required because the pinned, unmodified upstream
+`livekit_inference.py` only creates/joins a new room and never sends a named
+agent-dispatch request. Use a dedicated LiveKit project for this benchmark:
+automatic dispatch joins the worker to every new room in that project. The
+Phase 3 media smoke likewise creates one isolated room and relies on that same
+automatic dispatch, rather than creating a duplicate named session.
+
 ### One-command official reproduction
 
 With the released data directory and the five environment variables below,

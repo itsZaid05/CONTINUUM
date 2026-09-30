@@ -79,14 +79,17 @@ class LiveKitSmokeBackend:
 
     async def create_room(self, room_name: str, metadata: str) -> None:
         self.room_name = room_name
-        dispatch = api.RoomAgentDispatch(agent_name="continuum-fdb", metadata=metadata)
+        # The FDB worker intentionally has no dispatch name so it remains
+        # compatible with the unmodified upstream inference client, which only
+        # joins a newly-created room.  Creating the room is therefore enough to
+        # trigger LiveKit's automatic dispatch; an explicit dispatch here would
+        # start a duplicate agent session.
         await self.api.room.create_room(
             api.CreateRoomRequest(
                 name=room_name,
                 empty_timeout=60,
                 departure_timeout=30,
                 metadata=metadata,
-                agents=[dispatch],
             )
         )
 

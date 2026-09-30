@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import json
 import wave
 
@@ -163,3 +164,26 @@ def test_worker_argv_contains_no_credentials(tmp_path):
     paths = LiveSmokePaths(root, root/"t", root/"o", root/"w", root/"r.wav", provider)
     worker = FakeWorker(paths, events)
     assert not any("key" in arg.lower() or "secret" in arg.lower() for arg in worker.argv)
+
+
+def test_live_smoke_creates_room_without_a_second_named_dispatch():
+    """An unnamed worker auto-joins a new room, matching upstream inference."""
+    pytest.importorskip("livekit")
+    from types import SimpleNamespace
+
+    from continuum.integrations.fdb.livekit_smoke_backend import LiveKitSmokeBackend
+
+    class FakeRoomService:
+        request = None
+
+        async def create_room(self, request):
+            self.request = request
+
+    service = FakeRoomService()
+    backend = object.__new__(LiveKitSmokeBackend)
+    backend.api = SimpleNamespace(room=service)
+    asyncio.run(backend.create_room("phase03-room", '{"scenario_id":"phase03-live-smoke"}'))
+
+    assert backend.room_name == "phase03-room"
+    assert service.request.name == "phase03-room"
+    assert list(service.request.agents) == []

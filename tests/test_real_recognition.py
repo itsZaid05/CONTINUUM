@@ -26,7 +26,10 @@ MEDIA = Path("data/media")
 HAVE_ASR = perception.recognizers()["asr"] is not None
 HAVE_OCR = perception.recognizers()["ocr"] is not None
 needs_asr = pytest.mark.skipif(not HAVE_ASR, reason="no local faster-whisper model (continuum fetch-models)")
-needs_ocr = pytest.mark.skipif(not HAVE_OCR, reason="RapidOCR not installed (.[vision])")
+needs_ocr = pytest.mark.skipif(
+    not HAVE_OCR,
+    reason="RapidOCR unavailable (install .[vision]; Linux hosts also need libGL1)",
+)
 
 
 def _seg(words: list[float], no_speech: float = 0.0, avg_logprob: float = -0.4) -> SimpleNamespace:

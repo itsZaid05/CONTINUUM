@@ -93,7 +93,7 @@ git clone https://github.com/itsZaid05/CONTINUUM.git && cd CONTINUUM
 pip install --break-system-packages -e ".[dev]"   # or: uv sync --extra dev
 
 # 1) tests + lint + mypy (offline-fake deterministic, LLM adapters env-gated)
-python -m pytest -q                  # 331 passed, 6 optional-media skips (Python 3.11 audit)
+python -m pytest -q                  # 331 passed, 8 optional-dependency/media skips (Python 3.11 audit)
 ruff check src tests scripts backend examples # All checks passed!
 python -m mypy src && python -m mypy backend  # Success: no issues found
 
@@ -120,6 +120,39 @@ python -m continuum.cli replay data/scenarios/delhi_bangalore.json --trace | tai
 python -m continuum.cli replay data/scenarios/delhi_bangalore.json --backend gemini --trace | tail -n 50  # same logic, latency tag differs
 python examples/quickstart.py   # 7 steps + backend table + prompt preview
 ```
+
+### Optional real local ASR/OCR
+
+The deterministic submission harness does not need media-model downloads. To
+exercise the raw WAV/frame recognizers on Linux instead, install the optional
+extra and the OpenCV shared libraries (the supplied Docker image installs these
+libraries already):
+
+```bash
+# Debian/Ubuntu host only; omit if libGL1 is already present.
+sudo apt-get install -y libgl1 libglib2.0-0
+uv sync --frozen --extra dev --extra multimodal
+continuum fetch-models --asr base.en  # one-time download; needs Hugging Face access
+python -m pytest -q -rs tests/test_real_recognition.py
+continuum eval-multimodal
+```
+
+`rapidocr-onnxruntime` declares GUI OpenCV upstream, so a headless Linux host
+needs `libGL1` even though CONTINUUM does not create display windows. The ASR
+model is deliberately never fetched on a request path.
+
+To use the supplied container for raw ASR, prefetch the model on a networked
+machine and mount it read-only; the image already contains the OpenCV system
+libraries:
+
+```bash
+docker build -t continuum .
+docker run --rm -i -v "$PWD/models:/app/models:ro" continuum < events.jsonl
+```
+
+The container's default command is `continuum kit`. It remains usable for text
+runs without a model mount; audio input reports the documented unavailable-model
+condition rather than downloading at runtime.
 
 ### FDB-v3 LiveKit + Gemini native audio
 
