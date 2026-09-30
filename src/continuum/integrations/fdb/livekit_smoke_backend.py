@@ -8,10 +8,18 @@ import wave
 from datetime import timedelta
 from typing import Any
 
-from livekit import api, rtc
+# The LiveKit wheels expose these dynamically from extension modules, while
+# their partial type stubs omit several runtime members used by this adapter.
+# Contain that untyped SDK boundary here; the rest of the smoke runtime keeps
+# its regular protocol-checked interface.
+from livekit import api as _livekit_api
+from livekit import rtc as _livekit_rtc
 
 from .live_smoke_runtime import LiveSmokePaths
 from .media import Pcm16WavRecorder
+
+api: Any = _livekit_api
+rtc: Any = _livekit_rtc
 
 
 class LiveKitSmokeBackend:
@@ -71,16 +79,14 @@ class LiveKitSmokeBackend:
 
     async def create_room(self, room_name: str, metadata: str) -> None:
         self.room_name = room_name
-        dispatch = api.RoomAgentDispatch(agent_name="continuum-fdb", metadata=metadata)
-        await self.api.room.create_room(
-            api.CreateRoomRequest(
-                name=room_name,
-                empty_timeout=60,
-                departure_timeout=30,
-                metadata=metadata,
-                agents=[dispatch],
-            )
-        )
+        # An unnamed AgentServer is automatically dispatched when a participant
+        # creates a new room by joining it.  RoomService.create_room creates the
+        # room *without* that automatic job, which leaves the smoke caller
+        # waiting forever at ``wait_for_agent``.  Match the unmodified upstream
+        # inference client: defer creation until ``connect_caller`` joins this
+        # unique room. Automatic dispatch cannot receive metadata, so the smoke
+        # scenario identifier stays only in the local report.
+        del metadata
 
     async def connect_caller(self, room_name: str) -> None:
         token = (

@@ -33,9 +33,11 @@ uv sync --frozen --extra dev --extra fdb
 # python -m pip install -e '.[dev,fdb]'
 ```
 
-The lock pins LiveKit Agents 1.3.x and compatible 1.3.x Google/OpenAI/Silero
-plugins. Pinning the Google plugin explicitly avoids a known cross-minor import
-mismatch while retaining the official FDB `~1.3` API line.
+The lock pins LiveKit Agents **1.3.11**, Google **1.3.12**, and compatible
+OpenAI/Silero **1.3.11** plugins. Pinning the Google plugin explicitly avoids a
+cross-minor import mismatch while retaining the official FDB `~1.3` API line.
+The FDB extra also pins the OpenTelemetry 1.39.1 family: newer releases remove
+the `LogData` import still used by this LiveKit Agents release.
 
 ## Environment
 
@@ -77,18 +79,39 @@ continuum-fdb-agent dev
 continuum-fdb-agent --latency normal start
 ```
 
-Then run upstream's released batch command in its checkout, unchanged apart
-from selecting Gemini and the data path:
+The worker intentionally uses **automatic LiveKit dispatch** (it has no named
+`agent_name`). This is required because the pinned, unmodified upstream
+`livekit_inference.py` only creates/joins a new room and never sends a named
+agent-dispatch request. Use a dedicated LiveKit project for this benchmark:
+automatic dispatch joins the worker to every new room in that project. The
+Phase 3 media smoke likewise lets its caller join a new isolated room (rather
+than using RoomService creation, which does not create an automatic job) and
+relies on that same automatic dispatch.
+
+### One-command official reproduction
+
+With the released data directory and the five environment variables below,
+this is the single submission command:
 
 ```bash
-# This wrapper verifies the pinned source and delegates to the unmodified script:
-scripts/run_fdb_benchmark.sh /path/to/fdb_v3_data_released
+export LIVEKIT_URL=... LIVEKIT_API_KEY=... LIVEKIT_API_SECRET=...
+export GOOGLE_API_KEY=... OPENAI_API_KEY=...  # OpenAI key is the upstream LLM judge
+scripts/reproduce_fdb_v3.sh /path/to/fdb_v3_data_released
+```
 
-# Equivalent upstream command:
-cd .artifacts/Full-Duplex-Bench/v3
-python run_tool_benchmark_all_released.py \
-  --provider gemini2_5 \
-  --root_dir /path/to/fdb_v3_data_released
+It uses `uv sync --frozen --extra dev --extra fdb --extra fdb-eval`, fetches and
+audits the pinned upstream source, starts the CONTINUUM worker, runs every
+recording through the **unmodified** upstream inference script, then invokes the
+upstream tool-accuracy, strict-pass-rate, and latency evaluators with `--use-llm`.
+Machine-readable reports, worker log, telemetry, and official-shaped tool log
+are written beneath `reports/fdb-v3/<UTC-run-id>/`. Pass `--force` to overwrite
+existing `result_gemini2_5.json` files; `--skip-sync` is useful only after the
+locked environment has already been installed.
+
+For a manually managed worker, the lower-level runner remains available:
+
+```bash
+scripts/run_fdb_benchmark.sh /path/to/fdb_v3_data_released
 ```
 
 The upstream runner reads `/tmp/agent_tool_calls.log` using the exact official

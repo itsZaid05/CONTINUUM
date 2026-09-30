@@ -1,11 +1,20 @@
 .PHONY: sync test baseline eval eval-b ablate demo kit lint replay help
 
-PY=python3
-UV=uv
+# Prefer a globally installed uv, but also work immediately after a local
+# ``.venv/bin/uv`` install. This prevents `make test`/`make lint` from silently
+# falling back to a system Python after `uv sync` created the project venv.
+UV_BIN := $(firstword $(shell command -v uv 2>/dev/null) $(wildcard .venv/bin/uv))
+ifeq ($(UV_BIN),)
+PY ?= python3
+RUN :=
+else
+PY ?= $(UV_BIN) run --frozen python
+RUN := $(UV_BIN) run --frozen
+endif
 
 help:
 	@echo "CONTINUUM — Make targets"
-	@echo "  make sync        — install deps (uv sync --extra dev, fallback pip)"
+	@echo "  make sync        — install locked dev deps (uv sync --frozen --extra dev, fallback pip)"
 	@echo "  make test        — run all tests (offline-fake, deterministic)"
 	@echo "  make baseline    — reproduce baseline vs CONTINUUM comparison"
 	@echo "  make eval        — full evaluation (arbiter accuracy, shadow, comparison)"
@@ -16,8 +25,8 @@ help:
 	@echo "  make lint        — ruff + mypy"
 
 sync:
-	@if command -v uv >/dev/null 2>&1; then \
-		uv sync --extra dev; \
+	@if [ -n "$(UV_BIN)" ]; then \
+		$(UV_BIN) sync --frozen --extra dev; \
 	else \
 		$(PY) -m pip install -e ".[dev]"; \
 	fi
@@ -57,8 +66,9 @@ demo:
 	$(PY) -m uvicorn continuum.api:app --host 0.0.0.0 --port 8000 --reload || $(PY) -m continuum.cli serve --host 0.0.0.0 --port 8000
 
 lint:
-	ruff check src tests scripts
-	mypy src
+	$(RUN) ruff check src tests scripts backend examples
+	$(RUN) mypy src
+	$(RUN) mypy backend
 
 ablate:
 	$(PY) -m continuum.cli ablate || echo "ablate not yet"

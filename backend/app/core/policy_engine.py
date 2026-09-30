@@ -3,18 +3,21 @@ CONTINUUM Policy Engine
 Enforces Deterministic Safety Invariants & Decision Matrix:
 IRREVERSIBLE execution requires Auth == EXPLICIT AND IVS < 0.6; otherwise system must ASK or BLOCK.
 """
+
 from typing import Literal
-from backend.app.models.schemas import RiskTier, AuthorizationType
+
+from backend.app.models.schemas import AuthorizationType
 from backend.app.tools.registry import get_authoritative_risk
 
 PolicyDecision = Literal[
-    "EXECUTE",          # Safe to run immediately
+    "EXECUTE",  # Safe to run immediately
     "EXECUTE_PRIMARY",  # Safe for primary, but don't run shadow
-    "STAGE",            # Create draft / hold with rollback option
-    "HOLD",             # Delay execution until user stability increases
-    "ASK",              # Prompt user for explicit confirmation
-    "BLOCK"             # Strictly forbid autonomous execution
+    "STAGE",  # Create draft / hold with rollback option
+    "HOLD",  # Delay execution until user stability increases
+    "ASK",  # Prompt user for explicit confirmation
+    "BLOCK",  # Strictly forbid autonomous execution
 ]
+
 
 class PolicyEngine:
     def evaluate(
@@ -22,7 +25,7 @@ class PolicyEngine:
         tool_name: str,
         ivs_score: float,
         authorization: AuthorizationType,
-        is_shadow: bool = False
+        is_shadow: bool = False,
     ) -> PolicyDecision:
         """
         Evaluates tool execution against Risk + IVS + Auth policy matrix.
@@ -72,5 +75,6 @@ class PolicyEngine:
                 return "ASK"
 
         return "ASK"
+
 
 policy_engine = PolicyEngine()

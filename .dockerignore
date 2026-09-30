@@ -1,0 +1,17 @@
+# Use an allow-list so local credentials, virtual environments, downloaded
+# models, benchmark artifacts, and unrelated build products never enter the
+# Docker build context.
+**
+
+!Dockerfile
+!.dockerignore
+!pyproject.toml
+!uv.lock
+!README.md
+!LICENSE
+!src/
+!src/**
+!backend/
+!backend/**
+!data/
+!data/**

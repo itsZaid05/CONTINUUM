@@ -2,35 +2,39 @@
 CONTINUUM Provenance DAG Engine
 Manages execution nodes, dependency resolution, and surgical invalidation upon user interrupt.
 """
-from typing import Dict, List, Set, Any, Optional
-from dataclasses import dataclass, field
+
 import time
+from dataclasses import dataclass, field
+from typing import Any
+
 from backend.app.models.schemas import NodeStatus, RiskTier
+
 
 @dataclass
 class DAGNode:
     step_id: str
     tool: str
-    params: Dict[str, Any]
+    params: dict[str, Any]
     risk: RiskTier = "FREE"
-    depends_on: List[str] = field(default_factory=list)
+    depends_on: list[str] = field(default_factory=list)
     status: NodeStatus = "CREATED"
     base_version: int = 1
-    output: Optional[Any] = None
-    error: Optional[str] = None
+    output: Any | None = None
+    error: str | None = None
     created_at_ms: float = field(default_factory=lambda: time.time() * 1000)
-    started_at_ms: Optional[float] = None
-    completed_at_ms: Optional[float] = None
+    started_at_ms: float | None = None
+    completed_at_ms: float | None = None
     is_shadow: bool = False
-    branch_id: Optional[str] = None
+    branch_id: str | None = None
+
 
 class ProvenanceDAG:
     def __init__(self, session_id: str):
         self.session_id = session_id
-        self.nodes: Dict[str, DAGNode] = {}
+        self.nodes: dict[str, DAGNode] = {}
         # Adjacency lists for dependency resolution
-        self.children: Dict[str, Set[str]] = {}  # parent -> set of children who depend on parent
-        self.parents: Dict[str, Set[str]] = {}   # child -> set of parents it depends on
+        self.children: dict[str, set[str]] = {}  # parent -> set of children who depend on parent
+        self.parents: dict[str, set[str]] = {}  # child -> set of parents it depends on
 
     def add_node(self, node: DAGNode):
         self.nodes[node.step_id] = node
@@ -45,27 +49,25 @@ class ProvenanceDAG:
             self.children[parent_id].add(node.step_id)
             self.parents[node.step_id].add(parent_id)
 
-    def get_node(self, step_id: str) -> Optional[DAGNode]:
+    def get_node(self, step_id: str) -> DAGNode | None:
         return self.nodes.get(step_id)
 
-    def get_ready_nodes(self) -> List[DAGNode]:
+    def get_ready_nodes(self) -> list[DAGNode]:
         """
         Returns nodes that are in CREATED / SHADOW state and whose parents are all COMPLETED.
         """
         ready = []
-        for step_id, node in self.nodes.items():
+        for _step_id, node in self.nodes.items():
             if node.status in ["CREATED", "SHADOW"]:
                 # Check if all dependencies are COMPLETED
                 parents_done = all(
-                    self.nodes[p].status == "COMPLETED" 
-                    for p in node.depends_on 
-                    if p in self.nodes
+                    self.nodes[p].status == "COMPLETED" for p in node.depends_on if p in self.nodes
                 )
                 if parents_done:
                     ready.append(node)
         return ready
 
-    def find_downstream_dependents(self, step_id: str) -> Set[str]:
+    def find_downstream_dependents(self, step_id: str) -> set[str]:
         """
         Finds all transitive child nodes that depend on this step_id.
         """
@@ -79,7 +81,7 @@ class ProvenanceDAG:
                     stack.append(child)
         return visited
 
-    def surgically_invalidate(self, changed_fields: List[str], new_version: int) -> Set[str]:
+    def surgically_invalidate(self, changed_fields: list[str], new_version: int) -> set[str]:
         """
         Surgical Invalidation Invariant:
         When inputs change, identifies affected nodes, marks them and their downstream
@@ -87,13 +89,15 @@ class ProvenanceDAG:
         Latency target: <15ms
         """
         invalidated_steps = set()
-        
+
         # 1. Identify direct nodes affected by changed parameters
         for step_id, node in self.nodes.items():
             if node.status in ["COMPLETED", "RUNNING", "CREATED", "SHADOW"]:
                 # Check if node params contain changed fields
                 for field_name in changed_fields:
-                    if field_name in node.params or any(field_name in str(v) for v in node.params.values()):
+                    if field_name in node.params or any(
+                        field_name in str(v) for v in node.params.values()
+                    ):
                         invalidated_steps.add(step_id)
                         break
 
@@ -110,7 +114,7 @@ class ProvenanceDAG:
 
         return all_to_invalidate
 
-    def prune_retracted_nodes(self, retracted_tools: List[str]) -> Set[str]:
+    def prune_retracted_nodes(self, retracted_tools: list[str]) -> set[str]:
         """
         Prunes nodes matching retracted tools (e.g. 'confirm_booking', 'payment')
         """
@@ -124,7 +128,7 @@ class ProvenanceDAG:
                     pruned.add(child)
         return pruned
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "session_id": self.session_id,
             "nodes": {
@@ -138,7 +142,8 @@ class ProvenanceDAG:
                     "base_version": v.base_version,
                     "is_shadow": v.is_shadow,
                     "output": v.output,
-                    "error": v.error
-                } for k, v in self.nodes.items()
-            }
+                    "error": v.error,
+                }
+                for k, v in self.nodes.items()
+            },
         }

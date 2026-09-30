@@ -122,7 +122,14 @@ class TelemetryVideoSampler:
         return sampled
 
 
-@server.rtc_session(agent_name="continuum-fdb")
+# Keep this unnamed deliberately.  The pinned upstream ``livekit_inference.py``
+# creates a fresh room and joins it as a participant, but does not issue a named
+# agent dispatch.  LiveKit automatically dispatches an unnamed AgentServer to
+# each new room; adding an ``agent_name`` here would make the official, otherwise
+# unmodified FDB inference runner wait forever for an agent that never joins.
+# Run this worker in a dedicated evaluation project because auto-dispatch joins
+# every newly-created room in that project.
+@server.rtc_session()
 async def entrypoint(ctx: agents.JobContext) -> None:
     config = FdbAgentConfig.from_env()
     provider = selected_provider(config.provider)

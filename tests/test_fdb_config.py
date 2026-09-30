@@ -30,3 +30,13 @@ def test_livekit_preflight_names_missing_variables_without_values(
 def test_unknown_provider_is_rejected() -> None:
     with pytest.raises(ProviderConfigurationError, match="unsupported"):
         selected_provider("invented")
+
+
+def test_fdb_agent_uses_automatic_dispatch_for_the_upstream_runner() -> None:
+    """The upstream client joins rooms but does not create a named dispatch."""
+    pytest.importorskip("livekit.agents")
+    from continuum.integrations.fdb.agent import server
+
+    # The LiveKit SDK stores the decorator's public ``agent_name`` option here.
+    # An empty name is the documented automatic-dispatch mode.
+    assert server._agent_name == ""  # type: ignore[attr-defined]

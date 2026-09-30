@@ -3,13 +3,16 @@ CONTINUUM Two-Phase Effect Ledger & Idempotency Engine
 Lifecycle: INTENT -> PENDING -> [External Verification] -> COMMITTED | NOT_COMMITTED
 Timeout path: PENDING -> UNKNOWN -> [verify_effect()] -> COMMITTED | NOT_COMMITTED
 """
+
 import hashlib
 import json
-import uuid
 import time
-from typing import Dict, Optional, Any
+import uuid
 from dataclasses import dataclass, field
+from typing import Any
+
 from backend.app.models.schemas import EffectStatus
+
 
 @dataclass
 class EffectRecord:
@@ -19,26 +22,23 @@ class EffectRecord:
     event_id: str
     step_id: str
     tool_name: str
-    params: Dict[str, Any]
+    params: dict[str, Any]
     status: EffectStatus = "INTENT"
-    external_operation_id: Optional[str] = None
+    external_operation_id: str | None = None
     created_at_ms: float = field(default_factory=lambda: time.time() * 1000)
     updated_at_ms: float = field(default_factory=lambda: time.time() * 1000)
-    result_data: Optional[Dict[str, Any]] = None
+    result_data: dict[str, Any] | None = None
+
 
 class EffectLedger:
     def __init__(self):
         # Maps effect_id -> EffectRecord
-        self.effects: Dict[str, EffectRecord] = {}
+        self.effects: dict[str, EffectRecord] = {}
         # Maps idempotency_key -> effect_id (for deduplication)
-        self.idempotency_index: Dict[str, str] = {}
+        self.idempotency_index: dict[str, str] = {}
 
     def compute_idempotency_key(
-        self,
-        session_id: str,
-        event_id: str,
-        step_id: str,
-        params: Dict[str, Any]
+        self, session_id: str, event_id: str, step_id: str, params: dict[str, Any]
     ) -> str:
         """
         Computes deterministic idempotency key = hash(session, event, step, params)
@@ -47,15 +47,10 @@ class EffectLedger:
         return f"idemp_{hashlib.sha256(raw_str.encode('utf-8')).hexdigest()[:12]}"
 
     def create_intent(
-        self,
-        session_id: str,
-        event_id: str,
-        step_id: str,
-        tool_name: str,
-        params: Dict[str, Any]
+        self, session_id: str, event_id: str, step_id: str, tool_name: str, params: dict[str, Any]
     ) -> EffectRecord:
         idemp_key = self.compute_idempotency_key(session_id, event_id, step_id, params)
-        
+
         # Check if already exists in index
         if idemp_key in self.idempotency_index:
             existing_id = self.idempotency_index[idemp_key]
@@ -70,7 +65,7 @@ class EffectLedger:
             step_id=step_id,
             tool_name=tool_name,
             params=params,
-            status="INTENT"
+            status="INTENT",
         )
         self.effects[effect_id] = record
         self.idempotency_index[idemp_key] = effect_id
@@ -83,10 +78,7 @@ class EffectLedger:
         return record
 
     def transition_to_committed(
-        self,
-        effect_id: str,
-        external_operation_id: str,
-        result_data: Optional[Dict[str, Any]] = None
+        self, effect_id: str, external_operation_id: str, result_data: dict[str, Any] | None = None
     ) -> EffectRecord:
         record = self.effects[effect_id]
         record.status = "COMMITTED"
@@ -107,13 +99,15 @@ class EffectLedger:
         record.updated_at_ms = time.time() * 1000
         return record
 
-    def get_by_effect_id(self, effect_id: str) -> Optional[EffectRecord]:
+    def get_by_effect_id(self, effect_id: str) -> EffectRecord | None:
         return self.effects.get(effect_id)
 
     def get_committed_effects_for_session(self, session_id: str) -> list[EffectRecord]:
         return [
-            eff for eff in self.effects.values() 
+            eff
+            for eff in self.effects.values()
             if eff.session_id == session_id and eff.status == "COMMITTED"
         ]
+
 
 effect_ledger = EffectLedger()

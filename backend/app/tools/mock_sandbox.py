@@ -1,14 +1,27 @@
-import os
 import asyncio
+import hashlib
+import os
 import uuid
-from typing import Dict, Any, Optional
+from typing import Any
+
 import httpx
 from dotenv import load_dotenv
 
 load_dotenv()
 
 
-async def call_gemini_qa(prompt: str) -> Optional[str]:
+def _stable_mod(value: str, modulus: int) -> int:
+    """Return a process-independent pseudo-random-looking integer.
+
+    Python's built-in ``hash`` is intentionally salted per process, which made
+    demo flight prices and identifiers vary across otherwise identical runs.
+    """
+    if modulus <= 0:
+        raise ValueError("modulus must be positive")
+    return int.from_bytes(hashlib.sha256(value.encode("utf-8")).digest()[:8], "big") % modulus
+
+
+async def call_gemini_qa(prompt: str) -> str | None:
     key = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY") or ""
     if not key:
         return None
@@ -18,11 +31,16 @@ async def call_gemini_qa(prompt: str) -> Optional[str]:
         "gemini-flash-latest",
         "gemini-3.5-flash",
         "gemini-3.7-flash",
-        "gemini-3.8-flash"
+        "gemini-3.8-flash",
     ]
-    # Deduplicate while preserving order
-    seen = set()
-    models = [m for m in models_to_try if m and not (m in seen or seen.add(m))]
+    # Deduplicate while preserving order. Avoid a side-effecting comprehension:
+    # ``set.add`` returns ``None`` and obscures the intended boolean logic.
+    seen: set[str] = set()
+    models: list[str] = []
+    for model in models_to_try:
+        if model and model not in seen:
+            seen.add(model)
+            models.append(model)
 
     system_instruction = (
         "You are CONTINUUM, an intelligent real-time conversational and lifestyle assistant. "
@@ -33,9 +51,9 @@ async def call_gemini_qa(prompt: str) -> Optional[str]:
     payload = {
         "systemInstruction": {"parts": [{"text": system_instruction}]},
         "contents": [{"parts": [{"text": prompt}]}],
-        "generationConfig": {"temperature": 0.3, "maxOutputTokens": 400}
+        "generationConfig": {"temperature": 0.3, "maxOutputTokens": 400},
     }
-    
+
     for model in models:
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={key}"
         try:
@@ -58,14 +76,14 @@ class MockToolSandbox:
     def __init__(self, speedup: float = 1.0):
         self.speedup = speedup  # Set > 1.0 for fast test suites
 
-    async def search_flights(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def search_flights(self, params: dict[str, Any]) -> dict[str, Any]:
         origin = params.get("from", "Delhi")
         dest = params.get("to", "Bangalore")
         slot = params.get("slot", "morning")
         date = params.get("date", "tomorrow")
         orig_code = origin[:3].upper() if len(origin) >= 3 else "DEL"
         dest_code = dest[:3].upper() if len(dest) >= 3 else "BLR"
-        base_price = 4500 + (abs(hash(dest)) % 1500)
+        base_price = 4500 + _stable_mod(dest, 1500)
 
         # 5.0-second delay — provides comfortable window for live interruption demonstration
         await asyncio.sleep(5.0 / self.speedup)
@@ -74,7 +92,7 @@ class MockToolSandbox:
             {
                 "flight_id": f"6E_{orig_code}{dest_code}_401",
                 "airline": "IndiGo",
-                "flight_number": f"6E-{abs(hash(dest)) % 700 + 100}",
+                "flight_number": f"6E-{_stable_mod(dest, 700) + 100}",
                 "origin": origin,
                 "destination": dest,
                 "departure": "07:15 AM",
@@ -82,12 +100,12 @@ class MockToolSandbox:
                 "duration": "2h 35m (Non-stop)",
                 "price_inr": base_price,
                 "slot": "morning",
-                "status": "AVAILABLE"
+                "status": "AVAILABLE",
             },
             {
                 "flight_id": f"AI_{orig_code}{dest_code}_502",
                 "airline": "Air India",
-                "flight_number": f"AI-{abs(hash(dest)) % 600 + 200}",
+                "flight_number": f"AI-{_stable_mod(dest, 600) + 200}",
                 "origin": origin,
                 "destination": dest,
                 "departure": "01:30 PM",
@@ -95,12 +113,12 @@ class MockToolSandbox:
                 "duration": "2h 40m (Non-stop)",
                 "price_inr": base_price + 650,
                 "slot": "afternoon",
-                "status": "AVAILABLE"
+                "status": "AVAILABLE",
             },
             {
                 "flight_id": f"UK_{orig_code}{dest_code}_819",
                 "airline": "Vistara",
-                "flight_number": f"UK-{abs(hash(dest)) % 500 + 400}",
+                "flight_number": f"UK-{_stable_mod(dest, 500) + 400}",
                 "origin": origin,
                 "destination": dest,
                 "departure": "06:45 PM",
@@ -108,8 +126,8 @@ class MockToolSandbox:
                 "duration": "2h 35m (Non-stop)",
                 "price_inr": base_price + 1200,
                 "slot": "evening",
-                "status": "AVAILABLE"
-            }
+                "status": "AVAILABLE",
+            },
         ]
 
         return {
@@ -125,15 +143,15 @@ class MockToolSandbox:
             "duration": flights[0]["duration"],
             "price_inr": flights[0]["price_inr"],
             "flights": flights,
-            "status": "AVAILABLE"
+            "status": "AVAILABLE",
         }
 
-    async def search_hotels(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def search_hotels(self, params: dict[str, Any]) -> dict[str, Any]:
         city = params.get("city", params.get("to", "Delhi"))
         # 5.0-second delay
         await asyncio.sleep(5.0 / self.speedup)
         city_code = city[:3].upper() if len(city) >= 3 else "DEL"
-        base_rate = 3800 + (abs(hash(city)) % 1500)
+        base_rate = 3800 + _stable_mod(city, 1500)
 
         hotels = [
             {
@@ -143,7 +161,7 @@ class MockToolSandbox:
                 "rating": 4.8,
                 "amenities": ["Free WiFi", "Breakfast Included", "Swimming Pool", "Spa"],
                 "city": city,
-                "status": "AVAILABLE"
+                "status": "AVAILABLE",
             },
             {
                 "hotel_id": f"HTL_{city_code}_204",
@@ -152,7 +170,7 @@ class MockToolSandbox:
                 "rating": 4.5,
                 "amenities": ["Free WiFi", "Airport Shuttle", "Fitness Center"],
                 "city": city,
-                "status": "AVAILABLE"
+                "status": "AVAILABLE",
             },
             {
                 "hotel_id": f"HTL_{city_code}_308",
@@ -161,8 +179,8 @@ class MockToolSandbox:
                 "rating": 4.2,
                 "amenities": ["Free WiFi", "24/7 Room Service"],
                 "city": city,
-                "status": "AVAILABLE"
-            }
+                "status": "AVAILABLE",
+            },
         ]
 
         return {
@@ -172,10 +190,10 @@ class MockToolSandbox:
             "price_per_night": hotels[0]["price_per_night"],
             "rating": hotels[0]["rating"],
             "hotels": hotels,
-            "status": "AVAILABLE"
+            "status": "AVAILABLE",
         }
 
-    async def search_cabs(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def search_cabs(self, params: dict[str, Any]) -> dict[str, Any]:
         to_dest = params.get("to", "Airport")
         # 4.0-second delay
         await asyncio.sleep(4.0 / self.speedup)
@@ -187,10 +205,10 @@ class MockToolSandbox:
             "type": "Airport Sedan (Uber Premier)",
             "driver_name": "Rajesh Kumar",
             "rating": 4.9,
-            "status": "AVAILABLE"
+            "status": "AVAILABLE",
         }
 
-    async def travel_info(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def travel_info(self, params: dict[str, Any]) -> dict[str, Any]:
         query = params.get("query", "")
 
         # 1. If Gemini API Key is provided, call Gemini 2.5 Flash for true open-domain reasoning
@@ -200,13 +218,24 @@ class MockToolSandbox:
                 return {"query": query, "answer": gemini_ans, "status": "COMPLETED"}
 
         await asyncio.sleep(0.5 / self.speedup)
-        
+
         import re
+
         q_clean = query.strip()
         q_lower = q_clean.lower()
-        
+
         # 1. System / Capability Queries
-        if any(w in q_lower for w in ["what can you do", "features", "who are you", "what is continuum", "how do you work", "help"]):
+        if any(
+            w in q_lower
+            for w in [
+                "what can you do",
+                "features",
+                "who are you",
+                "what is continuum",
+                "how do you work",
+                "help",
+            ]
+        ):
             answer = (
                 "⚡ **CONTINUUM Real-Time Orchestrator Capabilities:**\n"
                 "• ✈️ **Flight Management:** Multi-carrier search, seat hold, and instant confirmation.\n"
@@ -220,37 +249,92 @@ class MockToolSandbox:
             return {"query": query, "answer": answer, "status": "COMPLETED"}
 
         # Known cities list for geo-tagging
-        cities = ["amritsar", "delhi", "mumbai", "bangalore", "bengaluru", "chennai", "kolkata", "hyderabad", "pune", "jaipur", "kochi", "goa", "chandigarh", "agra", "lucknow", "varanasi", "ahmedabad"]
+        cities = [
+            "amritsar",
+            "delhi",
+            "mumbai",
+            "bangalore",
+            "bengaluru",
+            "chennai",
+            "kolkata",
+            "hyderabad",
+            "pune",
+            "jaipur",
+            "kochi",
+            "goa",
+            "chandigarh",
+            "agra",
+            "lucknow",
+            "varanasi",
+            "ahmedabad",
+        ]
         detected_city = None
         for c in cities:
-            if re.search(rf'\b{c}\b', q_lower):
+            if re.search(rf"\b{c}\b", q_lower):
                 detected_city = c.title()
                 break
 
         # 2. Food & Restaurant Recommendations (Generalized for ANY restaurant/dish worldwide)
-        food_indicators = ["best food", "best item", "item to try", "items to try", "what to eat", "recommend", "dishes", "menu", "specialty", "food item", "famous food", "top dish", "cuisine", "taste", "good food", "food"]
-        is_food_query = any(ind in q_lower for ind in food_indicators) or any(w in q_lower for w in ["restaurant", "dhaba", "bistro", "cafe", "diner", "eatery"])
+        food_indicators = [
+            "best food",
+            "best item",
+            "item to try",
+            "items to try",
+            "what to eat",
+            "recommend",
+            "dishes",
+            "menu",
+            "specialty",
+            "food item",
+            "famous food",
+            "top dish",
+            "cuisine",
+            "taste",
+            "good food",
+            "food",
+        ]
+        is_food_query = any(ind in q_lower for ind in food_indicators) or any(
+            w in q_lower for w in ["restaurant", "dhaba", "bistro", "cafe", "diner", "eatery"]
+        )
 
         if is_food_query:
             # Extract venue name dynamically
             venue = None
-            venue_match = re.search(r'\b(?:at|in|from|for|of)\s+([a-zA-Z0-9\s&\'\-]+?)(?:\s+(?:restaurant|dhaba|bistro|cafe|lounge|bar|tonight|today|tomorrow|\,|$))', q_clean, re.IGNORECASE)
+            venue_match = re.search(
+                r"\b(?:at|in|from|for|of)\s+([a-zA-Z0-9\s&\'\-]+?)(?:\s+(?:restaurant|dhaba|bistro|cafe|lounge|bar|tonight|today|tomorrow|\,|$))",
+                q_clean,
+                re.IGNORECASE,
+            )
             if venue_match:
                 cand = venue_match.group(1).strip()
                 for c in cities:
                     if cand.lower().endswith(f" {c}"):
-                        cand = cand[:-len(c)-1].strip()
+                        cand = cand[: -len(c) - 1].strip()
                         if not detected_city:
                             detected_city = c.title()
-                if cand and cand.lower() not in ["the", "a", "an", "this", "that", "any", "good", "best"]:
+                if cand and cand.lower() not in [
+                    "the",
+                    "a",
+                    "an",
+                    "this",
+                    "that",
+                    "any",
+                    "good",
+                    "best",
+                ]:
                     venue = cand.title()
 
             if not venue:
                 for w in ["restaurant", "dhaba", "bistro", "cafe"]:
-                    m = re.search(rf'([a-zA-Z0-9\s&\'\-]+?)\s+{w}', q_clean, re.IGNORECASE)
+                    m = re.search(rf"([a-zA-Z0-9\s&\'\-]+?)\s+{w}", q_clean, re.IGNORECASE)
                     if m:
                         cand = m.group(1).strip()
-                        cand = re.sub(r'^(?:what|which|is|the|best|food|item|to|try|at|in)\s+', '', cand, flags=re.IGNORECASE).strip()
+                        cand = re.sub(
+                            r"^(?:what|which|is|the|best|food|item|to|try|at|in)\s+",
+                            "",
+                            cand,
+                            flags=re.IGNORECASE,
+                        ).strip()
                         if cand:
                             venue = cand.title()
                             break
@@ -283,7 +367,18 @@ class MockToolSandbox:
             return {"query": query, "answer": answer, "status": "COMPLETED"}
 
         # 3. Sightseeing / Places / Travel Inquiry (Generalized for ANY city)
-        if any(w in q_lower for w in ["places to visit", "sightseeing", "attractions", "things to do", "explore", "visit", "places"]):
+        if any(
+            w in q_lower
+            for w in [
+                "places to visit",
+                "sightseeing",
+                "attractions",
+                "things to do",
+                "explore",
+                "visit",
+                "places",
+            ]
+        ):
             city_name = detected_city or "your destination"
             answer = (
                 f"🗺️ **Top Attractions & Sights in {city_name}:**\n"
@@ -297,20 +392,20 @@ class MockToolSandbox:
         # 4. General Contextual Response
         answer = (
             f"ℹ️ **CONTINUUM Travel & Lifestyle Assistant**\n\n"
-            f"Regarding: *\"{query}\"*\n"
+            f'Regarding: *"{query}"*\n'
             f"I'm continuously monitoring your trip and lifestyle parameters. You can ask for recommendations, search flights, book hotels, reserve dining tables, or get in-car navigation in real time."
         )
         return {"query": query, "answer": answer, "status": "COMPLETED"}
 
-    async def check_calendar(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def check_calendar(self, params: dict[str, Any]) -> dict[str, Any]:
         await asyncio.sleep(0.5 / self.speedup)
         return {
             "calendar_id": "cal_primary",
             "has_conflict": False,
-            "available_slots": ["08:00-12:00", "14:00-18:00"]
+            "available_slots": ["08:00-12:00", "14:00-18:00"],
         }
 
-    async def hold_seat(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def hold_seat(self, params: dict[str, Any]) -> dict[str, Any]:
         flight_id = params.get("flight_id", "FL_BLR_702")
         await asyncio.sleep(0.6 / self.speedup)
         hold_id = f"HLD_{uuid.uuid4().hex[:8]}"
@@ -318,18 +413,18 @@ class MockToolSandbox:
             "hold_id": hold_id,
             "flight_id": flight_id,
             "hold_expires_in_secs": 600,
-            "status": "HELD"
+            "status": "HELD",
         }
 
-    async def modify_booking(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def modify_booking(self, params: dict[str, Any]) -> dict[str, Any]:
         await asyncio.sleep(1.0 / self.speedup)
         return {
             "external_operation_id": f"ext_mod_{uuid.uuid4().hex[:6]}",
             "status": "MODIFIED",
-            "updated_params": params
+            "updated_params": params,
         }
 
-    async def confirm_booking(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def confirm_booking(self, params: dict[str, Any]) -> dict[str, Any]:
         hold_id = params.get("hold_id", "HLD_DEFAULT")
         await asyncio.sleep(2.0 / self.speedup)
         ext_id = f"ext_tx_{uuid.uuid4().hex[:6]}"
@@ -338,10 +433,10 @@ class MockToolSandbox:
             "booking_ref": f"BK_{uuid.uuid4().hex[:6].upper()}",
             "hold_id": hold_id,
             "status": "COMMITTED",
-            "amount_paid": 5400
+            "amount_paid": 5400,
         }
 
-    async def navigate_route(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def navigate_route(self, params: dict[str, Any]) -> dict[str, Any]:
         dest = params.get("destination", params.get("to", "City Center"))
         avoid = params.get("avoid", "tolls")
         via = params.get("via", f"Expressway / Outer Ring Road (avoiding {avoid})")
@@ -353,20 +448,20 @@ class MockToolSandbox:
             "distance_km": 18.5,
             "via": via,
             "traffic": "Moderate (Fastest Route Selected)",
-            "status": "NAVIGATING"
+            "status": "NAVIGATING",
         }
 
-    async def set_climate(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def set_climate(self, params: dict[str, Any]) -> dict[str, Any]:
         temp = params.get("temperature", 22)
         await asyncio.sleep(0.8 / self.speedup)
         return {
             "target_temp_c": temp,
             "fan_speed": "Auto",
             "zone": "Cabin / Living Room",
-            "status": "SET_SUCCESSFULLY"
+            "status": "SET_SUCCESSFULLY",
         }
 
-    async def reserve_table(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def reserve_table(self, params: dict[str, Any]) -> dict[str, Any]:
         restaurant = params.get("restaurant", "Mainland China")
         guests = params.get("guests", 4)
         time_slot = params.get("time", "08:30 PM")
@@ -377,10 +472,10 @@ class MockToolSandbox:
             "guests": guests,
             "time": time_slot,
             "table_type": "Indoor Booth",
-            "status": "CONFIRMED"
+            "status": "CONFIRMED",
         }
 
-    async def diagnose_device(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def diagnose_device(self, params: dict[str, Any]) -> dict[str, Any]:
         err = params.get("error_code", "E-401")
         model = params.get("device_model", "Galaxy S24 / SmartHub")
         await asyncio.sleep(4.0 / self.speedup)
@@ -390,10 +485,10 @@ class MockToolSandbox:
             "diagnosis": "Network Handshake Timeout / Sensor Calibration Error",
             "remedy": "1. Power cycle device for 10s. 2. Reset WiFi cache via Settings > General > Reset.",
             "manual_ref": f"Manual Section 4.2 ({err} Recovery Protocol)",
-            "status": "DIAGNOSED"
+            "status": "DIAGNOSED",
         }
 
-    async def reserve_hotel(self, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def reserve_hotel(self, params: dict[str, Any]) -> dict[str, Any]:
         hotel_name = params.get("hotel_name", "Grand Palace Hotel")
         city = params.get("city", "Amritsar")
         nights = params.get("nights", 1)
@@ -406,7 +501,7 @@ class MockToolSandbox:
             "nights": nights,
             "room_type": "Executive Deluxe Room (Breakfast Included)",
             "total_price": price * nights,
-            "status": "CONFIRMED"
+            "status": "CONFIRMED",
         }
 
     def get_tool_callable(self, tool_name: str):
@@ -423,7 +518,7 @@ class MockToolSandbox:
             "navigate_route": self.navigate_route,
             "set_climate": self.set_climate,
             "reserve_table": self.reserve_table,
-            "diagnose_device": self.diagnose_device
+            "diagnose_device": self.diagnose_device,
         }
         return mapping.get(tool_name, self.travel_info)
 
