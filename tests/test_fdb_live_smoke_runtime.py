@@ -170,24 +170,20 @@ def test_worker_argv_contains_no_credentials(tmp_path):
     assert not any("key" in arg.lower() or "secret" in arg.lower() for arg in worker.argv)
 
 
-def test_live_smoke_creates_room_without_a_second_named_dispatch():
-    """An unnamed worker auto-joins a new room, matching upstream inference."""
+def test_live_smoke_defers_room_creation_to_the_auto_dispatched_caller():
+    """RoomService creation does not generate an unnamed-agent job."""
     pytest.importorskip("livekit")
     from types import SimpleNamespace
 
     from continuum.integrations.fdb.livekit_smoke_backend import LiveKitSmokeBackend
 
-    class FakeRoomService:
-        request = None
-
+    class RoomServiceMustNotBeCalled:
         async def create_room(self, request):
-            self.request = request
+            del request
+            raise AssertionError("automatic dispatch requires caller-created room")
 
-    service = FakeRoomService()
     backend = object.__new__(LiveKitSmokeBackend)
-    backend.api = SimpleNamespace(room=service)
+    backend.api = SimpleNamespace(room=RoomServiceMustNotBeCalled())
     asyncio.run(backend.create_room("phase03-room", '{"scenario_id":"phase03-live-smoke"}'))
 
     assert backend.room_name == "phase03-room"
-    assert service.request.name == "phase03-room"
-    assert list(service.request.agents) == []

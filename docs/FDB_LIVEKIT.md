@@ -84,8 +84,9 @@ The worker intentionally uses **automatic LiveKit dispatch** (it has no named
 `livekit_inference.py` only creates/joins a new room and never sends a named
 agent-dispatch request. Use a dedicated LiveKit project for this benchmark:
 automatic dispatch joins the worker to every new room in that project. The
-Phase 3 media smoke likewise creates one isolated room and relies on that same
-automatic dispatch, rather than creating a duplicate named session.
+Phase 3 media smoke likewise lets its caller join a new isolated room (rather
+than using RoomService creation, which does not create an automatic job) and
+relies on that same automatic dispatch.
 
 ### One-command official reproduction
 

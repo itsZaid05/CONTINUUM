@@ -79,19 +79,14 @@ class LiveKitSmokeBackend:
 
     async def create_room(self, room_name: str, metadata: str) -> None:
         self.room_name = room_name
-        # The FDB worker intentionally has no dispatch name so it remains
-        # compatible with the unmodified upstream inference client, which only
-        # joins a newly-created room.  Creating the room is therefore enough to
-        # trigger LiveKit's automatic dispatch; an explicit dispatch here would
-        # start a duplicate agent session.
-        await self.api.room.create_room(
-            api.CreateRoomRequest(
-                name=room_name,
-                empty_timeout=60,
-                departure_timeout=30,
-                metadata=metadata,
-            )
-        )
+        # An unnamed AgentServer is automatically dispatched when a participant
+        # creates a new room by joining it.  RoomService.create_room creates the
+        # room *without* that automatic job, which leaves the smoke caller
+        # waiting forever at ``wait_for_agent``.  Match the unmodified upstream
+        # inference client: defer creation until ``connect_caller`` joins this
+        # unique room. Automatic dispatch cannot receive metadata, so the smoke
+        # scenario identifier stays only in the local report.
+        del metadata
 
     async def connect_caller(self, room_name: str) -> None:
         token = (
