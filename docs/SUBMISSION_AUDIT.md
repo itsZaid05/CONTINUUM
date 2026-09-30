@@ -97,3 +97,74 @@ and latency reports (with `--use-llm`) plus worker/tool telemetry under
 These external checks should be completed and their resulting official FDB
 reports/video artifacts included before final form submission. Do not replace
 this audit with an inferred benchmark score.
+
+## Final deep-audit addendum — 30 Sep 2026
+
+### Repository scope and latest-main check
+
+`origin/main` was fetched immediately before this addendum. Its tip remains
+`3f29167c15fb08284a49e30f49e1ebd4b353fc37`; this submission branch is based on
+that exact commit and contains only the audited follow-up commits. The audit
+read every one of the **200 tracked files**: **190 UTF-8 text files** were read
+and parsed according to type, and all **10 binary fixtures/documents** were
+validated separately. This is an audit of the complete tracked repository, not
+only the Python package directory.
+
+| Surface | Deep-audit check | Result |
+|---|---|---|
+| Python source/tests/scripts | AST/bytecode compilation of 111 tracked Python files; shell syntax for every tracked `.sh` | passed |
+| Structured project data | Parsed 31 JSON, 3 JSONL, and both workflow YAML files | passed |
+| Media/submission assets | Validated all 6 PCM WAVs, 3 PNGs, and the presentation PDF header | passed |
+| Documentation | Checked 30 Markdown files for missing local link targets | passed |
+| Repository integrity | `git diff --check`, `git fsck --no-reflogs --full`, and `git archive` | passed |
+| Secret hygiene | High-confidence key scan of current files and all 239 reachable historical blobs | no matches |
+| Dependencies | `uv lock --check`, `pip check`, isolated wheel/sdist build, and `pip-audit --strict` | passed; no known vulnerabilities reported |
+| Local quality gates | `make lint`, `make test`, kit smoke, quickstart, CLI replay, FastAPI health/replay/404/CORS checks | passed |
+| Locked GitHub CI | Run `36716074731` on this branch: Python 3.10/3.11/3.12, FDB contracts, and real multimodal job | all jobs passed |
+
+The multimodal CI job now installs the required Linux `libgl1`/`libglib2.0-0`
+libraries, fetches a local ASR model during setup, executes the non-skipped
+real-recognition tests, and passes raw-media runtime evaluation. CI now uses
+`uv sync --frozen` throughout and every third-party action is pinned to a
+full commit SHA. The Docker recipe likewise installs from `uv.lock`; the new
+allow-list `.dockerignore` excludes local environments, models, artifacts, and
+any `.env` file from the build context. `make` now selects the project UV
+virtual environment rather than accidentally invoking an unrelated system
+Python after `uv sync`.
+
+### Credential and live-service status
+
+No secret value was read, printed, stored, or passed on a command line. The
+GitHub token available to this audit can read workflow results but is not
+allowed to list repository-secret names or dispatch workflows (both operations
+returned GitHub HTTP 403). A prior Phase 3 workflow did pass its own required
+credential-presence preflight, which establishes that its four expected secret
+inputs were non-empty at that time. It subsequently failed in the live smoke
+step, before this branch's diagnostic improvements.
+
+The Phase 3 workflow now emits a **sanitized** check annotation with only the
+failure stage, exception type, and failed check names; it never emits provider
+exception text or credentials. Because this audit token cannot issue
+`workflow_dispatch`, its credentialed re-run must be started from GitHub's
+**Actions → Phase 3 live media smoke → Run workflow** UI on this branch. A
+passing result is the last live-network gate.
+
+### Final execution plan
+
+1. **CI — complete:** retain successful run `36716074731` as evidence of the
+   locked Python, FDB-contract, OCR, and real-ASR lanes.
+2. **Phase 3 live smoke — owner action required:** manually dispatch the named
+   workflow on `arena/01a0f211-continuum`. If it fails, read the safe
+   `failure_stage` annotation and uploaded sanitized report, correct only that
+   stage, and re-run until every report check is `true`.
+3. **Official FDB score — credentialed evaluation environment:** provide the
+   released WAV directory and all five variables, then execute
+   `scripts/reproduce_fdb_v3.sh DATA_DIR`. Preserve its three upstream reports
+   and sanitized worker telemetry as submission evidence.
+4. **Container — environment action required:** on a machine with Docker, run
+   `docker build -t continuum .` and the documented JSONL smoke. Mount a
+   pre-fetched `models/faster-whisper-*` directory for raw audio. Docker is not
+   installed in this audit sandbox, so that engine-level build remains an honest
+   external gate.
+5. **Submit only after steps 2–4:** do not represent the deterministic suite,
+   FDB bridge contract, or credential-presence check as an official FDB score.
