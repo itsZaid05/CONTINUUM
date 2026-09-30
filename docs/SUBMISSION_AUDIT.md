@@ -120,7 +120,7 @@ only the Python package directory.
 | Secret hygiene | High-confidence key scan of current files and all 239 reachable historical blobs | no matches |
 | Dependencies | `uv lock --check`, `pip check`, isolated wheel/sdist build, and `pip-audit --strict` | passed; no known vulnerabilities reported |
 | Local quality gates | `make lint`, `make test`, kit smoke, quickstart, CLI replay, FastAPI health/replay/404/CORS checks | passed |
-| Locked GitHub CI | Run `36716074731` on this branch: Python 3.10/3.11/3.12, FDB contracts, and real multimodal job | all jobs passed |
+| Locked GitHub CI | Run `36716583044` on this branch: Python 3.10/3.11/3.12, FDB contracts, and real multimodal job | all jobs passed |
 
 The multimodal CI job now installs the required Linux `libgl1`/`libglib2.0-0`
 libraries, fetches a local ASR model during setup, executes the non-skipped
@@ -151,7 +151,7 @@ passing result is the last live-network gate.
 
 ### Final execution plan
 
-1. **CI — complete:** retain successful run `36716074731` as evidence of the
+1. **CI — complete:** retain successful run `36716583044` as evidence of the
    locked Python, FDB-contract, OCR, and real-ASR lanes.
 2. **Phase 3 live smoke — owner action required:** manually dispatch the named
    workflow on `arena/01a0f211-continuum`. If it fails, read the safe
