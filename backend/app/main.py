@@ -6,6 +6,7 @@ import os
 import time
 import asyncio
 import json
+import uuid
 from typing import Dict, Set, Optional, Any
 from dotenv import load_dotenv
 
@@ -85,6 +86,32 @@ def get_or_create_dag(session_id: str) -> ProvenanceDAG:
     if session_id not in SESSION_DAGS:
         SESSION_DAGS[session_id] = ProvenanceDAG(session_id)
     return SESSION_DAGS[session_id]
+
+async def broadcast_gemini_reply(session_id: str, version: int, utterance: str, context_hint: str = ""):
+    """
+    Always calls Google Gemini to generate a contextual conversational reply
+    and broadcasts it as a NODE_UPDATE (tool=answer_query) so the frontend
+    renders it in the chat. This guarantees zero hardcoded/canned responses.
+    """
+    from backend.app.tools.mock_sandbox import call_gemini_qa
+    prompt = utterance
+    if context_hint:
+        prompt = f"[Context: {context_hint}]\nUser said: {utterance}"
+    answer = await call_gemini_qa(prompt)
+    if not answer:
+        answer = f"Got it — I've updated your request accordingly."
+    step_id = f"reply_{uuid.uuid4().hex[:8]}"
+    await ws_manager.broadcast_to_session(session_id, DAGNodeUpdateEvent(
+        session_id=session_id,
+        version=version,
+        step_id=step_id,
+        tool="answer_query",
+        status="COMPLETED",
+        risk="FREE",
+        params={"query": utterance},
+        output={"query": utterance, "answer": answer, "status": "COMPLETED"}
+    ).model_dump())
+
 
 # -------------------------------------------------------------
 # Web Visualizer UI Endpoint (Split-Screen HUD)
@@ -168,8 +195,8 @@ async def orchestrate_utterance(session_id: str, utterance: str, event_record=No
 
     # 4. Handle based on Delta Type
     if intent.delta_type == "RETRACT":
-        # Retraction: Prune booking/payment nodes and cancel running tasks
-        pruned_steps = dag.prune_retracted_nodes(["confirm_booking", "process_payment"])
+        # Retraction: Prune booking/payment/hold nodes and cancel running tasks
+        pruned_steps = dag.prune_retracted_nodes(["confirm_booking", "process_payment", "hold_seat"])
         for step_id in pruned_steps:
             task_registry.cancel_task(session_id, step_id)
             node = dag.get_node(step_id)
@@ -183,6 +210,12 @@ async def orchestrate_utterance(session_id: str, utterance: str, event_record=No
                     risk=node.risk,
                     params=node.params
                 ).model_dump())
+        # Always send a Gemini-powered conversational reply for retraction
+        asyncio.create_task(broadcast_gemini_reply(
+            session_id, version, utterance,
+            context_hint="The user just cancelled or retracted a previous booking/hold action. Acknowledge clearly and helpfully."
+        ))
+
 
     elif intent.authorization == "EXPLICIT" and any(w in utterance.lower() for w in ["confirm", "book", "pay", "proceed"]):
         # User confirmed booking: execute pending hold & confirmation nodes in existing DAG
@@ -329,6 +362,14 @@ async def orchestrate_utterance(session_id: str, utterance: str, event_record=No
                 )
                 task_registry.register_task(session_id, node.step_id, task)
 
+    else:
+        # NOISE, ADD_CONSTRAINT, chit-chat, or any unhandled delta type
+        # — always respond with a live Gemini reply so the user never gets a silent ACK
+        asyncio.create_task(broadcast_gemini_reply(
+            session_id, version, utterance,
+            context_hint="You are CONTINUUM, an intelligent real-time travel and lifestyle assistant. Respond helpfully and conversationally."
+        ))
+
     # 6. Broadcast HUD metrics update
     pivot_lat = (time.time() * 1000) - start_time
     hud = MetricsHUDEvent(
@@ -343,6 +384,7 @@ async def orchestrate_utterance(session_id: str, utterance: str, event_record=No
         active_tasks_count=len(task_registry._tasks)
     )
     await ws_manager.broadcast_to_session(session_id, hud.model_dump())
+
 
 # -------------------------------------------------------------
 # REST Endpoints

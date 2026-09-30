@@ -192,8 +192,8 @@
 
     </main>
 
-    <!-- RIGHT SLIDE-OVER TELEMETRY & DAG DRAWER -->
-    <aside id="telemetry-drawer" class="w-96 border-l border-white/[0.06] bg-[#121217] flex flex-col transition-all duration-300 transform translate-x-full absolute right-0 top-0 bottom-0 z-40 lg:relative lg:translate-x-0">
+    <!-- RIGHT SLIDE-OVER TELEMETRY & DAG DRAWER (Hidden by default, toggled via Telemetry & DAG button) -->
+    <aside id="telemetry-drawer" class="hidden w-96 border-l border-white/[0.06] bg-[#121217] flex-col transition-all duration-300 z-40 shadow-2xl">
       
       <!-- Drawer Header -->
       <div class="h-14 px-5 border-b border-white/[0.06] flex items-center justify-between">
@@ -201,8 +201,8 @@
           <i class="fa-solid fa-diagram-project text-cyan-400 text-sm"></i>
           <span class="font-semibold text-xs tracking-wider uppercase text-slate-200">Engine Inspector</span>
         </div>
-        <button id="close-drawer-btn" class="lg:hidden w-7 h-7 rounded hover:bg-white/5 flex items-center justify-center text-slate-400">
-          <i class="fa-solid fa-xmark text-xs"></i>
+        <button id="close-drawer-btn" title="Close Inspector" class="w-7 h-7 rounded hover:bg-white/10 flex items-center justify-center text-slate-400 hover:text-white transition">
+          <i class="fa-solid fa-xmark text-sm"></i>
         </button>
       </div>
 
@@ -625,13 +625,22 @@
           </div>
         `;
       } else if (node.status === "RUNNING") {
-        const toolName = node.tool.replace("search_", "").replace("_", " ");
-        contentEl.innerHTML = `
-          <div class="flex items-center gap-2.5 text-xs text-cyan-400 py-1">
-            <i class="fa-solid fa-circle-notch fa-spin text-sm"></i>
-            <span>Processing <strong class="text-white capitalize">${toolName}</strong> request in real-time...</span>
-          </div>
-        `;
+        if (node.tool === "travel_info" || node.tool === "answer_query") {
+          contentEl.innerHTML = `
+            <div class="flex items-center gap-2.5 text-xs text-cyan-400 py-1">
+              <i class="fa-solid fa-circle-notch fa-spin text-sm"></i>
+              <span>Generating response with <strong class="text-white">Gemini AI</strong> in real-time...</span>
+            </div>
+          `;
+        } else {
+          const toolName = node.tool.replace("search_", "").replace("reserve_", "").replace("_", " ");
+          contentEl.innerHTML = `
+            <div class="flex items-center gap-2.5 text-xs text-cyan-400 py-1">
+              <i class="fa-solid fa-circle-notch fa-spin text-sm"></i>
+              <span>Processing <strong class="text-white capitalize">${toolName}</strong> request in real-time...</span>
+            </div>
+          `;
+        }
       } else if (node.status === "CANCELLED" || node.status === "INVALIDATED") {
         if (!contentEl.innerHTML.includes("NAVIGATING") && !contentEl.innerHTML.includes("RESERVED") && !contentEl.innerHTML.includes("COMMITTED") && !contentEl.innerHTML.includes("Found") && !contentEl.innerHTML.includes("E-Ticket")) {
           contentEl.innerHTML = `
@@ -756,11 +765,23 @@
 
     // Drawer toggling
     const drawer = document.getElementById("telemetry-drawer");
-    document.getElementById("toggle-drawer-btn").addEventListener("click", () => {
-      drawer.classList.toggle("translate-x-full");
-    });
-    document.getElementById("close-drawer-btn").addEventListener("click", () => {
-      drawer.classList.add("translate-x-full");
+    const toggleDrawerBtn = document.getElementById("toggle-drawer-btn");
+    const closeDrawerBtn = document.getElementById("close-drawer-btn");
+
+    function toggleDrawer() {
+      if (drawer.classList.contains("hidden")) {
+        drawer.classList.remove("hidden");
+        drawer.classList.add("flex");
+      } else {
+        drawer.classList.add("hidden");
+        drawer.classList.remove("flex");
+      }
+    }
+
+    if (toggleDrawerBtn) toggleDrawerBtn.addEventListener("click", toggleDrawer);
+    if (closeDrawerBtn) closeDrawerBtn.addEventListener("click", () => {
+      drawer.classList.add("hidden");
+      drawer.classList.remove("flex");
     });
 
     // Multimodal Image Upload Handling
@@ -797,6 +818,7 @@
     // Multimodal Live Voice Input (Web Speech API)
     const micBtn = document.getElementById("mic-btn");
     const micIcon = document.getElementById("mic-icon");
+    const chatInput = document.getElementById("chat-input");
     let recognition = null;
     let isRecording = false;
 
@@ -809,8 +831,9 @@
 
       recognition.onstart = () => {
         isRecording = true;
-        micIcon.className = "fa-solid fa-microphone-lines text-rose-400 animate-pulse";
-        document.getElementById("chat-input").placeholder = "🎙️ Listening... speak your prompt or interrupt now...";
+        micBtn.classList.add("bg-rose-500/20", "text-rose-400", "border", "border-rose-500/30");
+        micIcon.className = "fa-solid fa-microphone-lines text-rose-400 animate-pulse text-base";
+        chatInput.placeholder = "🎙️ Listening... Speak your prompt now (e.g. 'Find morning flights to Delhi')...";
       };
 
       recognition.onresult = (event) => {
@@ -818,42 +841,58 @@
         for (let i = event.resultIndex; i < event.results.length; ++i) {
           transcript += event.results[i][0].transcript;
         }
-        document.getElementById("chat-input").value = transcript;
+        chatInput.value = transcript;
       };
 
       recognition.onerror = (event) => {
         console.warn("Speech recognition error:", event.error);
+        if (event.error === "not-allowed") {
+          alert("Microphone access was blocked. Please click the Lock/Mic icon in your browser address bar and choose 'Allow' for localhost.");
+        } else if (event.error === "network") {
+          console.warn("Speech recognition network error in browser. Please use Chrome/Edge for native Web Speech API.");
+        }
         stopRecording();
       };
 
       recognition.onend = () => {
         stopRecording();
-        const inputVal = document.getElementById("chat-input").value.trim();
+        const inputVal = chatInput.value.trim();
         if (inputVal) {
           sendUtterance(inputVal);
-          document.getElementById("chat-input").value = "";
+          chatInput.value = "";
         }
       };
     }
 
     function stopRecording() {
       isRecording = false;
+      micBtn.classList.remove("bg-rose-500/20", "text-rose-400", "border", "border-rose-500/30");
       micIcon.className = "fa-solid fa-microphone text-sm";
-      document.getElementById("chat-input").placeholder = "Ask anything, speak, upload frame, or interrupt...";
+      chatInput.placeholder = "Ask anything, speak, upload frame, or interrupt...";
     }
 
-    micBtn.addEventListener("click", () => {
+    micBtn.addEventListener("click", async () => {
       if (!SpeechRec) {
-        alert("Voice recognition is supported in Chrome/Edge. You can also type your prompt in the box.");
+        alert("Voice recognition is supported in Google Chrome & Microsoft Edge. You can also type directly in the box.");
         return;
       }
+
       if (isRecording) {
-        recognition.stop();
+        try { recognition.stop(); } catch(e) {}
+        stopRecording();
       } else {
         try {
+          // Explicitly request microphone stream to ensure permission prompt appears
+          if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            await navigator.mediaDevices.getUserMedia({ audio: true }).catch(() => {});
+          }
           recognition.start();
         } catch (e) {
           console.warn("Speech start error:", e);
+          try {
+            recognition.stop();
+            setTimeout(() => recognition.start(), 200);
+          } catch (err) {}
         }
       }
     });

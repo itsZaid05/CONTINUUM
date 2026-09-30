@@ -3,37 +3,54 @@ import asyncio
 import uuid
 from typing import Dict, Any, Optional
 import httpx
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 async def call_gemini_qa(prompt: str) -> Optional[str]:
     key = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY") or ""
     if not key:
         return None
-    model = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={key}"
+    models_to_try = [
+        os.getenv("GEMINI_MODEL", "gemini-3.1-flash-lite"),
+        "gemini-3.1-flash-lite",
+        "gemini-flash-latest",
+        "gemini-3.5-flash",
+        "gemini-3.7-flash",
+        "gemini-3.8-flash"
+    ]
+    # Deduplicate while preserving order
+    seen = set()
+    models = [m for m in models_to_try if m and not (m in seen or seen.add(m))]
+
     system_instruction = (
-        "You are CONTINUUM, an intelligent real-time travel, dining, lifestyle, and diagnostics assistant. "
-        "Provide a concise, helpful, and beautifully formatted response with bullet points if applicable. "
-        "If the user asks about a restaurant, dish, or place, give genuine recommendations and mention they can ask you to reserve a table."
+        "You are CONTINUUM, an intelligent real-time conversational and lifestyle assistant. "
+        "Directly, accurately, and concisely answer the user's specific query. "
+        "If asked a factual, geopolitical, or general question, provide the direct accurate factual answer. "
+        "If asked about travel, dining, or recommendations, provide structured, helpful suggestions."
     )
     payload = {
         "systemInstruction": {"parts": [{"text": system_instruction}]},
         "contents": [{"parts": [{"text": prompt}]}],
         "generationConfig": {"temperature": 0.3, "maxOutputTokens": 400}
     }
-    try:
-        async with httpx.AsyncClient(timeout=6.0) as client:
-            resp = await client.post(url, json=payload)
-            if resp.status_code == 200:
-                data = resp.json()
-                cands = data.get("candidates", [])
-                if cands:
-                    parts = cands[0].get("content", {}).get("parts", [])
-                    text = "".join(p.get("text", "") for p in parts).strip()
-                    if text:
-                        return text
-    except Exception:
-        pass
+    
+    for model in models:
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={key}"
+        try:
+            async with httpx.AsyncClient(timeout=12.0) as client:
+                resp = await client.post(url, json=payload)
+                if resp.status_code == 200:
+                    data = resp.json()
+                    cands = data.get("candidates", [])
+                    if cands:
+                        parts = cands[0].get("content", {}).get("parts", [])
+                        text = "".join(p.get("text", "") for p in parts).strip()
+                        if text:
+                            return text
+        except Exception:
+            continue
     return None
 
 

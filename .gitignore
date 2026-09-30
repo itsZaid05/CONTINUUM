@@ -49,6 +49,7 @@ credentials.json
 
 # Local-only assets — PDFs and generator scripts, never committed
 *.pdf
+!docs/CONTINUUM_Presentation.pdf
 generate_*.py
 
 # External benchmark/model artifacts (fetched by scripts, never committed)

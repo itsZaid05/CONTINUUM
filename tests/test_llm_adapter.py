@@ -183,6 +183,7 @@ def test_dense_local_files_only_no_download():
 
     t0 = time.perf_counter()
     res = dense_classify("Hmm, okay…")
+    elapsed = time.perf_counter() - t0
     assert elapsed < 45.0  # fail fast (model load ~4-20s cold on slower hardware, but not 60s download)
     if res is not None:
         t1 = time.perf_counter()

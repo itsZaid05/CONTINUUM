@@ -18,7 +18,8 @@ VOLATILITY_MARKERS = [
 ]
 
 RETRACTION_MARKERS = [
-    "don't book", "dont book", "cancel", "stop", "nevermind", "abort", "do not book"
+    "don't book", "dont book", "cancel", "stop", "nevermind", "abort", "do not book",
+    "don't hold", "dont hold", "do not hold", "actually don't", "actually dont", "release"
 ]
 
 class IntentArbiter:
@@ -59,11 +60,21 @@ class IntentArbiter:
         noise_words = {"thanks", "thank", "you", "for", "the", "help", "cool", "ok", "okay", "hello", "there", "hi", "awesome", "appreciate", "it", "sounds", "good", "got"}
         
         # Check Retraction
-        if any(r in text for r in ["don't book", "dont book", "cancel", "stop", "nevermind", "abort", "do not book", "do not confirm", "do not reserve"]):
+        retract_markers = [
+            "don't book", "dont book", "do not book",
+            "don't hold", "dont hold", "do not hold",
+            "don't reserve", "dont reserve", "do not reserve",
+            "don't confirm", "dont confirm", "do not confirm",
+            "cancel", "stop", "nevermind", "never mind", "abort",
+            "actually don't", "actually dont", "actualy don't", "actualy dont",
+            "release hold", "release seat", "drop it", "leave it",
+            "don't want", "dont want"
+        ]
+        if any(r in text for r in retract_markers) or (("don't" in text or "dont" in text or "do not" in text) and any(w in text for w in ["hold", "book", "confirm", "reserve", "pay", "proceed", "buy", "ticket"])):
             delta_type = "RETRACT"
             ivs_score = max(0.15, base_ivs)
             auth = "NONE"
-            affected_fields = ["booking", "payment"]
+            affected_fields = ["booking", "payment", "hold_seat"]
         
         # Check Noise / Chit-chat
         elif words.issubset(noise_words) or text in ["sounds good", "got it", "okay sounds good", "awesome appreciate it", "thanks a lot for the help", "hello there"]:

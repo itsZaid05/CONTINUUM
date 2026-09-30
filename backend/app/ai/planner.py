@@ -11,8 +11,10 @@ from backend.app.core.version_manager import version_manager
 
 class PlanDAGGenerator:
     def __init__(self):
-        # Multi-turn session domain tracking (flight, hotel, cab)
+        # Multi-turn session domain and location tracking (flight, hotel, cab, origin, destination)
         self.session_domains: Dict[str, str] = {}
+        self.session_origins: Dict[str, str] = {}
+        self.session_dests: Dict[str, str] = {}
 
     def generate(
         self,
@@ -30,8 +32,9 @@ class PlanDAGGenerator:
         event_id = intent.event_id if intent else f"evt_v{curr_ver}"
         text = utterance.lower()
 
-        dest = "Bangalore"
-        origin = "Delhi"
+        # Retain multi-turn origin and destination memory from session
+        dest = self.session_dests.get(session_id, "Bangalore")
+        origin = self.session_origins.get(session_id, "Delhi")
         slot = "morning" if "morning" in text else "anytime"
         date = "tomorrow" if "tomorrow" in text else "next monday"
 
@@ -41,7 +44,8 @@ class PlanDAGGenerator:
             "delhi": "Delhi", "new delhi": "Delhi", "del": "Delhi",
             "mumbai": "Mumbai", "bombay": "Mumbai", "bom": "Mumbai",
             "chennai": "Chennai", "madras": "Chennai", "kolkata": "Kolkata",
-            "hyderabad": "Hyderabad", "pune": "Pune", "jaipur": "Jaipur", "kochi": "Kochi"
+            "hyderabad": "Hyderabad", "pune": "Pune", "jaipur": "Jaipur", "kochi": "Kochi",
+            "amritsar": "Amritsar", "jammu": "Jammu", "chandigarh": "Chandigarh", "goa": "Goa"
         }
 
         # 1. Intent values if provided
@@ -53,7 +57,7 @@ class PlanDAGGenerator:
 
         # 2. Generalized Dynamic Entity Extraction for any arbitrary locations worldwide
         from_m = re.search(r'\bfrom\s+([a-zA-Z0-9\s&\'\-]+?)(?:\s+to\b|\s+for\b|\s+tomorrow|\s+on\b|\s+next|,|$)', text, re.IGNORECASE)
-        to_m = re.search(r'\b(?:to|towards|into|in|make it|change to)\s+([a-zA-Z0-9\s&\'\-]+?)(?:\s+for\b|\s+tomorrow|\s+on\b|\s+next|\s+avoid|\s+via|\s+using|\s+with|\s+instead|,|$)', text, re.IGNORECASE)
+        to_m = re.search(r'\b(?:check|how about|what about|look for|try|switch to|fly to|search|towards|into|in|to|make it|change to)\s+([a-zA-Z0-9\s&\'\-]+?)(?:\s+too|\s+as well|\s+instead|\s+also|\s+for\b|\s+tomorrow|\s+on\b|\s+next|\s+avoid|\s+via|\s+using|\s+with|,|$)', text, re.IGNORECASE)
         
         if from_m:
             cand_from = re.sub(r'^(?:the|a|an)\s+', '', from_m.group(1).strip(), flags=re.IGNORECASE).title()
@@ -62,49 +66,66 @@ class PlanDAGGenerator:
         
         if to_m:
             cand_to = re.sub(r'^(?:the|a|an)\s+', '', to_m.group(1).strip(), flags=re.IGNORECASE).title()
-            if cand_to and cand_to.lower() not in ["hotel", "flight", "cab", "table", "seat", "room"]:
+            if cand_to and cand_to.lower() not in ["hotel", "flight", "cab", "table", "seat", "room", "delhi", "bangalore"]:
+                dest = cand_to
+            elif cand_to:
                 dest = cand_to
 
         # Normalize known aliases if matched
         dest = city_aliases.get(dest.lower(), dest)
         origin = city_aliases.get(origin.lower(), origin)
 
+        # Save active memory
+        self.session_origins[session_id] = origin
+        self.session_dests[session_id] = dest
+
         # Multi-turn Domain Detection & Memory
+        # Action triggers take strict priority over question/info starters
         is_direct_action = any(w in text for w in [
             "reserve a table", "reserve table", "book table", "book a table", "table for", "party of",
             "reserve room", "book room", "confirm room", "reserve a room", "book a room", "search hotel",
             "search flight", "book flight", "fly to", "search cabs", "book cab", "navigate", "reroute",
-            "set ac", "temp to", "cool cabin", "diagnose", "e-401"
-        ])
-        
-        has_question_or_info = any(w in text for w in [
-            "what is", "what are", "which", "how", "tell me", "recommend", "suggest", "popular", "best",
-            "famous", "top item", "item to try", "items to try", "dishes", "menu", "specialty", "places to visit",
-            "things to do", "attractions", "sightseeing", "help", "features", "who are you", "what to eat", "food item",
-            "what should i", "where should i"
+            "set ac", "temp to", "cool cabin", "diagnose", "e-401",
+            # Conversational flight-action phrases that start with "can you / find / get me"
+            "find flight", "find a flight", "get me a flight", "look for a flight",
+            "find hotel", "find a hotel", "get me a hotel", "look for a hotel",
+            "find cab", "find a cab", "book me a flight", "book me a hotel"
         ])
 
-        has_info_kw = has_question_or_info and not is_direct_action
+        question_starters = [
+            "who", "what", "where", "when", "why", "how", "which", "tell me", "explain", "is it",
+            "recommend", "suggest", "popular", "best", "famous", "top item", "item to try", "items to try",
+            "dishes", "menu", "specialty", "places to visit", "things to do", "attractions", "sightseeing",
+            "help", "features", "what to eat", "food item", "prime minister", "president", "capital", "weather"
+        ]
+        # "can you" is only an info query if no action domain keyword is also present
+        has_question_or_info = (
+            any(text.startswith(w) or f" {w} " in f" {text} " for w in question_starters)
+            or text.endswith("?")
+        )
+
+        has_flight_kw = any(w in text for w in ["flight", "fly", "plane", "airline", "fly to", "air ticket", "book flight", "flights"])
         has_dining_kw = any(w in text for w in ["dining", "restaurant", "table for", "reserve a table", "dinner table", "lunch table", "reservation", "reserve table", "book table", "book a table", "book a dining table", "dhaba", "bistro", "cafe"])
         has_hotel_kw = (any(w in text for w in ["hotel room", "stay in", "book hotel", "search hotel", "resort", "motel", "accommodation", "lodge", "reserve room", "book room", "hotel", "room", "stay"]) and not has_dining_kw)
         has_cab_kw = any(w in text for w in ["cab", "taxi", "ride", "uber", "ola"])
         has_nav_kw = any(w in text for w in ["navigate", "navigation", "route", "direction", "drive to", "reroute", "avoid toll", "avoid highway", "ring road"])
         has_climate_kw = any(w in text for w in ["temperature", "set ac", "temp to", "set climate", "cool cabin"])
         has_diag_kw = any(w in text for w in ["diagnos", "error code", "troubleshoot", "manual", "device error", "e-401", "e-", "camera frame"])
-        has_flight_kw = any(w in text for w in ["flight", "fly", "plane", "airline", "fly to", "air ticket", "book flight", "flights"])
 
-        if has_info_kw: domain = "info"
+        # Action domains take priority — info/Gemini only wins when NO action domain matched
+        if has_flight_kw: domain = "flight"
         elif has_dining_kw: domain = "dining"
         elif has_hotel_kw: domain = "hotel"
         elif has_nav_kw: domain = "navigation"
         elif has_climate_kw: domain = "climate"
         elif has_diag_kw: domain = "diagnostics"
         elif has_cab_kw: domain = "cab"
-        elif has_flight_kw: domain = "flight"
+        elif has_question_or_info and not is_direct_action: domain = "info"
         else:
             domain = self.session_domains.get(session_id, "flight")
 
         self.session_domains[session_id] = domain
+
 
         if domain == "info":
             primary_plan = [

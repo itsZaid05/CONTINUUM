@@ -3,15 +3,25 @@
 
 > **One-line pitch:** *CONTINUUM keeps AI agents consistent when humans change their minds: it sorts what kind of change happened, keeps the work that's still valid, discards the rest, and prepares for likely next changes within strict safety and resource limits.*
 
-[![Phase](https://img.shields.io/badge/phase-4%20speculation-%2300C853)](docs/STATUS.md)
-[![Tests](https://img.shields.io/badge/tests-308%20passed-%2300C853)](#quickstart)
-[![Ruff](https://img.shields.io/badge/ruff-clean-%2300C853)](#quickstart)
-[![Mypy](https://img.shields.io/badge/mypy-clean-%2300C853)](#quickstart)
+[![Demo Video](https://img.shields.io/badge/YouTube%20Demo-Watch%20Video-red?logo=youtube)](https://youtu.be/_RSBw8XO6tE)
+[![Presentation](https://img.shields.io/badge/Presentation-Slide%20Deck%20PDF-blue?logo=adobeacrobatreader)](docs/CONTINUUM_Presentation.pdf)
+[![Tag](https://img.shields.io/badge/PRISM--Tag-PRISM__GENAI__HACKATHON__Y2026-orange)](#submission)
+[![Tests](https://img.shields.io/badge/tests-330%20passed-%2300C853)](#quickstart)
 [![Python](https://img.shields.io/badge/python-3.10--3.12-blue)](#quickstart)
 [![License](https://img.shields.io/badge/license-MIT-lightgrey)](#acknowledgments)
-[![Demo](https://img.shields.io/badge/demo-Delhi→Bangalore-2962FF)](#scenarios)
 
-**Status (28 Sep 2026):** foundation plus the FDB-managed LiveKit media edge — **308 tests**, Python 3.10–3.12 core CI, Gemini native audio behind a provider interface, twelve manifest-generated FDB tools, lifecycle-safe effect reconciliation, and official-shape telemetry. Credential-free checks are complete; no official FDB score is claimed until the released audio and live services are run. See [`docs/FDB_LIVEKIT.md`](docs/FDB_LIVEKIT.md) and [`docs/BLUEPRINT_IMPLEMENTATION.md`](docs/BLUEPRINT_IMPLEMENTATION.md).
+---
+
+### 🏆 Samsung PRISM Hackathon 2026–27 Submission
+- **Theme:** Theme 05 (Interruptible Real-Time Agents)
+- **Team Name:** Pivot AI
+- **College:** Thapar Institute of Engineering and Technology
+- **Team Members:** Jaivesh Chopra, Zaid Yusuf, Ahaan Luther, Aakriti
+- 🎬 **Video Demonstration:** [https://youtu.be/_RSBw8XO6tE](https://youtu.be/_RSBw8XO6tE)
+- 📑 **Presentation Deck:** [docs/CONTINUUM_Presentation.pdf](docs/CONTINUUM_Presentation.pdf)
+- 🏷️ **Submission Tag:** `PRISM_GENAI_HACKATHON_Y2026`
+
+---
 
 ---
 
