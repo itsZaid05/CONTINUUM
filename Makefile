@@ -57,8 +57,9 @@ demo:
 	$(PY) -m uvicorn continuum.api:app --host 0.0.0.0 --port 8000 --reload || $(PY) -m continuum.cli serve --host 0.0.0.0 --port 8000
 
 lint:
-	ruff check src tests scripts
+	ruff check src tests scripts backend examples
 	mypy src
+	mypy backend
 
 ablate:
 	$(PY) -m continuum.cli ablate || echo "ablate not yet"

@@ -6,7 +6,7 @@
 [![Demo Video](https://img.shields.io/badge/YouTube%20Demo-Watch%20Video-red?logo=youtube)](https://youtu.be/_RSBw8XO6tE)
 [![Presentation](https://img.shields.io/badge/Presentation-Slide%20Deck%20PDF-blue?logo=adobeacrobatreader)](docs/CONTINUUM_Presentation.pdf)
 [![Tag](https://img.shields.io/badge/PRISM--Tag-PRISM__GENAI__HACKATHON__Y2026-orange)](#submission)
-[![Tests](https://img.shields.io/badge/tests-330%20passed-%2300C853)](#quickstart)
+[![Tests](https://img.shields.io/badge/tests-331%20passed-%2300C853)](#quickstart)
 [![Python](https://img.shields.io/badge/python-3.10--3.12-blue)](#quickstart)
 [![License](https://img.shields.io/badge/license-MIT-lightgrey)](#acknowledgments)
 
@@ -93,9 +93,9 @@ git clone https://github.com/itsZaid05/CONTINUUM.git && cd CONTINUUM
 pip install --break-system-packages -e ".[dev]"   # or: uv sync --extra dev
 
 # 1) tests + lint + mypy (offline-fake deterministic, LLM adapters env-gated)
-python -m pytest -q                  # 279 passed, 0 failed
-ruff check src tests scripts         # All checks passed!
-python -m mypy src                   # Success: no issues found
+python -m pytest -q                  # 331 passed, 6 optional-media skips (Python 3.11 audit)
+ruff check src tests scripts backend examples # All checks passed!
+python -m mypy src && python -m mypy backend  # Success: no issues found
 
 # organizer stdio protocol (JSONL in/out)
 continuum kit
@@ -133,12 +133,19 @@ continuum-fdb-contract .artifacts/Full-Duplex-Bench/v3/benchmark_data_v2.json
 # supplied through the environment:
 continuum-fdb-agent --check start
 continuum-fdb-agent start
+
+# Official end-to-end path: locked install, pinned source audit, worker,
+# inference, and all three upstream evaluators with the LLM judge enabled.
+# Also requires OPENAI_API_KEY and the separately downloaded released data.
+scripts/reproduce_fdb_v3.sh /path/to/fdb_v3_data_released
 ```
 
 The credential-free bridge check executes all **100 scenarios / 154 annotated
-calls** but is not an official model score. Live audio instructions, telemetry
-paths, provider replacement boundary, and honest evaluation limits are in
-[`docs/FDB_LIVEKIT.md`](docs/FDB_LIVEKIT.md).
+calls** but is not an official model score. `reproduce_fdb_v3.sh` is the
+submission reproduction command; it uses the unmodified upstream inference and
+evaluation scripts and writes score/log artifacts under `reports/fdb-v3/`.
+Live audio instructions, telemetry paths, provider replacement boundary, and
+honest evaluation limits are in [`docs/FDB_LIVEKIT.md`](docs/FDB_LIVEKIT.md).
 
 **Final harness-path results (deterministic offline run):**
 
@@ -282,7 +289,8 @@ Honest: `offline-fake` 1.00 is deterministic table for CI; `dense` fallback is s
 | `docs/IMPLEMENTATION_PLAN.md` | 5 phases with DoD, metrics, cut line (MVP = Phase 1) |
 | `docs/EVALUATION.md` | How to reproduce every number, gold freezing, leakage checks |
 | `docs/DEMO_SCRIPT.md` | 90-sec video script (copy-paste commands) |
-| `docs/STATUS.md` | Verified status of this checkout (tests, reports, next polish) |
+| `docs/STATUS.md` | Historical phase audit trail |
+| `docs/SUBMISSION_AUDIT.md` | Current release-readiness audit, exact commands, results, and honest external gates |
 | `examples/quickstart.py` | 30-sec tour (perception → arbiter → state → provenance → branch → replay) |
 
 ---
@@ -309,8 +317,8 @@ src/continuum/
 data/
   gold/arbiter_100.jsonl           # frozen 100, 20/category, hash b8920267657a
   scenarios/*.json                 # 7 deterministic traces (incl. R-02 duplicate)
-tests/  # 246 tests — contracts, planning, interruption runtime, harness edge, multimodal, safety, replay and evaluation
-docs/   # 6 markdown docs (research, architecture, plan, evaluation, demo, status)
+tests/  # 331 passing core tests — contracts, planning, interruption runtime, harness edge, multimodal, safety, replay and evaluation
+docs/   # 13 markdown docs (architecture, evaluation, FDB guide, demo, audit, and phase history)
 reports/  # arbiter_accuracy.{json,md}, comparison.{json,md}, shadow_metrics.{json,md}, shadow_scores.jsonl, ablation.{json,md}
 examples/quickstart.py    # Phase 2: shows backend table + prompt + calibration + replay gemini
 ```

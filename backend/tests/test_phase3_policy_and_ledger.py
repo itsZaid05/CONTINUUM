@@ -1,12 +1,11 @@
 """
 Phase 3 Verification Tests (Policy Engine, Effect Ledger, Idempotency & Safety Matrix)
 """
-import pytest
-import asyncio
-from backend.app.tools.registry import TOOL_REGISTRY, get_authoritative_risk
-from backend.app.core.policy_engine import policy_engine
+
 from backend.app.core.effect_ledger import effect_ledger
-from backend.app.tools.mock_sandbox import mock_sandbox_fast
+from backend.app.core.policy_engine import policy_engine
+from backend.app.tools.registry import get_authoritative_risk
+
 
 def test_authoritative_tool_registry():
     assert get_authoritative_risk("search_flights") == "FREE"
@@ -17,10 +16,15 @@ def test_authoritative_tool_registry():
     assert get_authoritative_risk("dangerous_unknown_tool") == "IRREVERSIBLE"
     print("\n[PASS] Authoritative Tool Registry verified.")
 
+
 def test_policy_engine_safety_matrix():
     # 1. FREE actions (search_flights) can execute across any IVS
-    assert policy_engine.evaluate("search_flights", ivs_score=0.1, authorization="NONE") == "EXECUTE"
-    assert policy_engine.evaluate("search_flights", ivs_score=0.8, authorization="NONE") == "EXECUTE"
+    assert (
+        policy_engine.evaluate("search_flights", ivs_score=0.1, authorization="NONE") == "EXECUTE"
+    )
+    assert (
+        policy_engine.evaluate("search_flights", ivs_score=0.8, authorization="NONE") == "EXECUTE"
+    )
 
     # 2. STAGEABLE actions (hold_seat)
     assert policy_engine.evaluate("hold_seat", ivs_score=0.2, authorization="IMPLIED") == "EXECUTE"
@@ -28,24 +32,50 @@ def test_policy_engine_safety_matrix():
     assert policy_engine.evaluate("hold_seat", ivs_score=0.8, authorization="IMPLIED") == "HOLD"
 
     # 3. MUTATING actions (modify_booking)
-    assert policy_engine.evaluate("modify_booking", ivs_score=0.2, authorization="IMPLIED") == "EXECUTE"
-    assert policy_engine.evaluate("modify_booking", ivs_score=0.5, authorization="IMPLIED") == "STAGE"
+    assert (
+        policy_engine.evaluate("modify_booking", ivs_score=0.2, authorization="IMPLIED")
+        == "EXECUTE"
+    )
+    assert (
+        policy_engine.evaluate("modify_booking", ivs_score=0.5, authorization="IMPLIED") == "STAGE"
+    )
     assert policy_engine.evaluate("modify_booking", ivs_score=0.8, authorization="IMPLIED") == "ASK"
 
     # 4. IRREVERSIBLE actions (confirm_booking) - Deterministic Safety Invariant:
     # Requires EXPLICIT Auth AND IVS < 0.6
-    assert policy_engine.evaluate("confirm_booking", ivs_score=0.2, authorization="EXPLICIT") == "EXECUTE"
-    assert policy_engine.evaluate("confirm_booking", ivs_score=0.2, authorization="IMPLIED") == "ASK"
-    assert policy_engine.evaluate("confirm_booking", ivs_score=0.7, authorization="EXPLICIT") == "BLOCK"  # High IVS blocks!
+    assert (
+        policy_engine.evaluate("confirm_booking", ivs_score=0.2, authorization="EXPLICIT")
+        == "EXECUTE"
+    )
+    assert (
+        policy_engine.evaluate("confirm_booking", ivs_score=0.2, authorization="IMPLIED") == "ASK"
+    )
+    assert (
+        policy_engine.evaluate("confirm_booking", ivs_score=0.7, authorization="EXPLICIT")
+        == "BLOCK"
+    )  # High IVS blocks!
     assert policy_engine.evaluate("confirm_booking", ivs_score=0.7, authorization="NONE") == "BLOCK"
     print("\n[PASS] Policy Engine Deterministic Safety Matrix verified.")
 
+
 def test_shadow_branch_read_only_rule():
     # Shadow branches MUST be FREE (read-only) and only execute when IVS < 0.3
-    assert policy_engine.evaluate("search_cabs", ivs_score=0.2, authorization="NONE", is_shadow=True) == "EXECUTE"
-    assert policy_engine.evaluate("search_cabs", ivs_score=0.5, authorization="NONE", is_shadow=True) == "BLOCK"
-    assert policy_engine.evaluate("confirm_booking", ivs_score=0.1, authorization="EXPLICIT", is_shadow=True) == "BLOCK"
+    assert (
+        policy_engine.evaluate("search_cabs", ivs_score=0.2, authorization="NONE", is_shadow=True)
+        == "EXECUTE"
+    )
+    assert (
+        policy_engine.evaluate("search_cabs", ivs_score=0.5, authorization="NONE", is_shadow=True)
+        == "BLOCK"
+    )
+    assert (
+        policy_engine.evaluate(
+            "confirm_booking", ivs_score=0.1, authorization="EXPLICIT", is_shadow=True
+        )
+        == "BLOCK"
+    )
     print("\n[PASS] Shadow Branch Read-Only & IVS Invariant verified.")
+
 
 def test_two_phase_effect_ledger_and_idempotency():
     session_id = "sess_ledger_001"
@@ -59,7 +89,9 @@ def test_two_phase_effect_ledger_and_idempotency():
     assert record.idempotency_key.startswith("idemp_")
 
     # 2. Duplicate submission test -> should return SAME record and idempotency key
-    record_dup = effect_ledger.create_intent(session_id, event_id, step_id, "confirm_booking", params)
+    record_dup = effect_ledger.create_intent(
+        session_id, event_id, step_id, "confirm_booking", params
+    )
     assert record_dup.effect_id == record.effect_id
     assert record_dup.idempotency_key == record.idempotency_key
 

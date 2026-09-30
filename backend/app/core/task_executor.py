@@ -2,19 +2,23 @@
 CONTINUUM Async Task Registry & Tool Executor
 Manages running asyncio tasks, instantaneous task.cancel() on invalidation, and Stale Gate enforcement.
 """
+
 import asyncio
 import time
-from typing import Dict, Optional, Callable, Any
+from collections.abc import Callable
+from typing import Any
+
 from backend.app.core.dag_engine import DAGNode, ProvenanceDAG
 from backend.app.core.version_manager import version_manager
-from backend.app.models.schemas import DAGNodeUpdateEvent, NodeStatus
+from backend.app.models.schemas import DAGNodeUpdateEvent
+
 
 class AsyncTaskRegistry:
     def __init__(self):
         # Maps (session_id, step_id) -> asyncio.Task
-        self._tasks: Dict[str, asyncio.Task] = {}
+        self._tasks: dict[str, asyncio.Task] = {}
         # Status callback for WebSocket broadcasting
-        self.broadcast_callback: Optional[Callable[[str, dict], Any]] = None
+        self.broadcast_callback: Callable[[str, dict], Any] | None = None
 
     def _make_key(self, session_id: str, step_id: str) -> str:
         return f"{session_id}::{step_id}"
@@ -55,10 +59,7 @@ class AsyncTaskRegistry:
         return cancelled_count
 
     async def execute_node(
-        self,
-        dag: ProvenanceDAG,
-        node: DAGNode,
-        tool_callable: Callable[[Dict[str, Any]], Any]
+        self, dag: ProvenanceDAG, node: DAGNode, tool_callable: Callable[[dict[str, Any]], Any]
     ):
         """
         Executes a single DAG node with Stale Gate checks and cancellation handling.
@@ -127,8 +128,9 @@ class AsyncTaskRegistry:
                 params=node.params,
                 output=node.output,
                 error=node.error,
-                duration_ms=duration
+                duration_ms=duration,
             )
             await self.broadcast_callback(session_id, event.model_dump())
+
 
 task_registry = AsyncTaskRegistry()

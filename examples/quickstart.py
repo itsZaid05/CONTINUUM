@@ -10,14 +10,22 @@ Run:
 
 from pathlib import Path
 
+from continuum.branch_manager import BranchManager
+from continuum.contracts import (
+    ArbiterCategory,
+    ArbiterDecision,
+    Delta,
+    DeltaOp,
+    ExecutionNode,
+    NodeStatus,
+    Provenance,
+)
 from continuum.delta_arbiter import ArbiterBackend, arbitrate_offline_fake
-from continuum.llm import calibrate_confidence, parse_structured_json
+from continuum.llm import build_fused_prompt, calibrate_confidence, parse_structured_json
 from continuum.perception import perceive_text
 from continuum.provenance import ProvenanceGraph
 from continuum.replay import replay_scenario
 from continuum.versioned_state import VersionedStore
-from continuum.branch_manager import BranchManager
-from continuum.contracts import ArbiterCategory, ArbiterDecision, DeltaOp, Delta
 
 print("=== 1. Perception FAST PATH (<200ms) ===")
 out = perceive_text("Actually, Bangalore", version_in=1)
@@ -52,8 +60,6 @@ print(
 )
 
 print("\n=== 2c. Temperature scaling + prompt ===")
-from continuum.llm import build_fused_prompt
-
 prompt = build_fused_prompt("Actually, Bangalore", cur)
 print(f"  prompt preview: {prompt[:120]}... (len {len(prompt)})")
 for raw, cat in [(0.94, ArbiterCategory.RETRACT), (0.88, ArbiterCategory.MODIFY)]:
@@ -121,7 +127,6 @@ print(f"  MERGED burst: {merged.state}  status={merged.status.value}")
 
 print("\n=== 4. Provenance selective invalidation ===")
 g = ProvenanceGraph()
-from continuum.contracts import ExecutionNode, Provenance, NodeStatus
 
 n_search = ExecutionNode(
     id="search:1:0",

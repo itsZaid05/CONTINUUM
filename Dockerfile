@@ -21,8 +21,11 @@ COPY src ./src
 COPY backend ./backend
 COPY data ./data
 
-# multimodal = local ASR (faster-whisper) + local OCR (RapidOCR, models in the wheel)
-RUN pip install --no-cache-dir ".[multimodal]" || pip install --no-cache-dir -r requirements.txt
+# multimodal = local ASR (faster-whisper) + local OCR (RapidOCR, models in the wheel).
+# Fail the build if this complete, declared environment cannot be installed;
+# silently falling back to requirements.txt can produce a container without the
+# package entry point or the required recognizers.
+RUN pip install --no-cache-dir ".[multimodal]"
 
 # Expose FastAPI & WebSocket port for live prototype HUD
 EXPOSE 8000

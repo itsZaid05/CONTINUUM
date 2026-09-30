@@ -25,9 +25,11 @@ jobs:
       - name: Test
         run: python -m pytest -q
       - name: Ruff
-        run: ruff check src tests scripts
+        run: ruff check src tests scripts backend examples
       - name: Mypy
-        run: mypy src
+        run: |
+          mypy src
+          mypy backend
 
   fdb-edge:
     runs-on: ubuntu-latest
